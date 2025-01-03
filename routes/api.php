@@ -1,26 +1,56 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
-Route::get('/debug', function (Request $request) {
+Route::prefix('user')->group(function () {
 
-    $obj = new \App\Models\UserModel();
+    Route::get('/',        [UserController::class, 'list']);
+    Route::post('/',       [UserController::class, 'create']);
 
-    $data = new \App\DTO\User\UserDatabase();
-    $data->id = 1;
-    $data->username = "joaosilva";
-    $data->email = "joaosilva@gmail.com";
-    $data->secondaryEmail = "joaosilva@outlook.com";
-    $data->password = password_hash("senha123", PASSWORD_DEFAULT); // Utilize hash para segurança
-    $data->imageProfile = "https://example.com/images/joaosilva.jpg"; // URL da imagem do perfil
-    $data->mainPhone = "+55 11 91234-5678";
-    $data->secondaryPhone = "+55 11 99876-5432";
-    $data->active = true; // Usuário ativo
-    $data->createdAt = date("Y-m-d H:i:s"); // Data de criação
-    $data->updatedAt = date("Y-m-d H:i:s"); // Última atualização
+    Route::prefix('{userId}')->group(function () {
 
-    $resp = $obj->create($data);
+        Route::get('/',    [UserController::class, 'get']);
+        Route::put('/',    [UserController::class, 'update']);
+        Route::delete('/', [UserController::class, 'delete']);
 
-    return response()->json($resp);
+        Route::get('/announcement', [UserController::class, 'listAnnouncements']);
+        Route::post('/announcement', [UserController::class, 'createAnnouncement']);
+        Route::put('/announcement/{announcementId}', [UserController::class, 'updateAnnouncement']);
+        Route::delete('/announcement/{announcementId}', [UserController::class, 'deleteAnnouncement']);
+
+        Route::get('/notification', [UserController::class, 'listNotifications']);
+        Route::delete('/notification/{notificationId}', [UserController::class, 'removeNotification']);
+        Route::put('/notification/{notificationId}', [UserController::class, 'setViewedNotification']);
+
+    });
+
+});
+
+// ANOTAÇÕES E DEFINIÇÕES DE ROTAS PROVISÓRIOS A PARTIR DAQUI
+
+/**
+ * Rotas Públicas
+ */
+Route::prefix('public')->group(function () {
+
+    Route::post('/login',             [AuthController::class, 'login']);
+    Route::post('/logout',            [AuthController::class, 'logout']);
+    Route::post('/register',          [AuthController::class, 'register']);
+    Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
+    Route::get('/use-therms',         [AuthController::class, 'useTherms']);
+    Route::post('/accept-therms',     [AuthController::class, 'acceptTherms']);
+
+    /**
+     * Grupo de Rotas Públicas de anúncios
+     */
+    Route::prefix('announcement/{type}')->group(function () {
+
+        Route::get('/',       [PublicAnnouncementController::class, 'list']);
+        Route::get('/{id}',   [PublicAnnouncementController::class, 'get']);
+        Route::get('/form/{id}',  [PublicAnnouncementController::class, 'getForm']);
+        Route::post('/form/send', [PublicAnnouncementController::class, 'sendForm']);
+
+    });
+
 });

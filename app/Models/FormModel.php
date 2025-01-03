@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Form\FormDatabase;
+use App\DTO\Form\FormDTO;
 
 class FormModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class FormModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = FormDatabase::class;
+    protected $class = FormDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Report\ReportDatabase;
+use App\DTO\Report\ReportDTO;
 
 class ReportModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class ReportModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = ReportDatabase::class;
+    protected $class = ReportDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

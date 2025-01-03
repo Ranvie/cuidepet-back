@@ -2,7 +2,7 @@
 
 namespace App\DTO\Report;
 
-class ReportDatabase {
+class ReportDTO {
 
     public int $id;
 

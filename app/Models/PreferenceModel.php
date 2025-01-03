@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Preference\PreferenceDatabase;
+use App\DTO\Preference\PreferenceDTO;
 
 class PreferenceModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class PreferenceModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = PreferenceDatabase::class;
+    protected $class = PreferenceDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

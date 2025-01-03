@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Animal\AnimalDatabase;
+use App\DTO\Animal\AnimalDTO;
 
 class AnimalModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class AnimalModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = AnimalDatabase::class;
+    protected $class = AnimalDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

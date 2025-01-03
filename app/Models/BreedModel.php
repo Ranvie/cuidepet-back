@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Breed\BreedDatabase;
+use App\DTO\Breed\BreedDTO;
 
 class BreedModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class BreedModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = BreedDatabase::class;
+    protected $class = BreedDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

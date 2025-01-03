@@ -2,7 +2,7 @@
 
 namespace App\DTO\Specie;
 
-class SpecieDatabase {
+class SpecieDTO {
 
     public int $id;
 

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Notification\NotificationDatabase;
+use App\DTO\Notification\NotificationDTO;
 
 class NotificationModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class NotificationModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = NotificationDatabase::class;
+    protected $class = NotificationDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

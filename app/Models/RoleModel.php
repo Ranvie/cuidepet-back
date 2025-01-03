@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Role\RoleDatabase;
+use App\DTO\Role\RoleDTO;
 
 class RoleModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class RoleModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = RoleDatabase::class;
+    protected $class = RoleDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

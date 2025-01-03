@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('username', 255);
             $table->string('email', 255)->unique();
-            $table->string('secondary_email', 255)->unique();
+            $table->string('secondary_email', 255)->unique()->nullable();
             $table->string('password', 255);
-            $table->string('image_profile');
-            $table->string('main_phone', 20);
-            $table->string('secondary_phone', 20);
+            $table->string('image_profile')->nullable();
+            $table->string('main_phone', 20)->nullable();
+            $table->string('secondary_phone', 20)->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

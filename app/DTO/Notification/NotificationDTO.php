@@ -2,7 +2,7 @@
 
 namespace App\DTO\Notification;
 
-class NotificationDatabase {
+class NotificationDTO {
 
     public int $id;
 

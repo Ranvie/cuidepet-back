@@ -2,7 +2,7 @@
 
 namespace App\DTO\User;
 
-class UserDatabase{
+class UserDTO{
     public $id;
     public $username;
     public $email;

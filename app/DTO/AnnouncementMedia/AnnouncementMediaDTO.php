@@ -2,7 +2,7 @@
 
 namespace App\DTO\AnnouncementMedia;
 
-class AnnouncementMediaDatabase {
+class AnnouncementMediaDTO {
 
     public int $id;
 

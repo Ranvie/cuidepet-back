@@ -41,7 +41,6 @@ class BusinessModel extends Model{
      * Procura um registro por ID
      * @param $id
      * @return null|object
-     * @throws \Exception
      */
     public function getById($id){
         $register = parent::find($id);
@@ -54,7 +53,6 @@ class BusinessModel extends Model{
     /**
      * @param $data
      * @return array
-     * @throws \Exception
      */
     public function create($data){
         $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
@@ -70,7 +68,6 @@ class BusinessModel extends Model{
      * @param object $data
      * @param boolean $ignoreNulls
      * @return object
-     * @throws \Exception
      */
     public function edit($id, $data, $ignoreNulls = true){
         $register = parent::find($id);

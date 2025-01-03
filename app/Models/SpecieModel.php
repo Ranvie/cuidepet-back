@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Specie\SpecieDatabase;
+use App\DTO\Specie\SpecieDTO;
 
 class SpecieModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class SpecieModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = SpecieDatabase::class;
+    protected $class = SpecieDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

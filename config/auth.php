@@ -44,7 +44,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | UserDatabase Providers
+    | UserDTO Providers
     |--------------------------------------------------------------------------
     |
     | All authentication guards have a user provider, which defines how the

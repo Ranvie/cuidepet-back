@@ -2,7 +2,7 @@
 
 namespace App\DTO\Form;
 
-class FormDatabase {
+class FormDTO {
 
     public int $id;
 

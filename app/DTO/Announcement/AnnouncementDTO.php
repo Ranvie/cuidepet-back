@@ -2,7 +2,7 @@
 
 namespace App\DTO\Announcement;
 
-class AnnouncementDatabase {
+class AnnouncementDTO {
 
     public int $id;
 

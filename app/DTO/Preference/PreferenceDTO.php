@@ -2,7 +2,7 @@
 
 namespace App\DTO\Preference;
 
-class PreferenceDatabase {
+class PreferenceDTO {
 
     public int $id;
 

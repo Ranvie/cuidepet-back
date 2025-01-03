@@ -2,7 +2,7 @@
 
 namespace App\DTO\Role;
 
-class RoleDatabase {
+class RoleDTO {
 
     public int $id;
 

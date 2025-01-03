@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\DTO\Announcement\AnnouncementDatabase;
+use App\DTO\Announcement\AnnouncementDTO;
 
 class AnnouncementModel extends BusinessModel {
 
@@ -10,7 +10,7 @@ class AnnouncementModel extends BusinessModel {
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = AnnouncementDatabase::class;
+    protected $class = AnnouncementDTO::class;
 
     /**
      * Aponta a entidade do banco de dados
