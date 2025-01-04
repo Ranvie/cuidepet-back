@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserRoleModel extends BusinessModel {
 
@@ -27,5 +28,4 @@ class UserRoleModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
-
 }

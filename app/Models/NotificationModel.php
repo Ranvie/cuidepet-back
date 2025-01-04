@@ -36,4 +36,6 @@ class NotificationModel extends BusinessModel {
      */
     public $timestamps = true;
 
+    public $fillable = ['viewed', 'title', 'message'];
+
 }

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UserModel extends BusinessModel {
 
@@ -37,10 +40,25 @@ class UserModel extends BusinessModel {
      */
     public $timestamps = true;
 
-    public $fillable = ['username','email','secondary_email','password','image_profile','main_phone','secondary_phone','active','created_at','updated_at'];
+    public $fillable = ['username','email','password','image_profile','phone','active','created_at','updated_at'];
 
-    public function getById($id){
-        $user = parent::getById($id);
+    public function getById($id, $relations = ['roles', 'preference', 'notifications']){
+        $user = parent::getById($id, $relations);
+
+        if(!$user)
+            throw new BusinessException('O usuário não foi encontrado.', 200);
+
+        return $user;
+    }
+
+    public function create($data, $relations = ['preference'])
+    {
+        return parent::create($data);
+    }
+
+    public function edit($id, $data, $ignoreNulls = true)
+    {
+        $user = parent::edit($id, $data, $ignoreNulls);
 
         if(!$user)
             throw new BusinessException('O usuário não foi encontrado.', 200);
@@ -52,5 +70,17 @@ class UserModel extends BusinessModel {
     //Validar se não faz sentido deletar outros dados também
     public function remove($id): bool{
         return true;
+    }
+
+    public function preference(): HasOne{
+        return $this->hasOne(PreferenceModel::class, 'user_id', 'id');
+    }
+
+    public function notifications(): HasMany{
+        return $this->hasMany(NotificationModel::class, 'user_id', 'id');
+    }
+
+    public function roles(): BelongsToMany{
+        return $this->BelongsToMany(RoleModel::class, UserRoleModel::class, 'user_id', 'role_id');
     }
 }

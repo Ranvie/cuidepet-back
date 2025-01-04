@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Role\RoleDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class RoleModel extends BusinessModel {
 
@@ -35,5 +36,9 @@ class RoleModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function roles(): BelongsToMany{
+        return $this->BelongsToMany(UserModel::class, UserRoleModel::class, 'user_id', 'role_id');
+    }
 
 }

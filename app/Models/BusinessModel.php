@@ -6,6 +6,7 @@ use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
+use function Psy\debug;
 
 class BusinessModel extends Model{
 
@@ -39,27 +40,59 @@ class BusinessModel extends Model{
 
     /**
      * Procura um registro por ID
-     * @param $id
+     * @param integer $id
+     * @param array $relations
      * @return null|object
      */
-    public function getById($id){
-        $register = parent::find($id);
-        if(!$register instanceof $this) return null;
+    public function getById($id, $relations = []){
+        $model = parent::where('id', $id)->with($relations)->first();
+        if(!$model instanceof $this) return null;
 
-        $parsed = ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, $this->class);
+        $parsed = ParseConvention::parse($model->original, PARSE_MODE::snakeToCamel, $this->class);
+        foreach($model->relations as $key => $relation) {
+            if($relation::class == 'Illuminate\Database\Eloquent\Collection' ){
+                $items = [];
+                foreach($relation as $item) {
+                    $items[] = ParseConvention::parse($item->original, PARSE_MODE::snakeToCamel, $item->class);
+                }
+
+                $parsed->$key = $items;
+            }
+            else{
+                $parsed->$key = ParseConvention::parse($relation->original, PARSE_MODE::snakeToCamel, $relation->class);
+            }
+        }
+
         return $parsed;
     }
 
     /**
      * @param $data
-     * @return array
+     * @return object
      */
-    public function create($data){
+    public function create($data, $relations = ['notifications']){
         $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
+
         $this->fill($origin);
         $this->save();
 
-        return ParseConvention::parse($this->original, PARSE_MODE::snakeToCamel, $this->class);
+        foreach($relations as $relation){
+            $content = $origin[$relation];
+            $isArray = isset($content[0]);
+
+            if($isArray){
+                foreach($content as $item){
+                    $parse = ParseConvention::parse($item, PARSE_MODE::camelToSnake);
+                    $this->$relation()->create($parse);
+                }
+            }
+            else{
+                $parse = ParseConvention::parse($content, PARSE_MODE::camelToSnake);
+                $this->$relation()->create($parse);
+            }
+        }
+
+        return $this->getById($this->original['id']);
     }
 
     /**
@@ -82,7 +115,7 @@ class BusinessModel extends Model{
         $register->save();
 
         //TODO: Pensar em como podemos fazer os retornos dos cruds, visto que se for um response, podem faltar campos para mexer depois
-        return ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, $this->class);
+        return $this->getById($id);
     }
 
     /**

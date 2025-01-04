@@ -57,7 +57,7 @@ class ParseConvention {
     private static function camelToSnakeParser($text): string{
         $result = '';
 
-        $result = strtolower($text[0]);
+        $result = gettype($text) === 'string' ? strtolower($text[0]) : $text;
         for($i = 1; $i < strlen($text); $i++){
             if(ctype_upper($text[$i])){
                 $result .= '_' . strtolower($text[$i]);

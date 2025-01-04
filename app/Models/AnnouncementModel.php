@@ -36,4 +36,8 @@ class AnnouncementModel extends BusinessModel {
      */
     public $timestamps = true;
 
+    public function user(){
+        return $this->belongsTo(UserModel::class, 'id', 'user_id');
+    }
+
 }

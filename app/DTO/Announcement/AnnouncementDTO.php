@@ -17,6 +17,8 @@ class AnnouncementDTO {
     public string $mainImage;
 
     public string $address;
+    public string $contactEmail;
+    public string $contactPhone;
 
     public bool $timesFavorited;
 

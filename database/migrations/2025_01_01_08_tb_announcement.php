@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('times_favorited')->default(0);
             $table->string('main_image', 255);
             $table->string('address', 255);
+            $table->string('contact_phone', 20);
+            $table->string('contact_email', 255);
             $table->string('last_seen_latitude', 255);
             $table->string('last_seen_longitude', 255);
             $table->boolean('active')->default(true);
