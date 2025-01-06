@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\DTO\Announcement\AnnouncementDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AnnouncementModel extends BusinessModel {
 
@@ -36,8 +39,28 @@ class AnnouncementModel extends BusinessModel {
      */
     public $timestamps = true;
 
-    public function user(){
+    public function user() :BelongsTo {
         return $this->belongsTo(UserModel::class, 'id', 'user_id');
+    }
+
+    public function animal() :HasOne {
+        return $this->hasOne(AnimalModel::class, 'announcement_id', 'id');
+    }
+
+    public function announcementMedia() :HasMany {
+        return $this->hasMany(AnnouncementMediaModel::class, 'announcement_id', 'id');
+    }
+
+    public function form() :BelongsTo {
+        return $this->belongsTo(FormModel::class, 'form_id', 'id');
+    }
+
+    public function favorites () :HasMany {
+        return $this->hasMany(FavoriteModel::class, 'announcement_id', 'id');
+    }
+
+    public function reports () :HasMany {
+        return $this->hasMany(ReportModel::class, 'announcement_id', 'id');
     }
 
 }

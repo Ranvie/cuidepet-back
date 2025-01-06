@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class FavoriteModel extends BusinessModel {
 
     /**
@@ -27,5 +29,13 @@ class FavoriteModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function announcement() :BelongsTo {
+        return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
+    }
+
+    public function user() :BelongsTo {
+        return $this->belongsTo(UserModel::class, 'user_id', 'id');
+    }
 
 }

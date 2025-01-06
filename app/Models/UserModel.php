@@ -83,4 +83,21 @@ class UserModel extends BusinessModel {
     public function roles(): BelongsToMany{
         return $this->BelongsToMany(RoleModel::class, UserRoleModel::class, 'user_id', 'role_id');
     }
+
+    public function favorites(): HasMany{
+        return $this->hasMany(FavoriteModel::class, 'user_id', 'id');
+    }
+
+    public function reports(): HasMany{
+        return $this->hasMany(ReportModel::class, 'user_id', 'id');
+    }
+
+    public function announcements(): HasMany{
+        return $this->hasMany(AnnouncementModel::class, 'user_id', 'id');
+    }
+
+    public function forms(): HasMany{
+        return $this->hasMany(FormModel::class, 'user_id', 'id');
+    }
+
 }

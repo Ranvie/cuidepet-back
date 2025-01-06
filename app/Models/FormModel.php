@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\DTO\Form\FormDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormModel extends BusinessModel {
 
@@ -35,5 +37,13 @@ class FormModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function announcements() :HasMany {
+        return $this->hasMany(AnnouncementModel::class, 'form_id', 'id');
+    }
+
+    public function users() :BelongsTo {
+        return $this->belongsTo(UserModel::class, 'user_id', 'id');
+    }
 
 }
