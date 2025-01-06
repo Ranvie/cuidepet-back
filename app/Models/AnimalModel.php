@@ -41,7 +41,7 @@ class AnimalModel extends BusinessModel {
         return $this->belongsTo(AnnouncementModel::class, 'id_announcement', 'id');
     }
 
-    public function breed() :BelongsTo {''
+    public function breed() :BelongsTo {
         return $this->belongsTo(BreedModel::class, 'id_breed', 'id');
     }
 
