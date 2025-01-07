@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Notification\NotificationDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotificationModel extends BusinessModel {
 
@@ -37,5 +38,9 @@ class NotificationModel extends BusinessModel {
     public $timestamps = true;
 
     public $fillable = ['viewed', 'title', 'message'];
+
+    public function user() :BelongsTo {
+        return $this->belongsTo(UserModel::class, 'user_id', 'id');
+    }
 
 }

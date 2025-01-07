@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Report\ReportDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReportModel extends BusinessModel {
 
@@ -35,5 +36,13 @@ class ReportModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function user() :BelongsTo {
+        return $this->belongsTo(UserModel::class, 'user_id', 'id');
+    }
+
+    public function announcement() :BelongsTo {
+        return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
+    }
 
 }

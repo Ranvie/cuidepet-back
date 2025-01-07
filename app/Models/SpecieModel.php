@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Specie\SpecieDTO;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SpecieModel extends BusinessModel {
 
@@ -35,5 +36,13 @@ class SpecieModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function breeds() :HasMany {
+        return $this->HasMany(BreedModel::class, 'id_specie', 'id');
+    }
+
+    public function animals() :HasMany {
+        return $this->HasMany(AnimalModel::class, 'id_specie', 'id');
+    }
 
 }

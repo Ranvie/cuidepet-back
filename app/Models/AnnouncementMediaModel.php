@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnnouncementMediaModel extends BusinessModel {
 
@@ -35,5 +36,9 @@ class AnnouncementMediaModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function announcement() :BelongsTo {
+        return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
+    }
 
 }

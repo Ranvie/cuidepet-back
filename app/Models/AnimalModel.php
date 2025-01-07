@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Animal\AnimalDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnimalModel extends BusinessModel {
 
@@ -35,4 +36,17 @@ class AnimalModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function announcement() :BelongsTo {
+        return $this->belongsTo(AnnouncementModel::class, 'id_announcement', 'id');
+    }
+
+    public function breed() :BelongsTo {
+        return $this->belongsTo(BreedModel::class, 'id_breed', 'id');
+    }
+
+    public function species() :BelongsTo {
+        return $this->belongsTo(SpecieModel::class, 'id_specie', 'id');
+    }
+
 }

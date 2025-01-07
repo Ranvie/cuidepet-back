@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\DTO\Breed\BreedDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BreedModel extends BusinessModel {
 
@@ -35,4 +37,13 @@ class BreedModel extends BusinessModel {
      * @var bool
      */
     public $timestamps = false;
+
+    public function animals() :HasMany {
+        return $this->hasMany(AnimalModel::class, 'breed_id', 'id');
+    }
+
+    public function specie() :BelongsTo {
+        return $this->belongsTo(SpecieModel::class, 'specie_id', 'id');
+    }
+
 }
