@@ -51,6 +51,8 @@ class BusinessModel extends Model{
 
         $parsed = ParseConvention::parse($model->original, PARSE_MODE::snakeToCamel, $this->class);
         foreach($model->relations as $key => $relation) {
+            if(empty($relation)) { continue; }
+
             if($relation::class == 'Illuminate\Database\Eloquent\Collection' ){
                 $items = [];
                 foreach($relation as $item) {
@@ -68,10 +70,15 @@ class BusinessModel extends Model{
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @return null|object
      */
     public function create($data, $relations = []){
+        if(empty($data)) {
+            $this->save();
+            return $this->getById($this->original['id'], $relations);
+        }
+
         return
             DB::transaction(function() use($data, $relations){
             $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
@@ -84,7 +91,7 @@ class BusinessModel extends Model{
                 $this->saveRelations($content, $relation);
             }
 
-            return $this->original ? $this->getById($this->original['id'], $relations) : null;
+            return $this->getById($this->original['id'], $relations);
         });
     }
 

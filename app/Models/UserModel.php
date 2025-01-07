@@ -51,9 +51,13 @@ class UserModel extends BusinessModel {
         return $user;
     }
 
-    public function create($data, $relations = ['roles'])
+    public function create($data, $relations = ['roles', 'preference', 'notifications'])
     {
-        return parent::create($data, $relations);
+        parent::create($data, []);
+        $this->preference()->create();
+        $this->roles()->sync([2]);
+
+        return parent::getById($this->original['id'], $relations);
     }
 
     public function edit($id, $data, $ignoreNulls = true)
