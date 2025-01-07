@@ -48,6 +48,7 @@ class UserRequest extends FormRequest {
             'preference.receiveAlarmsOnEmail' => 'boolean',
             'preference.receiveNews' => 'boolean',
             'notifications' => 'array|nullable',
+            'roles' => 'array|nullable',
         ];
     }
 

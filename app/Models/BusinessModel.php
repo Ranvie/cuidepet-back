@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Exceptions\BusinessException;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
-use function Psy\debug;
+use Illuminate\Support\Facades\DB;
 
 class BusinessModel extends Model{
 
@@ -68,31 +69,39 @@ class BusinessModel extends Model{
 
     /**
      * @param $data
-     * @return object
+     * @return null|object
      */
-    public function create($data, $relations = ['notifications']){
-        $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
+    public function create($data, $relations = []){
+        return
+            DB::transaction(function() use($data, $relations){
+            $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
 
-        $this->fill($origin);
-        $this->save();
+            $this->fill($origin);
+            $this->save();
 
-        foreach($relations as $relation){
-            $content = $origin[$relation];
-            $isArray = isset($content[0]);
-
-            if($isArray){
-                foreach($content as $item){
-                    $parse = ParseConvention::parse($item, PARSE_MODE::camelToSnake);
-                    $this->$relation()->create($parse);
-                }
+            foreach($relations as $relation){
+                $content = $origin[$relation];
+                $this->saveRelations($content, $relation);
             }
-            else{
-                $parse = ParseConvention::parse($content, PARSE_MODE::camelToSnake);
-                $this->$relation()->create($parse);
+
+            return $this->original ? $this->getById($this->original['id'], $relations) : null;
+        });
+    }
+
+    private function saveRelations($content, $relation){
+        $isArray = isset($content[0]);
+        $relationType = get_class($this->$relation());
+
+        if($isArray){
+            foreach($content as $item){
+                $parse = ParseConvention::parse($item, PARSE_MODE::camelToSnake);
+                $this->$relation()->create($parse, []);
             }
         }
-
-        return $this->getById($this->original['id']);
+        else{
+            $parse = ParseConvention::parse($content, PARSE_MODE::camelToSnake);
+            $this->$relation()->create($parse, []);
+        }
     }
 
     /**
@@ -123,7 +132,10 @@ class BusinessModel extends Model{
      * @param $id
      * @return bool
      */
-    public function remove($id) :bool {
+    public function remove($id = null) : bool {
+        $id = $id ?? $this->original['id'];
+
+        if(empty($id)) return false;
         return $this->where('id', $id)->delete();
     }
 

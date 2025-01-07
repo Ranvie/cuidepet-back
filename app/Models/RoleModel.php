@@ -37,6 +37,8 @@ class RoleModel extends BusinessModel {
      */
     public $timestamps = false;
 
+    public $fillable = ['id', 'name', 'description'];
+
     public function roles(): BelongsToMany{
         return $this->BelongsToMany(UserModel::class, UserRoleModel::class, 'user_id', 'role_id');
     }

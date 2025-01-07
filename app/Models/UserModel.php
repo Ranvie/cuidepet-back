@@ -51,9 +51,9 @@ class UserModel extends BusinessModel {
         return $user;
     }
 
-    public function create($data, $relations = ['preference'])
+    public function create($data, $relations = ['roles'])
     {
-        return parent::create($data);
+        return parent::create($data, $relations);
     }
 
     public function edit($id, $data, $ignoreNulls = true)
@@ -68,7 +68,7 @@ class UserModel extends BusinessModel {
 
     //TODO: Implementar o update no campo active do usuário, setando como false;
     //Validar se não faz sentido deletar outros dados também
-    public function remove($id): bool{
+    public function remove($id = null): bool{
         return true;
     }
 
