@@ -21,6 +21,7 @@ Route::prefix('announcement/{type}')->group(function () {
 Route::prefix('user')->group(function () {
 
     Route::get('/',        [UserController::class, 'list']);
+    Route::get('/page',    [UserController::class, 'paginate']);
     Route::post('/',       [UserController::class, 'create']);
 
     Route::prefix('{userId}')->group(function () {

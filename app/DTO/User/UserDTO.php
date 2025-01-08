@@ -14,4 +14,5 @@ class UserDTO{
     public $updatedAt;
     public $preference;
     public $notifications;
+    public $roles;
 }

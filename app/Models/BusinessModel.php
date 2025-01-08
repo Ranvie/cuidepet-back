@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,22 @@ class BusinessModel extends Model{
         foreach($registers as $register){
             $parsed[] = ParseConvention::parse($register, PARSE_MODE::snakeToCamel, $this->class);
         }
+
+        return $parsed;
+    }
+
+    public function getPaginated($limit = 10, $page = 1, $hardCodedMaxItems = 50){
+
+        $parsed = [];
+        $registers = $this->paginate($limit, ['*'], 'page', $page);
+        foreach($registers as $register){
+            $parsed[] = ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, UserDTO::class);
+        }
+
+        $parsed['perPage']     = $registers->perPage();
+        $parsed['lastPage']    = $registers->lastPage();
+        $parsed['currentPage'] = $registers->currentPage();
+        $parsed['maxItems']    = $hardCodedMaxItems;
 
         return $parsed;
     }
@@ -114,7 +131,7 @@ class BusinessModel extends Model{
     /**
      * Atualiza o registro no banco de dados
      * @param integer $id
-     * @param object $data
+     * @param array|object $data
      * @param boolean $ignoreNulls
      * @return object
      */

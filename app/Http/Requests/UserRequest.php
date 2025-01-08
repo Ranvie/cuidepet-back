@@ -42,13 +42,6 @@ class UserRequest extends FormRequest {
             'passwordConfirmation' => 'required|string',
             'imageProfile' => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'phone' => ['string','nullable', new PhoneRule()],
-            //TODO: REMOVER DEPOIS
-            'preference' => 'array|nullable',
-            'preference.receiveRegionAlarms' => 'boolean',
-            'preference.receiveAlarmsOnEmail' => 'boolean',
-            'preference.receiveNews' => 'boolean',
-            'notifications' => 'array|nullable',
-            'roles' => 'array|nullable',
         ];
     }
 

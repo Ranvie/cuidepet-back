@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
 use App\Models\UserModel;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
+
+    public function __construct(private UserService $userService){}
+
     /**
      * @return JsonResponse
      */
@@ -18,8 +22,15 @@ class UserController extends Controller
         return response()->json($response);
     }
 
+    public function paginate(){
+        $users = $this->userService->getList(10, 1);
+
+        $response = new BusinessResponse(200, $users);
+        return response()->json($response);
+    }
+
     public function get(int $userId){
-        $user = (new UserModel())->getById($userId);
+        $user = $this->userService->getById($userId);
 
         $response = new BusinessResponse(200, $user);
         return response()->json($response);
@@ -27,23 +38,22 @@ class UserController extends Controller
 
     public function create(UserRequest $request){
         $requestData = $request->validated();
-        $user = new UserModel();
+        $user = $this->userService->create($requestData);
 
-        $response = new BusinessResponse(201, $user->create($requestData));
+        $response = new BusinessResponse(201, $user);
         return response()->json($response, 201);
     }
 
     public function update(int $userId, UserRequest $request){
         $requestData = $request->validated();
-        $user = new UserModel();
+        $user = $this->userService->edit($userId, $requestData);
 
-        $response = new BusinessResponse(200, $user->edit($userId, $requestData));
+        $response = new BusinessResponse(200, $user);
         return response()->json($response);
     }
 
     public function delete(int $userId){
-        $user = new UserModel();
-        $user->remove($userId);
+        $this->userService->remove($userId);
 
         $response = new BusinessResponse(200, "O usuário {$userId} foi deletado com sucesso.");
         return response()->json($response);

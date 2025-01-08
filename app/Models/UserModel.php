@@ -42,16 +42,7 @@ class UserModel extends BusinessModel {
 
     public $fillable = ['username','email','password','image_profile','phone','active','created_at','updated_at'];
 
-    public function getById($id, $relations = ['roles', 'preference', 'notifications']){
-        $user = parent::getById($id, $relations);
-
-        if(!$user)
-            throw new BusinessException('O usuário não foi encontrado.', 200);
-
-        return $user;
-    }
-
-    public function create($data, $relations = ['roles', 'preference', 'notifications'])
+    public function create($data, $relations = [])
     {
         parent::create($data, []);
         $this->preference()->create();
@@ -60,19 +51,9 @@ class UserModel extends BusinessModel {
         return parent::getById($this->original['id'], $relations);
     }
 
-    public function edit($id, $data, $ignoreNulls = true)
-    {
-        $user = parent::edit($id, $data, $ignoreNulls);
-
-        if(!$user)
-            throw new BusinessException('O usuário não foi encontrado.', 200);
-
-        return $user;
-    }
-
-    //TODO: Implementar o update no campo active do usuário, setando como false;
     //Validar se não faz sentido deletar outros dados também
     public function remove($id = null): bool{
+        parent::edit($id, ['active' => 0]);
         return true;
     }
 

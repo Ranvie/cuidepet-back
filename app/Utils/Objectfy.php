@@ -74,14 +74,14 @@ class Objectfy {
         switch (gettype($origin)){
             case 'object':
                 foreach($origin as $key => $value){
-                    if($ignoreNulls && empty($value)) continue;
+                    if($ignoreNulls && is_null($value)) continue;
 
                     $destin->$key = $value;
                 }
                 break;
             case 'array':
                 foreach($origin as $key => $value){
-                    if($ignoreNulls && empty($value)) continue;
+                    if($ignoreNulls && is_null($value)) continue;
 
                     $destin[$key] = $value;
                 }
