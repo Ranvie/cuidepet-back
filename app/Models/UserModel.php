@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\DTO\User\UserDTO;
-use App\Exceptions\BusinessException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

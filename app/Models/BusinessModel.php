@@ -159,7 +159,7 @@ class BusinessModel extends Model{
     public function remove($id = null) : bool {
         $id = $id ?? $this->original['id'];
 
-        if(empty($id)) return false;
+        if(!$id) return false;
         return $this->where('id', $id)->delete();
     }
 
