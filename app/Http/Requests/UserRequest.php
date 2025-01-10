@@ -36,22 +36,22 @@ class UserRequest extends FormRequest {
 
     private function postRules(){
         return [
-            'username' => 'required|string',
-            'email' => 'required|string|email|unique:tb_user,email',
-            'password' => 'required|string|min:6|confirmed:passwordConfirmation',
+            'username'             => 'required|string',
+            'email'                => 'required|string|email|unique:tb_user,email',
+            'password'             => 'required|string|min:6|confirmed:passwordConfirmation',
             'passwordConfirmation' => 'required|string',
-            'imageProfile' => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'phone' => ['string','nullable', new PhoneRule()],
+            'imageProfile'         => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'phone'                => ['string','nullable', new PhoneRule()],
         ];
     }
 
     private function putRules(){
         return [
-            'username' => 'nullable|string',
-            'password' => 'nullable|string|min:6|confirmed:passwordConfirmation',
+            'username'             => 'nullable|string',
+            'password'             => 'nullable|string|min:6|confirmed:passwordConfirmation',
             'passwordConfirmation' => 'nullable|string',
-            'imageProfile' => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'phone' => ['string','nullable', new PhoneRule()]
+            'imageProfile'         => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'phone'                => ['string','nullable', new PhoneRule()]
         ];
     }
 }

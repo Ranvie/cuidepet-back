@@ -2,33 +2,38 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
+use App\Models\AnnouncementModel;
 use App\Services\Interfaces\IAnnouncementService;
 
-class AnnouncementService implements Interfaces\IAnnouncementService
+class AnnouncementService implements IAnnouncementService
 {
 
-    public function getList($limit, $page)
-    {
-        // TODO: Implement getList() method.
+    public function __construct(private AnnouncementModel $obAnnouncementModel){}
+
+    public function getList($limit, $page) :array {
+        return $this->obAnnouncementModel->getPaginated($limit, $page);
     }
 
-    public function getById($id, $relations)
-    {
-        // TODO: Implement getById() method.
+    public function getById($id, $relations) :object {
+        $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
+        if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não encontrado', 404); }
+
+        return $obAnnouncementDTO;
     }
 
-    public function create($data)
-    {
-        // TODO: Implement create() method.
+    public function create($data) :object {
+        return $this->obAnnouncementModel->create($data);
     }
 
-    public function edit($id, $data)
-    {
-        // TODO: Implement edit() method.
+    public function edit($id, $data) :object {
+        $obAnnouncementDTO = $this->obAnnouncementModel->edit($id, $data);
+        if(is_null($obAnnouncementDTO)){ throw new BusinessException('O anúncio não encontrado', 404); }
+
+        return $obAnnouncementDTO;
     }
 
-    public function remove($id = null)
-    {
-        // TODO: Implement remove() method.
+    public function remove($id = null) :bool {
+        return $this->obAnnouncementModel->remove($id);
     }
 }

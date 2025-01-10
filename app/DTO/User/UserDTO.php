@@ -3,7 +3,7 @@
 namespace App\DTO\User;
 
 class UserDTO{
-    public $id;
+    private $id;
     public $username;
     public $email;
     public $password;

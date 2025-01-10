@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tb_announcement_media', function (Blueprint $table) {
             $table->id();
             $table->foreignId('announcement_id')->constrained('tb_announcement')->onDelete('cascade');
-            $table->string('url');
+            $table->string('url')->nullable();
         });
     }
 

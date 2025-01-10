@@ -3,26 +3,16 @@
 namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
-use App\Models\UserModel;
 use App\Services\UserService;
-use Illuminate\Http\JsonResponse;
 
-class UserController extends Controller
-{
+/**
+ * @implements UserController<UserRequest>
+ */
+class UserController extends Controller {
 
     public function __construct(private UserService $userService){}
 
-    /**
-     * @return JsonResponse
-     */
     public function list(){
-        $users = (new UserModel())->getAll();
-
-        $response = new BusinessResponse(200, $users);
-        return response()->json($response);
-    }
-
-    public function paginate(){
         $users = $this->userService->getList(10, 1);
 
         $response = new BusinessResponse(200, $users);

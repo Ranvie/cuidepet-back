@@ -13,11 +13,6 @@ class FavoriteController extends Controller
         // TODO: Implement list() method.
     }
 
-    public function paginate()
-    {
-        // TODO: Implement paginate() method.
-    }
-
     public function get(int $userId)
     {
         // TODO: Implement get() method.

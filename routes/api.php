@@ -46,20 +46,21 @@ Route::prefix('user/{userId}')->group(function () {
     Route::post('/inactivate', [UserController::class, 'inactivate']);
 
     //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
-    Route::get('/my-announcements',                           [AnnouncementController::class, 'list']);
-    Route::get('/my-announcement-responses/{announcementId}', [AnnouncementController::class, 'listAnswers']);
-    Route::get('/announcement/{announcementId}',              [AnnouncementController::class, 'get']);
-
-    Route::post('/announcement',                              [AnnouncementController::class, 'create']);
-    Route::put('/announcement/{announcementId}',              [AnnouncementController::class, 'update']);
-    Route::delete('/announcement/{announcementId}',           [AnnouncementController::class, 'delete']);
+    Route::prefix('my-announcements')->group(function () {
+        Route::get('/',                         [AnnouncementController::class, 'list']);
+        Route::get('/{announcementId}',                     [AnnouncementController::class, 'get']);
+        Route::get('/answers/{announcementId}', [AnnouncementController::class, 'listAnswers']);
+        Route::post('/',                        [AnnouncementController::class, 'create']);
+        Route::put('/{announcementId}',         [AnnouncementController::class, 'update']);
+        Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
+    });
 
     Route::get('/notification',                     [NotificationController::class, 'list']);
     Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
     Route::patch('/notification/{notificationId}',  [NotificationController::class, 'setViewed']);
 
     Route::get('/form',             [FormController::class, 'list']);
-    Route::get('/form/{id}',        [FormController::class, 'get']);
+    Route::get('/form/{formId}',    [FormController::class, 'get']);
     Route::post('/form',            [FormController::class, 'create']);
     Route::delete('/form/{formId}', [FormController::class, 'delete']);
     Route::put('/form/{formId}',    [FormController::class, 'update']);
@@ -67,7 +68,7 @@ Route::prefix('user/{userId}')->group(function () {
     Route::prefix('/myForms')->group(function () {
 
         Route::get('/',            [MyFormController::class, 'list']);
-        Route::get('/{id}',        [MyFormController::class, 'get']);
+        Route::get('/{formId}',    [MyFormController::class, 'get']);
         Route::post('/',           [MyFormController::class, 'create']);
         Route::delete('/{formId}', [MyFormController::class, 'delete']);
         Route::put('/{formId}',    [MyFormController::class, 'update']);
@@ -78,6 +79,6 @@ Route::prefix('user/{userId}')->group(function () {
     Route::post('/favorite',   [FavoriteController::class, 'create']);
     Route::delete('/favorite', [FavoriteController::class, 'delete']);
 
-    Route::post('/report/announcement/{id}', [ReportController::class, 'create']);
+    Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 
 });

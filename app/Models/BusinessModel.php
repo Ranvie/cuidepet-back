@@ -40,7 +40,7 @@ class BusinessModel extends Model{
         return $parsed;
     }
 
-    public function getPaginated($limit = 10, $page = 1, $hardCodedMaxItems = 50){
+    public function getPaginated($limit = 10, $page = 1, $hardCodedMaxItems = 50) :array {
 
         $parsed = [];
         $registers = $this->paginate($limit, ['*'], 'page', $page);
@@ -62,7 +62,7 @@ class BusinessModel extends Model{
      * @param array $relations
      * @return null|object
      */
-    public function getById($id, $relations = []){
+    public function getById($id, $relations = []) :?object {
         $model = parent::where('id', $id)->with($relations)->first();
         if(!$model instanceof $this) return null;
 
@@ -90,7 +90,7 @@ class BusinessModel extends Model{
      * @param array $data
      * @return null|object
      */
-    public function create($data, $relations = []){
+    public function create($data, $relations = []) :object {
         if(empty($data)) {
             $this->save();
             return $this->getById($this->original['id'], $relations);
@@ -112,7 +112,7 @@ class BusinessModel extends Model{
         });
     }
 
-    private function saveRelations($content, $relation){
+    private function saveRelations($content, $relation) :void {
         $isArray = isset($content[0]);
         $relationType = get_class($this->$relation());
 
@@ -135,7 +135,7 @@ class BusinessModel extends Model{
      * @param boolean $ignoreNulls
      * @return object
      */
-    public function edit($id, $data, $ignoreNulls = true){
+    public function edit($id, $data, $ignoreNulls = true) :?object {
         $register = parent::find($id);
         if(!$register instanceof $this) return null;
 
@@ -156,7 +156,7 @@ class BusinessModel extends Model{
      * @param $id
      * @return bool
      */
-    public function remove($id = null) : bool {
+    public function remove($id = null) :bool {
         $id = $id ?? $this->original['id'];
 
         if(!$id) return false;

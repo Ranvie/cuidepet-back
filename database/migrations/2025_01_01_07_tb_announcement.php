@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
             $table->enum('type', ['lost', 'donation']);
-            $table->string('description', 1000);
+            $table->string('description', 1000)->nullable();
             $table->integer('times_favorited')->default(0);
-            $table->string('main_image', 255);
+            $table->string('main_image', 255)->nullable();
             $table->string('address', 255);
-            $table->string('contact_phone', 20);
-            $table->string('contact_email', 255);
+            $table->string('contact_phone', 20)->nullable();
+            $table->string('contact_email', 255)->nullable();
             $table->string('last_seen_latitude', 255);
             $table->string('last_seen_longitude', 255);
             $table->boolean('active')->default(true);

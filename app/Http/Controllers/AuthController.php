@@ -7,13 +7,7 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    //
     public function list()
-    {
-        // TODO: Implement list() method.
-    }
-
-    public function paginate()
     {
         // TODO: Implement paginate() method.
     }
@@ -23,12 +17,12 @@ class AuthController extends Controller
         // TODO: Implement get() method.
     }
 
-    public function create(UserRequest $request)
+    public function create(Request $request)
     {
         // TODO: Implement create() method.
     }
 
-    public function update(int $userId, UserRequest $request)
+    public function update(int $userId, Request $request)
     {
         // TODO: Implement update() method.
     }

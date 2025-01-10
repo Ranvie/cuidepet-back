@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
 use App\Models\UserModel;
 use App\Services\Interfaces\IUserService;
@@ -10,13 +11,11 @@ class UserService implements IUserService
 {
     public function __construct(private UserModel $userModel){}
 
-    public function getList($limit, $page)
-    {
+    public function getList($limit, $page) :array {
         return $this->userModel->getPaginated($limit, $page);
     }
 
-    public function getById($id, $relations = ['forms', 'announcements'])
-    {
+    public function getById($id, $relations = ['forms', 'announcements']) :UserDTO {
         $user = $this->userModel->getById($id, $relations);
 
         if(!$user)
@@ -25,8 +24,7 @@ class UserService implements IUserService
         return $user;
     }
 
-    public function create($data)
-    {
+    public function create($data) :UserDTO {
         return $this->userModel->create($data);
     }
 

@@ -1,40 +1,49 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\AnnouncementRequest;
+use App\Http\Response\BusinessResponse;
+use App\Services\AnnouncementService;
+use Illuminate\Http\JsonResponse;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\UserRequest;
+class AnnouncementController extends Controller {
 
-class AnnouncementController extends Controller
-{
+    public function __construct(private AnnouncementService $obAnnouncementService){}
 
-    public function list()
-    {
-        // TODO: Implement list() method.
+    public function list() :JsonResponse {
+        $registers = $this->obAnnouncementService->getList(10, 1);
+
+        $response = new BusinessResponse(200, $registers);
+        return response()->json($response);
     }
 
-    public function paginate()
-    {
-        // TODO: Implement paginate() method.
+    public function get(int $id) :JsonResponse {
+        $obAnnouncementDTO = $this->obAnnouncementService->getById($id);
+
+        $response = new BusinessResponse(200, $obAnnouncementDTO);
+        return response()->json($response);
     }
 
-    public function get(int $userId)
-    {
-        // TODO: Implement get() method.
+    public function create(int $announcementId, AnnouncementRequest $request) :JsonResponse {
+        $requestData = $request->validated();
+        //TODO: Tem que resolver essa parte, tem que colocar o $announcementId no user_id do banco;
+
+        $obAnnouncementDTO = $this->obAnnouncementService->create($requestData);
+
+        $response = new BusinessResponse(200, $obAnnouncementDTO);
+        return response()->json($response);
     }
 
-    public function create(UserRequest $request)
-    {
-        // TODO: Implement create() method.
+    public function update(int $id, AnnouncementRequest $request) :JsonResponse {
+        $obAnnouncementDTO = $this->obAnnouncementService->edit($id, $request->validated());
+
+        $response = new BusinessResponse(200, $obAnnouncementDTO);
+        return response()->json($response);
     }
 
-    public function update(int $userId, UserRequest $request)
-    {
-        // TODO: Implement update() method.
-    }
-
-    public function delete(int $userId)
-    {
-        // TODO: Implement delete() method.
+    public function delete(int $id) :JsonResponse {
+        $this->obAnnouncementService->remove($id);
+        $response = new BusinessResponse(200, 'O anúncio '.$id.' foi removido com sucesso.');
+        return response()->json($response);
     }
 }

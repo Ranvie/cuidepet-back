@@ -39,6 +39,8 @@ class AnnouncementModel extends BusinessModel {
      */
     public $timestamps = true;
 
+    public $fillable = ['type', 'description', 'main_image', 'address', 'contact_phone', 'contact_email', 'last_seen_latitude', 'last_seen_longitude'];
+
     public function user() :BelongsTo {
         return $this->belongsTo(UserModel::class, 'id', 'user_id');
     }
