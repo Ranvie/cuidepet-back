@@ -63,4 +63,8 @@ class AnnouncementModel extends BusinessModel {
         return $this->hasMany(ReportModel::class, 'announcement_id', 'id');
     }
 
+    public function formResponses () :HasMany {
+        return $this->hasMany(FormResponseModel::class, 'announcement_id', 'id');
+    }
+
 }

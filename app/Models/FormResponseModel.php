@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
-use App\DTO\Form\FormDTO;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class FormModel extends BusinessModel {
-
+class FormResponseModel extends Model
+{
     /**
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = FormDTO::class;
+    protected $class = FormResponseDTO::class;
 
     /**
      * Aponta a entidade do banco de dados
      * @var string
      */
-    public $table = 'tb_form';
+    public $table = 'tb_form_response';
 
     /**
      * Aponta a chave primária no banco de dados
@@ -38,12 +37,11 @@ class FormModel extends BusinessModel {
      */
     public $timestamps = true;
 
-    public function announcements() :HasMany {
-        return $this->hasMany(AnnouncementModel::class, 'id', 'announcement_id');
+    public function announcements() :BelongsTo {
+        return $this->BelongsTo(AnnouncementModel::class, 'id', 'announcement_id');
     }
 
-    public function user() :BelongsTo {
+    public function users() :BelongsTo {
         return $this->belongsTo(UserModel::class, 'id', 'user_id');
     }
-
 }

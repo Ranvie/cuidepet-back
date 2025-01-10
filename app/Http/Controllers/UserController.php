@@ -58,4 +58,11 @@ class UserController extends Controller
         $response = new BusinessResponse(200, "O usuário {$userId} foi deletado com sucesso.");
         return response()->json($response);
     }
+
+    public function inactivate(int $userId){
+        $this->userService->inactivate($userId);
+
+        $response = new BusinessResponse(200, "O usuário {$userId} foi deletado com sucesso.");
+        return response()->json($response);
+    }
 }

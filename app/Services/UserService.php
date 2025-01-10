@@ -10,14 +10,12 @@ class UserService implements IUserService
 {
     public function __construct(private UserModel $userModel){}
 
-    //TODO: não deve retornar usuários inativos;
     public function getList($limit, $page)
     {
         return $this->userModel->getPaginated($limit, $page);
     }
 
-    //TODO: não deve retornar usuários inativos;
-    public function getById($id, $relations = [])
+    public function getById($id, $relations = ['forms', 'announcements'])
     {
         $user = $this->userModel->getById($id, $relations);
 
@@ -32,7 +30,6 @@ class UserService implements IUserService
         return $this->userModel->create($data);
     }
 
-    //TODO: não deve editar usuários inativos;
     public function edit($id, $data)
     {
         $user = $this->userModel->edit($id, $data);
@@ -46,5 +43,10 @@ class UserService implements IUserService
     public function remove($id = null)
     {
         return $this->userModel->remove($id);
+    }
+
+    public function inactivate($id = null)
+    {
+        return $this->userModel->inactivate($id);
     }
 }

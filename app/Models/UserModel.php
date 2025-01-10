@@ -51,7 +51,7 @@ class UserModel extends BusinessModel {
     }
 
     //Validar se não faz sentido deletar outros dados também
-    public function remove($id = null): bool{
+    public function inactivate($id = null): bool{
         parent::edit($id, ['active' => 0]);
         return true;
     }
@@ -82,6 +82,10 @@ class UserModel extends BusinessModel {
 
     public function forms(): HasMany{
         return $this->hasMany(FormModel::class, 'user_id', 'id');
+    }
+
+    public function responses(): HasMany{
+        return $this->hasMany(FormResponseModel::class, 'user_id', 'id');
     }
 
 }

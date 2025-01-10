@@ -15,4 +15,6 @@ class UserDTO{
     public $preference;
     public $notifications;
     public $roles;
+    public $announcements;
+    public $forms;
 }
