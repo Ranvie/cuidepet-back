@@ -37,6 +37,12 @@ class AnimalModel extends BusinessModel {
      */
     public $timestamps = false;
 
+    public function create($data, $relations = [])
+    {
+        //parent::create($data, []);
+    }
+
+
     public function announcement() :BelongsTo {
         return $this->belongsTo(AnnouncementModel::class, 'id_announcement', 'id');
     }

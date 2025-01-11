@@ -12,9 +12,9 @@ class FormService implements Interfaces\IFormService
         // TODO: Implement getList() method.
     }
 
-    public function getById($id, $relations)
+    public function getById($id, $relations = [])
     {
-        // TODO: Implement getById() method.
+        parent::getById($id, $relations);
     }
 
     public function create($data)

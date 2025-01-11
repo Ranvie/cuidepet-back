@@ -9,7 +9,10 @@ use App\Services\Interfaces\IAnnouncementService;
 class AnnouncementService implements IAnnouncementService
 {
 
-    public function __construct(private AnnouncementModel $obAnnouncementModel){}
+    public function __construct(
+        private AnnouncementModel $obAnnouncementModel,
+        private ValidationService $validationService
+    ){}
 
     public function getList($limit, $page) :array {
         return $this->obAnnouncementModel->list($limit, $page);
@@ -23,6 +26,7 @@ class AnnouncementService implements IAnnouncementService
     }
 
     public function create($data) :object {
+        $this->validationService->validateIfUserExists($data['userId']);
         return $this->obAnnouncementModel->create($data);
     }
 

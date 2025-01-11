@@ -29,19 +29,14 @@ class AnnouncementController extends Controller {
     }
 
     public function create(int $userId, AnnouncementRequest $request) :JsonResponse {
+        echo "A"; exit;
         $requestData = $request->validated();
         $requestData['userId'] = $userId;
-        dd($requestData); //TODO: Implementar as lógicas de salvar as relações :P;
 
-        $this->validateIfUserExists($userId);
         $obAnnouncementDTO = $this->obAnnouncementService->create($requestData);
 
         $response = new BusinessResponse(200, $obAnnouncementDTO);
         return $response->build();
-    }
-
-    private function validateIfUserExists($userId){
-        $this->userService->getById($userId);
     }
 
     public function update(int $userId, int $announcementId, AnnouncementRequest $request) :JsonResponse {

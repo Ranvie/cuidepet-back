@@ -44,6 +44,13 @@ class AnnouncementModel extends BusinessModel {
         'last_seen_latitude', 'last_seen_longitude', 'user_id'
     ];
 
+    public function create($data, $relations = [])
+    {
+        //parent::create($data, []);
+        //$this->animal()->create();
+        return parent::getById($this->original['id'], $relations);
+    }
+
     public function user() :BelongsTo {
         return $this->belongsTo(UserModel::class, 'id', 'user_id');
     }
