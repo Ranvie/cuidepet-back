@@ -47,7 +47,7 @@ Route::prefix('user/{userId}')->group(function () {
     //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
     Route::prefix('my-announcements')->group(function () {
         Route::get('/',                         [AnnouncementController::class, 'list']);
-        Route::get('/{announcementId}',                     [AnnouncementController::class, 'get']);
+        Route::get('/{announcementId}',         [AnnouncementController::class, 'get']);
         Route::get('/answers/{announcementId}', [AnnouncementController::class, 'listAnswers']);
         Route::post('/',                        [AnnouncementController::class, 'create']);
         Route::put('/{announcementId}',         [AnnouncementController::class, 'update']);

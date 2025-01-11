@@ -47,7 +47,7 @@ class BusinessModel extends Model{
      * @return null|object
      */
     public function getById($id, $relations = []) {
-        $model = parent::where('id', $id)->with($relations)->first();
+        $model = parent::where($this->primaryKey, $id)->with($relations)->first();
         if(!$model instanceof $this) return null;
 
         $parsed = ParseConvention::parse($model->original, PARSE_MODE::snakeToCamel, $this->class);
@@ -78,7 +78,7 @@ class BusinessModel extends Model{
     public function create($data, $relations = []) {
         if(empty($data)) {
             $this->save();
-            return $this->getById($this->original['id'], $relations);
+            return $this->getById($this->original[$this->primaryKey], $relations);
         }
 
         return
@@ -93,7 +93,7 @@ class BusinessModel extends Model{
                 $this->saveRelations($content, $relation);
             }
 
-            return $this->getById($this->original['id'], $relations);
+            return $this->getById($this->original[$this->primaryKey], $relations);
         });
     }
 

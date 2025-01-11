@@ -29,7 +29,6 @@ class AnnouncementController extends Controller {
     }
 
     public function create(int $userId, AnnouncementRequest $request) :JsonResponse {
-        echo "A"; exit;
         $requestData = $request->validated();
         $requestData['userId'] = $userId;
 

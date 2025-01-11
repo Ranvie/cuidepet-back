@@ -23,7 +23,7 @@ class AnimalModel extends BusinessModel {
      * Aponta a chave primária no banco de dados
      * @var string
      */
-    public $primaryKey = 'id';
+    public $primaryKey = 'announcement_id';
 
     /**
      * Define a chave primária como auto incremento
@@ -37,9 +37,15 @@ class AnimalModel extends BusinessModel {
      */
     public $timestamps = false;
 
+    public $fillable = [
+        'announcement_id', 'name', 'gender', 'color', 'size', 'age', 'disability', 'vaccinated', 'dewormed',
+        'castrated', 'image_profile', 'last_seen_date', 'breed_id', 'specie_id'
+    ];
+
     public function create($data, $relations = [])
     {
-        //parent::create($data, []);
+        parent::create($data, []);
+        return parent::getById($this->original['announcement_id'], ['breed', 'species']);
     }
 
 

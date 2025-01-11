@@ -46,8 +46,12 @@ class AnnouncementModel extends BusinessModel {
 
     public function create($data, $relations = [])
     {
-        //parent::create($data, []);
-        //$this->animal()->create();
+        $animalData = $data['animal'];
+
+        parent::create($data, []);
+        $animalData['announcementId'] = $this->original['id'];
+
+        $this->animal()->getModel()->create($animalData);
         return parent::getById($this->original['id'], $relations);
     }
 
@@ -56,7 +60,7 @@ class AnnouncementModel extends BusinessModel {
     }
 
     public function animal() :HasOne {
-        return $this->hasOne(AnimalModel::class, 'announcement_id', 'id');
+        return $this->hasOne(AnimalModel::class, 'announcement_id', 'announcement_id');
     }
 
     public function announcementMedia() :HasMany {

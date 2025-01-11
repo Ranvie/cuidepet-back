@@ -17,4 +17,5 @@ class AnnouncementDTO {
     public $status;
     public $createdAt;
     public $updatedAt;
+    public $animal;
 }

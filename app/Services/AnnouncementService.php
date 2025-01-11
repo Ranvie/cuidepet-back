@@ -11,14 +11,14 @@ class AnnouncementService implements IAnnouncementService
 
     public function __construct(
         private AnnouncementModel $obAnnouncementModel,
-        private ValidationService $validationService
+        private UserService $userService
     ){}
 
     public function getList($limit, $page) :array {
         return $this->obAnnouncementModel->list($limit, $page);
     }
 
-    public function getById($id, $relations = []) :object {
+    public function getById($id, $relations = ['animal']) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
@@ -26,8 +26,12 @@ class AnnouncementService implements IAnnouncementService
     }
 
     public function create($data) :object {
-        $this->validationService->validateIfUserExists($data['userId']);
+        $this->validateIfUserExists($data['userId']);
         return $this->obAnnouncementModel->create($data);
+    }
+
+    private function validateIfUserExists($userId){
+        $this->userService->getById($userId);
     }
 
     public function edit($id, $data) :object {

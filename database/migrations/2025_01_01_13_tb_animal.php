@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('gender');
             $table->string('color');
-            $table->enum('age', ['puppy, adult, senior']);
-            $table->enum('size', ['medium', 'large']);
+            $table->enum('age', ['puppy','adult','senior']);
+            $table->enum('size', ['small', 'medium', 'large']);
             $table->boolean('disability');
-            $table->boolean('vacinated');
+            $table->boolean('vaccinated');
             $table->boolean('dewormed');
             $table->boolean('castrated');
             $table->string('image_profile');
