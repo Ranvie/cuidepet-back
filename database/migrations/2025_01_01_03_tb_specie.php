@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,8 +14,10 @@ return new class extends Migration
     {
         Schema::create('tb_specie', function (Blueprint $table) {
             $table->id();
-            $table->string('nome', 255);
+            $table->string('name', 255);
         });
+
+        Artisan::call('db:seed', ['--class' => 'SpecieSeeder']);
     }
 
     /**

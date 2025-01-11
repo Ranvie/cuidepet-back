@@ -40,7 +40,7 @@ class UserRequest extends FormRequest {
             'email'                => 'required|string|email|unique:tb_user,email',
             'password'             => 'required|string|min:6|confirmed:passwordConfirmation',
             'passwordConfirmation' => 'required|string',
-            'imageProfile'         => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imageProfile'         => 'string|nullable|string',
             'phone'                => ['string','nullable', new PhoneRule()],
         ];
     }
@@ -50,7 +50,7 @@ class UserRequest extends FormRequest {
             'username'             => 'nullable|string',
             'password'             => 'nullable|string|min:6|confirmed:passwordConfirmation',
             'passwordConfirmation' => 'nullable|string',
-            'imageProfile'         => 'string|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imageProfile'         => 'string|nullable|string',
             'phone'                => ['string','nullable', new PhoneRule()]
         ];
     }

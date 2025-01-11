@@ -31,6 +31,7 @@ class AnnouncementController extends Controller {
     public function create(int $userId, AnnouncementRequest $request) :JsonResponse {
         $requestData = $request->validated();
         $requestData['userId'] = $userId;
+        dd($requestData); //TODO: Implementar as lógicas de salvar as relações :P;
 
         $this->validateIfUserExists($userId);
         $obAnnouncementDTO = $this->obAnnouncementService->create($requestData);
