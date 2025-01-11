@@ -2,6 +2,8 @@
 
 namespace App\Http\Response;
 
+use Illuminate\Http\JsonResponse;
+
 class BusinessResponse
 {
     public int $code = 200;
@@ -15,6 +17,10 @@ class BusinessResponse
     {
         $this->code = $code;
         $this->content = $content;
+    }
+
+    public function build(): JsonResponse{
+        return response()->json($this);
     }
 
 }

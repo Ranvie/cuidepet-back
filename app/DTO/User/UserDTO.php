@@ -3,7 +3,7 @@
 namespace App\DTO\User;
 
 class UserDTO{
-    private $id;
+    public $id;
     public $username;
     public $email;
     public $password;
@@ -13,8 +13,5 @@ class UserDTO{
     public $createdAt;
     public $updatedAt;
     public $preference;
-    public $notifications;
     public $roles;
-    public $announcements;
-    public $forms;
 }

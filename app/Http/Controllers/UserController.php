@@ -5,9 +5,6 @@ use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\UserService;
 
-/**
- * @implements UserController<UserRequest>
- */
 class UserController extends Controller {
 
     public function __construct(private UserService $userService){}
@@ -16,14 +13,14 @@ class UserController extends Controller {
         $users = $this->userService->getList(10, 1);
 
         $response = new BusinessResponse(200, $users);
-        return response()->json($response);
+        return $response->build();
     }
 
     public function get(int $userId){
         $user = $this->userService->getById($userId);
 
         $response = new BusinessResponse(200, $user);
-        return response()->json($response);
+        return $response->build();
     }
 
     public function create(UserRequest $request){
@@ -39,20 +36,20 @@ class UserController extends Controller {
         $user = $this->userService->edit($userId, $requestData);
 
         $response = new BusinessResponse(200, $user);
-        return response()->json($response);
+        return $response->build();
     }
 
     public function delete(int $userId){
         $this->userService->remove($userId);
 
         $response = new BusinessResponse(200, "O usuário {$userId} foi deletado com sucesso.");
-        return response()->json($response);
+        return $response->build();
     }
 
     public function inactivate(int $userId){
         $this->userService->inactivate($userId);
 
         $response = new BusinessResponse(200, "O usuário {$userId} foi deletado com sucesso.");
-        return response()->json($response);
+        return $response->build();
     }
 }

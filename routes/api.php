@@ -19,10 +19,9 @@ Route::post('/accept-therms',     [AuthController::class, 'acceptTherms']);
 
 //TODO: Nome temporário, mas vão ser as rotas que SOMENTE admins podem acessar: criação de usuário, reports, etc;
 //Não sei se vale a pena, mas uma opção seria criar um safeDTO de cada model que tenha registros sensíveis;
-Route::prefix('admin/user/')->group(function () {
+Route::prefix('admin/user')->group(function () {
 
     Route::get('/',               [UserController::class, 'list']);
-    Route::get('/page',           [UserController::class, 'paginate']);
     Route::get('/{id}',           [UserController::class, 'get']);
     Route::post('/',              [UserController::class, 'create']);
     Route::put('/{id}',           [UserController::class, 'update']);

@@ -4,46 +4,55 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnnouncementRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\AnnouncementService;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
 class AnnouncementController extends Controller {
 
-    public function __construct(private AnnouncementService $obAnnouncementService){}
+    public function __construct(
+        private AnnouncementService $obAnnouncementService,
+        private UserService $userService
+    ){}
 
     public function list() :JsonResponse {
         $registers = $this->obAnnouncementService->getList(10, 1);
 
         $response = new BusinessResponse(200, $registers);
-        return response()->json($response);
+        return $response->build();
     }
 
-    public function get(int $id) :JsonResponse {
-        $obAnnouncementDTO = $this->obAnnouncementService->getById($id);
+    public function get(int $userId, int $announcementId) :JsonResponse {
+        $obAnnouncementDTO = $this->obAnnouncementService->getById($announcementId);
 
         $response = new BusinessResponse(200, $obAnnouncementDTO);
-        return response()->json($response);
+        return $response->build();
     }
 
-    public function create(int $announcementId, AnnouncementRequest $request) :JsonResponse {
+    public function create(int $userId, AnnouncementRequest $request) :JsonResponse {
         $requestData = $request->validated();
-        //TODO: Tem que resolver essa parte, tem que colocar o $announcementId no user_id do banco;
+        $requestData['userId'] = $userId;
 
+        $this->validateIfUserExists($userId);
         $obAnnouncementDTO = $this->obAnnouncementService->create($requestData);
 
         $response = new BusinessResponse(200, $obAnnouncementDTO);
-        return response()->json($response);
+        return $response->build();
     }
 
-    public function update(int $id, AnnouncementRequest $request) :JsonResponse {
-        $obAnnouncementDTO = $this->obAnnouncementService->edit($id, $request->validated());
+    private function validateIfUserExists($userId){
+        $this->userService->getById($userId);
+    }
+
+    public function update(int $userId, int $announcementId, AnnouncementRequest $request) :JsonResponse {
+        $obAnnouncementDTO = $this->obAnnouncementService->edit($announcementId, $request->validated());
 
         $response = new BusinessResponse(200, $obAnnouncementDTO);
-        return response()->json($response);
+        return $response->build();
     }
 
-    public function delete(int $id) :JsonResponse {
-        $this->obAnnouncementService->remove($id);
-        $response = new BusinessResponse(200, 'O anúncio '.$id.' foi removido com sucesso.');
-        return response()->json($response);
+    public function delete(int $announcementId) :JsonResponse {
+        $this->obAnnouncementService->remove($announcementId);
+        $response = new BusinessResponse(200, 'O anúncio '.$announcementId.' foi removido com sucesso.');
+        return $response->build();
     }
 }

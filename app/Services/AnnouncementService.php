@@ -12,12 +12,12 @@ class AnnouncementService implements IAnnouncementService
     public function __construct(private AnnouncementModel $obAnnouncementModel){}
 
     public function getList($limit, $page) :array {
-        return $this->obAnnouncementModel->getPaginated($limit, $page);
+        return $this->obAnnouncementModel->list($limit, $page);
     }
 
-    public function getById($id, $relations) :object {
+    public function getById($id, $relations = []) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
-        if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não encontrado', 404); }
+        if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
         return $obAnnouncementDTO;
     }
@@ -28,7 +28,7 @@ class AnnouncementService implements IAnnouncementService
 
     public function edit($id, $data) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->edit($id, $data);
-        if(is_null($obAnnouncementDTO)){ throw new BusinessException('O anúncio não encontrado', 404); }
+        if(is_null($obAnnouncementDTO)){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
         return $obAnnouncementDTO;
     }

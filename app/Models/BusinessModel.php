@@ -24,28 +24,12 @@ class BusinessModel extends Model{
      */
     public $timestamps = false;
 
-    /**
-     * Retorna todos os registros da tabela
-     * @return array<object>
-     * @throws \Exception
-     */
-    public function getAll(){
-        $parsed = [];
-        $registers = $this->all()->toArray();
-
-        foreach($registers as $register){
-            $parsed[] = ParseConvention::parse($register, PARSE_MODE::snakeToCamel, $this->class);
-        }
-
-        return $parsed;
-    }
-
-    public function getPaginated($limit = 10, $page = 1, $hardCodedMaxItems = 50) :array {
+    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50) {
 
         $parsed = [];
         $registers = $this->paginate($limit, ['*'], 'page', $page);
         foreach($registers as $register){
-            $parsed[] = ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, UserDTO::class);
+            $parsed[] = ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, $this->class);
         }
 
         $parsed['perPage']     = $registers->perPage();
@@ -59,10 +43,10 @@ class BusinessModel extends Model{
     /**
      * Procura um registro por ID
      * @param integer $id
-     * @param array $relations
+     * @param array<string> $relations
      * @return null|object
      */
-    public function getById($id, $relations = []) :?object {
+    public function getById($id, $relations = []) {
         $model = parent::where('id', $id)->with($relations)->first();
         if(!$model instanceof $this) return null;
 
@@ -88,9 +72,10 @@ class BusinessModel extends Model{
 
     /**
      * @param array $data
+     * @param array<string> $relations
      * @return null|object
      */
-    public function create($data, $relations = []) :object {
+    public function create($data, $relations = []) {
         if(empty($data)) {
             $this->save();
             return $this->getById($this->original['id'], $relations);
@@ -112,7 +97,13 @@ class BusinessModel extends Model{
         });
     }
 
-    private function saveRelations($content, $relation) :void {
+    /**
+     * @param array|object $content
+     * @param string $relation
+     * @return void
+     * @throws \Exception
+     */
+    private function saveRelations($content, $relation) {
         $isArray = isset($content[0]);
         $relationType = get_class($this->$relation());
 
@@ -133,9 +124,9 @@ class BusinessModel extends Model{
      * @param integer $id
      * @param array|object $data
      * @param boolean $ignoreNulls
-     * @return object
+     * @return null|object
      */
-    public function edit($id, $data, $ignoreNulls = true) :?object {
+    public function edit($id, $data, $ignoreNulls = true) {
         $register = parent::find($id);
         if(!$register instanceof $this) return null;
 
@@ -153,10 +144,10 @@ class BusinessModel extends Model{
 
     /**
      * Apaga um registro no banco de dados
-     * @param $id
-     * @return bool
+     * @param integer $id
+     * @return boolean
      */
-    public function remove($id = null) :bool {
+    public function remove($id = null) {
         $id = $id ?? $this->original['id'];
 
         if(!$id) return false;
