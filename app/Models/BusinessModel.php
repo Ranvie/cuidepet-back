@@ -39,12 +39,19 @@ class BusinessModel extends Model{
     /**
      * Método responsável por converter de snake_case para camelCase
      */
-    public function parser(Model|Collection $registers, string $class = "") {
-        return !$registers instanceof Collection
+    public function parser(Model|Collection $registers) {
+        $parsed = [];
+
+        if(isset($registers->relations))
+            foreach ($registers->relations as $register) $parsed[] = $this->parser($register);
+
+        $parsed[] = !$registers instanceof Collection
             ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
             });
+
+        return $parsed;
     }
 
     public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50) {
@@ -71,12 +78,16 @@ class BusinessModel extends Model{
         if(!$model instanceof $this) return null;
         if(!$parse) return $model;
 
+        $teste = [];
         $parsed = $this->parser($model);
-        foreach($model->relations as $key => $relation) {
+        /*foreach($model->relations as $key => $relation) {
             if(empty($relation)) { continue; }
 
-            $parsed->$key = $this->parser($relation);
-        }
+            //$parsed->$key = $this->parser($relation);
+            $t
+        }*/
+
+        dd($parsed);
 
         return $parsed;
     }

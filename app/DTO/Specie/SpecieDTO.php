@@ -6,6 +6,6 @@ class SpecieDTO {
 
     public int $id;
 
-    public string $nome;
+    public string $name;
 
 }
