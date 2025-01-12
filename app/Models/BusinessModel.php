@@ -118,7 +118,6 @@ class BusinessModel extends Model{
         $register = parent::find($id);
         if(!$register instanceof $this) return null;
 
-        //TODO: Pensar em uns nomes melhores depois kkkkk
         $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
         $destin = $register->original;
         $obj = Objectfy::transferTo($origin, $destin, $ignoreNulls);
@@ -126,7 +125,6 @@ class BusinessModel extends Model{
         $register->fill($obj);
         $register->save();
 
-        //TODO: Pensar em como podemos fazer os retornos dos cruds, visto que se for um response, podem faltar campos para mexer depois
         return $this->getById($id, [], $parse);
     }
 

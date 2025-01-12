@@ -12,7 +12,8 @@ class AnnouncementService implements IAnnouncementService
     public function __construct(
         private AnnouncementModel $obAnnouncementModel,
         private UserService $userService,
-        private AnnouncementMediaService $announcementMediaService
+        private AnnouncementMediaService $announcementMediaService,
+        private FormService $formService
     ){}
 
     public function getList($limit, $page) {
@@ -23,13 +24,12 @@ class AnnouncementService implements IAnnouncementService
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
-        //dd($obAnnouncementDTO);
-
         return $obAnnouncementDTO;
     }
 
     public function create($data) :object {
         $this->validateIfUserExists($data['userId']);
+        $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
         $announcementModel = $this->obAnnouncementModel->create($data, [], false);
         $announcementId = $announcementModel->getOriginal()['id'];
@@ -46,11 +46,19 @@ class AnnouncementService implements IAnnouncementService
             $this->announcementMediaService->newInstance()->create($announcementMedia);
         }
 
-        return $announcementModel->getById($announcementId, ['animal', 'form', 'announcementMedia']);
+        return $announcementModel->getById($announcementId, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
     }
 
     private function validateIfUserExists($userId){
         $this->userService->getById($userId);
+    }
+
+    private function validateIfFormBelongsToUser($userId, $formId){
+        $userForm = $this->formService->getUserForm($userId, $formId);
+
+        if(!$userForm){
+            throw new BusinessException('O usuário não possui o formulário requisitado.', 404);
+        }
     }
 
     public function edit($id, $data) :object {

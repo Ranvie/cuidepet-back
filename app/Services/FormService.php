@@ -22,6 +22,10 @@ class FormService implements Interfaces\IFormService
         return $this->formModel-$this->getById($id, $relations);
     }
 
+    public function getUserForm($userId, $formId){
+        return $this->formModel->getUserForm($userId, $formId);
+    }
+
     public function create($data)
     {
         $data['url'] = 'Url muito legal, me altera depois kkkkjk';

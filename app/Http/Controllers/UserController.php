@@ -28,7 +28,7 @@ class UserController extends Controller {
         $user = $this->userService->create($requestData);
 
         $response = new BusinessResponse(201, $user);
-        return response()->json($response, 201);
+        return $response->build();
     }
 
     public function update(int $userId, UserRequest $request){

@@ -40,6 +40,10 @@ class FormModel extends BusinessModel {
 
     public $fillable = ['user_id', 'url', 'payload'];
 
+    public function getUserForm($userId, $formId){
+        return $this->where('id', $formId)->where('user_id', $userId)->first();
+    }
+
     public function create($data, $relations = [], $parse = true)
     {
         return parent::create($data, $relations);

@@ -10,8 +10,7 @@ use Illuminate\Http\JsonResponse;
 class AnnouncementController extends Controller {
 
     public function __construct(
-        private AnnouncementService $obAnnouncementService,
-        private UserService $userService
+        private AnnouncementService $obAnnouncementService
     ){}
 
     public function list() :JsonResponse {
