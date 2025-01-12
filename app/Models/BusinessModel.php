@@ -8,6 +8,7 @@ use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class BusinessModel extends Model{
 
@@ -40,16 +41,14 @@ class BusinessModel extends Model{
      * Método responsável por converter de snake_case para camelCase
      */
     public function parser(Model|Collection $registers) {
-        $parsed = [];
-
-        if(isset($registers->relations))
-            foreach ($registers->relations as $register) $parsed[] = $this->parser($register);
-
-        $parsed[] = !$registers instanceof Collection
+        $parsed = !$registers instanceof Collection
             ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
             });
+
+        if(isset($registers->relations))
+            foreach ($registers->relations as $key => $register) $parsed->$key = $this->parser($register);
 
         return $parsed;
     }
@@ -78,18 +77,7 @@ class BusinessModel extends Model{
         if(!$model instanceof $this) return null;
         if(!$parse) return $model;
 
-        $teste = [];
-        $parsed = $this->parser($model);
-        /*foreach($model->relations as $key => $relation) {
-            if(empty($relation)) { continue; }
-
-            //$parsed->$key = $this->parser($relation);
-            $t
-        }*/
-
-        dd($parsed);
-
-        return $parsed;
+        return $this->parser($model);
     }
 
     /**

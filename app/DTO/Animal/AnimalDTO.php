@@ -2,6 +2,9 @@
 
 namespace App\DTO\Animal;
 
+use App\DTO\Breed\BreedDTO;
+use App\DTO\Specie\SpecieDTO;
+
 class AnimalDTO {
 
     public int $id;
@@ -16,6 +19,6 @@ class AnimalDTO {
     public bool $castrated;
     public string $imageProfile;
     public string $lastSeenDate;
-    public string $breed;
-    public string $specie;
+    public BreedDTO $breed;
+    public SpecieDTO $specie;
 }
