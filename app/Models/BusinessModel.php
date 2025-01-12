@@ -8,6 +8,7 @@ use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class BusinessModel extends Model{
@@ -24,13 +25,34 @@ class BusinessModel extends Model{
      */
     public $timestamps = false;
 
-    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50) {
+    /**
+     * Objeto de conversão de classes
+     * @var ParseConvention
+     */
+    private ParseConvention $obParseConvention;
 
-        $parsed = [];
+    /**
+     * Método Construtor
+     */
+    public function __construct(){
+        $this->obParseConvention = new ParseConvention;
+    }
+
+    /**
+     * Método responsável por converter de snake_case para camelCase
+     */
+    public function parser(Model|Collection $registers) {
+        return !$registers instanceof Collection
+            ? $this->obParseConvention::parse($registers, PARSE_MODE::snakeToCamel, $this->class)
+            : $registers->map(function($obModel){
+                return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
+            });
+    }
+
+    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50) {
         $registers = $this->paginate($limit, ['*'], 'page', $page);
-        foreach($registers as $register){
-            $parsed[] = ParseConvention::parse($register->original, PARSE_MODE::snakeToCamel, $this->class);
-        }
+
+        $parsed = $this->parser($registers->getCollection());
 
         $parsed['perPage']     = $registers->perPage();
         $parsed['lastPage']    = $registers->lastPage();
@@ -75,48 +97,15 @@ class BusinessModel extends Model{
      * @param array<string> $relations
      * @return null|object
      */
-    public function create($data, $relations = []) {
-        if(empty($data)) {
-            $this->save();
-            return $this->getById($this->original[$this->primaryKey], $relations);
-        }
-
-        return
+    public function create($data, $relations = []) { return
             DB::transaction(function() use($data, $relations){
             $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
 
             $this->fill($origin);
             $this->save();
 
-            foreach($relations as $relation){
-                $content = $origin[$relation];
-                $this->saveRelations($content, $relation);
-            }
-
             return $this->getById($this->original[$this->primaryKey], $relations);
         });
-    }
-
-    /**
-     * @param array|object $content
-     * @param string $relation
-     * @return void
-     * @throws \Exception
-     */
-    private function saveRelations($content, $relation) {
-        $isArray = isset($content[0]);
-        $relationType = get_class($this->$relation());
-
-        if($isArray){
-            foreach($content as $item){
-                $parse = ParseConvention::parse($item, PARSE_MODE::camelToSnake);
-                $this->$relation()->create($parse, []);
-            }
-        }
-        else{
-            $parse = ParseConvention::parse($content, PARSE_MODE::camelToSnake);
-            $this->$relation()->create($parse, []);
-        }
     }
 
     /**
