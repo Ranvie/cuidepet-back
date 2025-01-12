@@ -155,4 +155,8 @@ class BusinessModel extends Model{
         return $this->where('id', $id)->delete();
     }
 
+    public function newModel(){
+        return new static();
+    }
+
 }

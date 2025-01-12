@@ -37,6 +37,8 @@ class AnnouncementMediaModel extends BusinessModel {
      */
     public $timestamps = false;
 
+    public $fillable = ['announcement_id', 'url'];
+
     public function announcement() :BelongsTo {
         return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
     }
