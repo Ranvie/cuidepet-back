@@ -39,9 +39,9 @@ class BusinessModel extends Model{
     /**
      * Método responsável por converter de snake_case para camelCase
      */
-    public function parser(Model|Collection $registers) {
+    public function parser(Model|Collection $registers, string $class = "") {
         return !$registers instanceof Collection
-            ? $this->obParseConvention::parse($registers, PARSE_MODE::snakeToCamel, $this->class)
+            ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
             });
@@ -71,21 +71,11 @@ class BusinessModel extends Model{
         if(!$model instanceof $this) return null;
         if(!$parse) return $model;
 
-        $parsed = ParseConvention::parse($model->original, PARSE_MODE::snakeToCamel, $this->class);
+        $parsed = $this->parser($model);
         foreach($model->relations as $key => $relation) {
             if(empty($relation)) { continue; }
 
-            if($relation::class == 'Illuminate\Database\Eloquent\Collection' ){
-                $items = [];
-                foreach($relation as $item) {
-                    $items[] = ParseConvention::parse($item->original, PARSE_MODE::snakeToCamel, $item->class);
-                }
-
-                $parsed->$key = $items;
-            }
-            else{
-                $parsed->$key = ParseConvention::parse($relation->original, PARSE_MODE::snakeToCamel, $relation->class);
-            }
+            $parsed->$key = $this->parser($relation);
         }
 
         return $parsed;

@@ -16,7 +16,6 @@ class AnimalDTO {
     public bool $castrated;
     public string $imageProfile;
     public string $lastSeenDate;
-    public int $breedId;
-    public int $specieId;
-
+    public string $breed;
+    public string $specie;
 }

@@ -15,13 +15,15 @@ class AnnouncementService implements IAnnouncementService
         private AnnouncementMediaService $announcementMediaService
     ){}
 
-    public function getList($limit, $page) :array {
+    public function getList($limit, $page) {
         return $this->obAnnouncementModel->list($limit, $page);
     }
 
-    public function getById($id, $relations = ['animal', 'form', 'announcementMedia']) :object {
-        $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
+    public function getById($id, $relations = ['animal', 'animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {
+        $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
+
+        //dd($obAnnouncementDTO);
 
         return $obAnnouncementDTO;
     }

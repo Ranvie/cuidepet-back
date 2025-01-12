@@ -50,15 +50,15 @@ class AnimalModel extends BusinessModel {
 
 
     public function announcement() :BelongsTo {
-        return $this->belongsTo(AnnouncementModel::class, 'id_announcement', 'id');
+        return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
     }
 
     public function breed() :BelongsTo {
-        return $this->belongsTo(BreedModel::class, 'id_breed', 'id');
+        return $this->belongsTo(BreedModel::class, 'breed_id', 'id');
     }
 
-    public function species() :BelongsTo {
-        return $this->belongsTo(SpecieModel::class, 'id_specie', 'id');
+    public function specie() :BelongsTo {
+        return $this->belongsTo(SpecieModel::class, 'specie_id', 'id');
     }
 
 }
