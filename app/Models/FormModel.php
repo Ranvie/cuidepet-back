@@ -38,8 +38,15 @@ class FormModel extends BusinessModel {
      */
     public $timestamps = true;
 
+    public $fillable = ['user_id', 'url', 'payload'];
+
+    public function create($data, $relations = [], $parse = true)
+    {
+        return parent::create($data, $relations);
+    }
+
     public function announcements() :HasMany {
-        return $this->hasMany(AnnouncementModel::class, 'id', 'announcement_id');
+        return $this->hasMany(AnnouncementModel::class, 'form_id', 'id');
     }
 
     public function user() :BelongsTo {

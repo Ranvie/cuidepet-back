@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tb_announcement', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
+            $table->foreignId('form_id')->constrained('tb_form');
             $table->enum('type', ['lost', 'donation']);
             $table->string('description', 1000)->nullable();
             $table->integer('times_favorited')->default(0);

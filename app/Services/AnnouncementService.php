@@ -11,14 +11,15 @@ class AnnouncementService implements IAnnouncementService
 
     public function __construct(
         private AnnouncementModel $obAnnouncementModel,
-        private UserService $userService
+        private UserService $userService,
+        private AnnouncementMediaService $announcementMediaService
     ){}
 
     public function getList($limit, $page) :array {
         return $this->obAnnouncementModel->list($limit, $page);
     }
 
-    public function getById($id, $relations = ['animal']) :object {
+    public function getById($id, $relations = ['animal', 'form', 'announcementMedia']) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
@@ -27,7 +28,23 @@ class AnnouncementService implements IAnnouncementService
 
     public function create($data) :object {
         $this->validateIfUserExists($data['userId']);
-        return $this->obAnnouncementModel->create($data);
+
+        $announcementModel = $this->obAnnouncementModel->create($data, [], false);
+        $announcementId = $announcementModel->getOriginal()['id'];
+
+        $animalData = $data['animal'];
+        $animalData['announcementId'] = $announcementId;
+        $announcementModel->animal()->getModel()->create($animalData, [], false);
+
+        $announcementModel->form()->associate($data['formId']);
+
+        $announcementMediaData = $data['announcementMedia'];
+        foreach ($announcementMediaData as $announcementMedia) {
+            $announcementMedia['announcementId'] = $announcementId;
+            $this->announcementMediaService->newInstance()->create($announcementMedia);
+        }
+
+        return $announcementModel->getById($announcementId, ['animal', 'form', 'announcementMedia']);
     }
 
     private function validateIfUserExists($userId){

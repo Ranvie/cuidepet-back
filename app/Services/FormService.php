@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\FormModel;
 use App\Services\Interfaces\IFormService;
 
 class FormService implements Interfaces\IFormService
 {
+
+    public function __construct(
+        private FormModel $formModel
+    ){}
 
     public function getList($limit, $page)
     {
@@ -14,12 +19,15 @@ class FormService implements Interfaces\IFormService
 
     public function getById($id, $relations = [])
     {
-        parent::getById($id, $relations);
+        return $this->formModel-$this->getById($id, $relations);
     }
 
     public function create($data)
     {
-        // TODO: Implement create() method.
+        $data['url'] = 'Url muito legal, me altera depois kkkkjk';
+        $data['payload'] = 'Não há nada aqui, além de lágrimas, PHP';
+
+        $this->formModel->create($data);
     }
 
     public function edit($id, $data)

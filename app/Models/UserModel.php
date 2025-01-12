@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\User\UserDTO;
+use App\Services\FormService;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -41,13 +42,10 @@ class UserModel extends BusinessModel {
 
     public $fillable = ['username','email','password','image_profile','phone','active','created_at','updated_at'];
 
-    public function create($data, $relations = [])
+    public function create($data, $relations = [], $parse = true)
     {
         parent::create($data, []);
-        $this->preference()->create();
-        $this->roles()->sync([2]);
-
-        return parent::getById($this->original['id'], $relations);
+        return parent::getById($this->original['id'], $relations, $parse);
     }
 
     //Validar se não faz sentido deletar outros dados também

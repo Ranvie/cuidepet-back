@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\DTO\User\UserDTO;
-use App\Exceptions\BusinessException;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
@@ -68,9 +66,10 @@ class BusinessModel extends Model{
      * @param array<string> $relations
      * @return null|object
      */
-    public function getById($id, $relations = []) {
+    public function getById($id, $relations = [], bool $parse = true) {
         $model = parent::where($this->primaryKey, $id)->with($relations)->first();
         if(!$model instanceof $this) return null;
+        if(!$parse) return $model;
 
         $parsed = ParseConvention::parse($model->original, PARSE_MODE::snakeToCamel, $this->class);
         foreach($model->relations as $key => $relation) {
@@ -97,14 +96,25 @@ class BusinessModel extends Model{
      * @param array<string> $relations
      * @return null|object
      */
-    public function create($data, $relations = []) { return
-            DB::transaction(function() use($data, $relations){
+    public function create($data, $relations = [], $parse = true) {
+        if(empty($data)) {
+            $this->save();
+            return $this->getById($this->original[$this->primaryKey], $relations, $parse);
+        }
+
+        return
+            DB::transaction(function() use($data, $relations, $parse) {
             $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
 
             $this->fill($origin);
             $this->save();
 
-            return $this->getById($this->original[$this->primaryKey], $relations);
+            foreach($relations as $relation){
+                $content = $origin[$relation];
+                $this->saveRelations($content, $relation);
+            }
+
+            return $this->getById($this->original[$this->primaryKey], $relations, $parse);
         });
     }
 
@@ -115,7 +125,7 @@ class BusinessModel extends Model{
      * @param boolean $ignoreNulls
      * @return null|object
      */
-    public function edit($id, $data, $ignoreNulls = true) {
+    public function edit($id, $data, $ignoreNulls = true, $parse = true) {
         $register = parent::find($id);
         if(!$register instanceof $this) return null;
 
@@ -128,7 +138,7 @@ class BusinessModel extends Model{
         $register->save();
 
         //TODO: Pensar em como podemos fazer os retornos dos cruds, visto que se for um response, podem faltar campos para mexer depois
-        return $this->getById($id);
+        return $this->getById($id, [], $parse);
     }
 
     /**
@@ -141,6 +151,10 @@ class BusinessModel extends Model{
 
         if(!$id) return false;
         return $this->where('id', $id)->delete();
+    }
+
+    public function newModel(){
+        return new static();
     }
 
 }
