@@ -42,7 +42,7 @@ class AnimalModel extends BusinessModel {
         'castrated', 'image_profile', 'last_seen_date', 'breed_id', 'specie_id'
     ];
 
-    public function create($data, $relations = [])
+    public function create($data, $relations = [], $parse = true)
     {
         parent::create($data, []);
         return parent::getById($this->original['announcement_id'], ['breed', 'species']);

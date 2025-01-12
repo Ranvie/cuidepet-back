@@ -18,7 +18,7 @@ class AnnouncementService implements IAnnouncementService
         return $this->obAnnouncementModel->list($limit, $page);
     }
 
-    public function getById($id, $relations = ['animal']) :object {
+    public function getById($id, $relations = ['animal', 'form']) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
@@ -27,7 +27,16 @@ class AnnouncementService implements IAnnouncementService
 
     public function create($data) :object {
         $this->validateIfUserExists($data['userId']);
-        return $this->obAnnouncementModel->create($data);
+
+        $announcementModel = $this->obAnnouncementModel->create($data, [], false);
+        $announcementId = $announcementModel->getOriginal()['id'];
+
+        $animalData = $data['animal'];
+        $animalData['announcementId'] = $announcementId;
+        $announcementModel->animal()->getModel()->create($animalData, [], false);
+
+        $announcementModel->form()->associate($data['formId']);
+        return $announcementModel->getById($announcementId, ['animal', 'form']);
     }
 
     private function validateIfUserExists($userId){

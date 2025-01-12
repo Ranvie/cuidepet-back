@@ -6,6 +6,7 @@ use App\DTO\Announcement\AnnouncementDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use function Psy\debug;
 
 class AnnouncementModel extends BusinessModel {
 
@@ -41,18 +42,13 @@ class AnnouncementModel extends BusinessModel {
 
     public $fillable = [
         'type', 'description', 'main_image', 'address', 'contact_phone', 'contact_email',
-        'last_seen_latitude', 'last_seen_longitude', 'user_id'
+        'last_seen_latitude', 'last_seen_longitude', 'user_id', 'form_id'
     ];
 
-    public function create($data, $relations = [])
+    public function create($data, $relations = [], $parse = true)
     {
-        $animalData = $data['animal'];
-
         parent::create($data, []);
-        $animalData['announcementId'] = $this->original['id'];
-
-        $this->animal()->getModel()->create($animalData);
-        return parent::getById($this->original['id'], $relations);
+        return parent::getById($this->original['id'], $relations, $parse);
     }
 
     public function user() :BelongsTo {
@@ -60,7 +56,7 @@ class AnnouncementModel extends BusinessModel {
     }
 
     public function animal() :HasOne {
-        return $this->hasOne(AnimalModel::class, 'announcement_id', 'announcement_id');
+        return $this->hasOne(AnimalModel::class, 'announcement_id', 'id');
     }
 
     public function announcementMedia() :HasMany {

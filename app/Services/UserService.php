@@ -9,14 +9,17 @@ use App\Services\Interfaces\IUserService;
 
 class UserService implements IUserService
 {
-    public function __construct(private UserModel $userModel){}
+    public function __construct(
+        private UserModel $userModel,
+        private FormService $formService
+    ){}
 
     public function getList($limit, $page) {
         return $this->userModel->list($limit, $page);
     }
 
-    public function getById($id, $relations = ['preference', 'roles']) :UserDTO {
-        $user = $this->userModel->getById($id, $relations);
+    public function getById($id, $relations = ['preference', 'roles', 'forms'], $parse = true) :UserDTO|UserModel {
+        $user = $this->userModel->getById($id, $relations, $parse);
 
         if(!$user)
             throw new BusinessException('O usuário não foi encontrado.', 404);
@@ -24,8 +27,15 @@ class UserService implements IUserService
         return $user;
     }
 
-    public function create($data) {
-        return $this->userModel->create($data);
+    public function create($data, $relations = [], $parse = true) :UserDTO|UserModel {
+        $user = $this->userModel->create($data, [], false);
+        $user->preference()->create();
+        $user->roles()->sync([2]);
+
+        $userId = $user->getOriginal()['id'];
+        $this->formService->create(['userId' => $userId]);
+
+        return $this->userModel->getById($userId, ['preference', 'roles', 'forms']);
     }
 
     public function edit($id, $data)
