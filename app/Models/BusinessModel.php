@@ -8,7 +8,6 @@ use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use stdClass;
 
 class BusinessModel extends Model{
 
@@ -48,7 +47,7 @@ class BusinessModel extends Model{
             });
 
         if(isset($registers->relations))
-            foreach ($registers->relations as $key => $register) $parsed->$key = $this->parser($register);
+            foreach ($registers->relations as $key => $register) is_null($register) ?: $parsed->$key = $this->parser($register);
 
         return $parsed;
     }
