@@ -28,6 +28,8 @@ class UserService implements IUserService
     }
 
     public function create($data, $relations = [], $parse = true) :UserDTO|UserModel {
+        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+
         $user = $this->userModel->create($data, [], false);
         $user->preference()->create();
         $user->roles()->sync([2]);

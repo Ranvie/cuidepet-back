@@ -14,8 +14,8 @@ Route::post('/login',             [AuthController::class, 'login']);
 Route::post('/logout',            [AuthController::class, 'logout']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
-Route::get('/use-therms',         [AuthController::class, 'useTherms']);
-Route::post('/accept-therms',     [AuthController::class, 'acceptTherms']);
+Route::get('/use-terms',          [AuthController::class, 'useTerms']);
+Route::post('/accept-terms',      [AuthController::class, 'acceptTerms']);
 
 //TODO: Nome temporário, mas vão ser as rotas que SOMENTE admins podem acessar: criação de usuário, reports, etc;
 //Não sei se vale a pena, mas uma opção seria criar um safeDTO de cada model que tenha registros sensíveis;

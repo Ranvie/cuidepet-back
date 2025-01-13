@@ -2,33 +2,34 @@
 
 namespace App\Services;
 
+use App\Exceptions\AuthException;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Services\Interfaces\IAuthService;
 
-class AuthService implements Interfaces\IAuthService
+class AuthService
 {
-
-    public function getList($limit, $page)
-    {
-        // TODO: Implement getList() method.
+    public function login($data){
+        dd("Login");
     }
 
-    public function getById($id, $relations)
-    {
-        // TODO: Implement getById() method.
+    public function register($data){
+        dd("Register");
     }
 
-    public function create($data)
-    {
-        // TODO: Implement create() method.
+    public function recoveryPassword($data){
+        dd("RecoveryPassword");
     }
 
-    public function edit($id, $data)
-    {
-        // TODO: Implement edit() method.
+    public function useTerms(){
+        dd("UseTherms");
     }
 
-    public function remove($id = null)
-    {
-        // TODO: Implement remove() method.
+    public function acceptTerms(){
+        dd("AcceptTherms");
+    }
+
+    public function logout(){
+        dd("Logout");
     }
 }
