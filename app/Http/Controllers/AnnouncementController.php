@@ -38,7 +38,10 @@ class AnnouncementController extends Controller {
     }
 
     public function update(int $userId, int $announcementId, AnnouncementRequest $request) :JsonResponse {
-        $obAnnouncementDTO = $this->obAnnouncementService->edit($announcementId, $request->validated());
+        $requestData = $request->validated();
+        $requestData['userId'] = $userId;
+
+        $obAnnouncementDTO = $this->obAnnouncementService->edit($announcementId, $requestData);
 
         $response = new BusinessResponse(200, $obAnnouncementDTO);
         return $response->build();

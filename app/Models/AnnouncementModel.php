@@ -45,6 +45,10 @@ class AnnouncementModel extends BusinessModel {
         'last_seen_latitude', 'last_seen_longitude', 'user_id', 'form_id'
     ];
 
+    public function getUserAnnouncement($userId, $announcementId) {
+        return $this->where('id', $announcementId)->where('user_id', $userId)->first();
+    }
+
     public function create($data, $relations = [], $parse = true)
     {
         parent::create($data, []);

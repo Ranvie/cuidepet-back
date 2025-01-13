@@ -27,6 +27,10 @@ class AnnouncementService implements IAnnouncementService
         return $obAnnouncementDTO;
     }
 
+    public function getUserAnnouncement($userId, $announcementId){
+        return $this->obAnnouncementModel->getUserAnnouncement($userId, $announcementId);
+    }
+
     public function create($data) :object {
         $this->validateIfUserExists($data['userId']);
         $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
@@ -61,11 +65,54 @@ class AnnouncementService implements IAnnouncementService
         }
     }
 
-    public function edit($id, $data) :object {
-        $obAnnouncementDTO = $this->obAnnouncementModel->edit($id, $data);
-        if(is_null($obAnnouncementDTO)){ throw new BusinessException('O anúncio não foi encontrado', 404); }
+    public function edit($id, $data) {
+        $this->validateIfUserExists($data['userId']);
+        $this->validateIfAnnouncementBelongsToUser($data['userId'], $id);
+        if(isset($data['formId'])) $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
-        return $obAnnouncementDTO;
+        $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
+
+        if(isset($data['animal'])){
+            $animalData = $data['animal'];
+            $announcementModel->animal()->getModel()->edit($id, $animalData);
+        }
+
+        if(isset($data['formId'])) $announcementModel->form()->associate($data['formId']);
+
+        if(isset($data['announcementMedia'])){
+            $announcementMediaData = $data['announcementMedia'];
+            foreach ($announcementMediaData as $announcementMedia) {
+                $announcementMedia['announcementId'] = $id;
+                $this->changeMediaData($announcementMedia);
+            }
+        }
+
+        return $announcementModel->getById($id, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
+    }
+
+    private function validateIfAnnouncementBelongsToUser($userId, $announcementId){
+        $announcement = $this->getUserAnnouncement($userId, $announcementId);
+
+        if(!$announcement){
+            throw new BusinessException('O anúncio requisitado não pertence ao usuário', 404);
+        }
+    }
+
+    private function changeMediaData($announcementMedia){
+        $mediaId = $announcementMedia['id'];
+        $option = $announcementMedia['action'];
+
+        switch ($option) {
+            case 'UPD':
+                $this->announcementMediaService->newInstance()->edit($mediaId, $announcementMedia);
+                break;
+            case 'DEL':
+                $this->announcementMediaService->remove($mediaId);
+                break;
+            case 'ADD':
+                $this->announcementMediaService->newInstance()->create($announcementMedia);
+                break;
+        }
     }
 
     public function remove($id = null) :bool {
