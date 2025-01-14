@@ -39,7 +39,7 @@ Route::prefix('announcement/{type}')->group(function () {
 
 });
 
-Route::middleware('auth:sanctum')->prefix('user/{userId}')->group(function () {
+Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user/{userId}')->group(function () {
 
     Route::post('/inactivate', [UserController::class, 'inactivate']);
     Route::post('/logout',     [AuthController::class, 'logout']);
