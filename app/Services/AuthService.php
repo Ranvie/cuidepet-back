@@ -7,6 +7,7 @@ use App\Http\Response\BusinessResponse;
 use App\Models\UserModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use stdClass;
 
 class AuthService
 {
@@ -16,10 +17,10 @@ class AuthService
 
     public function login($data){
         $user = $this->validateUser($data);
-        //$this->deleteTokens($user);
+        $this->deleteTokens($user);
 
-        $token = $user->createToken($user->username.'-AuthToken')->plainTextToken;
-        auth()->setUser($user);
+        $token = new stdClass();
+        $token->token = $user->createToken($user->username.'-AuthToken')->plainTextToken;
 
         $response = new BusinessResponse(200, $token);
         return $response->build();
@@ -59,7 +60,6 @@ class AuthService
 
     public function logout(int $userId){
         $user = $this->userService->getById($userId, [], false);
-        dd(auth());
 
         $this->deleteTokens($user);
         $response = new BusinessResponse(200, "Logout efetuado com sucesso");

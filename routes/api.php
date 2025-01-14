@@ -39,7 +39,7 @@ Route::prefix('announcement/{type}')->group(function () {
 
 });
 
-Route::prefix('user/{userId}')->group(function () {
+Route::middleware('auth:sanctum')->prefix('user/{userId}')->group(function () {
 
     Route::post('/inactivate', [UserController::class, 'inactivate']);
     Route::post('/logout',     [AuthController::class, 'logout']);
@@ -80,4 +80,4 @@ Route::prefix('user/{userId}')->group(function () {
 
     Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 
-})->middleware('auth:sanctum');
+});
