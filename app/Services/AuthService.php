@@ -2,15 +2,43 @@
 
 namespace App\Services;
 
-use App\Exceptions\AuthException;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Services\Interfaces\IAuthService;
+use App\Exceptions\BusinessException;
+use App\Http\Response\BusinessResponse;
+use App\Models\UserModel;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
+    public function __construct(
+        private UserService $userService
+    ){}
+
     public function login($data){
-        dd("Login");
+        $user = $this->validateUser($data);
+        //$this->deleteTokens($user);
+
+        $token = $user->createToken($user->username.'-AuthToken')->plainTextToken;
+        auth()->setUser($user);
+
+        $response = new BusinessResponse(200, $token);
+        return $response->build();
+    }
+
+    private function validateUser($data): UserModel{
+        $user = null;
+
+        try{
+            $user = $this->userService->getByEmail($data['email'], false);
+
+            if(!Hash::check($data['password'], $user->password))
+                throw new BusinessException();
+
+        }catch (BusinessException $e){
+            throw new BusinessException('Verifique suas credenciais e tente novamente', 400);
+        }
+
+        return $user;
     }
 
     public function register($data){
@@ -29,7 +57,16 @@ class AuthService
         dd("AcceptTherms");
     }
 
-    public function logout(){
-        dd("Logout");
+    public function logout(int $userId){
+        $user = $this->userService->getById($userId, [], false);
+        dd(auth());
+
+        $this->deleteTokens($user);
+        $response = new BusinessResponse(200, "Logout efetuado com sucesso");
+        return $response->build();
+    }
+
+    private function deleteTokens($user){
+        $user->tokens()->delete();
     }
 }

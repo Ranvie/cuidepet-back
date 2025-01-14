@@ -4,11 +4,18 @@ namespace App\Models;
 
 use App\DTO\User\UserDTO;
 use App\Services\FormService;
+use Illuminate\Auth\Authenticatable as TraitAuthenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class UserModel extends BusinessModel {
+class UserModel extends BusinessModel implements Authenticatable{
+
+    use TraitAuthenticatable, HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Define a classe de saída dos objetos. (Formato: Classe::class)
@@ -41,6 +48,14 @@ class UserModel extends BusinessModel {
     public $timestamps = true;
 
     public $fillable = ['username','email','password','image_profile','phone','active','created_at','updated_at'];
+
+    public function getByEmail($email, $parse) {
+        $user = $this->where('email',$email)->first();
+        if(!$user) return null;
+        if(!$parse) return $user;
+
+        return $this->parser($user);
+    }
 
     public function create($data, $relations = [], $parse = true)
     {

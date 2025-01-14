@@ -27,6 +27,15 @@ class UserService implements IUserService
         return $user;
     }
 
+    public function getByEmail($email, $parse = true) {
+        $user = $this->userModel->getByEmail($email, $parse);
+
+        if(!$user)
+            throw new BusinessException('O email não foi encontrado.', 404);
+
+        return $user;
+    }
+
     public function create($data, $relations = [], $parse = true) :UserDTO|UserModel {
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 

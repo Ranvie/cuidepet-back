@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
 Route::post('/login',             [AuthController::class, 'login']);
-Route::post('/logout',            [AuthController::class, 'logout']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
 Route::get('/use-terms',          [AuthController::class, 'useTerms']);
@@ -43,6 +42,7 @@ Route::prefix('announcement/{type}')->group(function () {
 Route::prefix('user/{userId}')->group(function () {
 
     Route::post('/inactivate', [UserController::class, 'inactivate']);
+    Route::post('/logout',     [AuthController::class, 'logout']);
 
     //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
     Route::prefix('my-announcements')->group(function () {
@@ -80,4 +80,4 @@ Route::prefix('user/{userId}')->group(function () {
 
     Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 
-});
+})->middleware('auth:sanctum');

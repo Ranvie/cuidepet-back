@@ -15,7 +15,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request){
         $loginData = $request->validated();
-        $this->authService->login($loginData);
+        return $this->authService->login($loginData);
     }
 
     public function register(RegisterRequest $request){
@@ -36,7 +36,7 @@ class AuthController extends Controller
         $this->authService->acceptTerms();
     }
 
-    public function logout(){
-        $this->authService->logout();
+    public function logout(int $userId){
+        return $this->authService->logout($userId);
     }
 }

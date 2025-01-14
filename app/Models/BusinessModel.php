@@ -39,9 +39,9 @@ class BusinessModel extends Model{
     /**
      * Método responsável por converter de snake_case para camelCase
      */
-    public function parser(Model|Collection $registers) {
+    public function parser(Model|Collection $registers, $class = null) {
         $parsed = !$registers instanceof Collection
-            ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $registers->class)
+            ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
             });
