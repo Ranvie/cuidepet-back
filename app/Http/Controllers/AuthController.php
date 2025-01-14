@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RecoveryRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Response\BusinessResponse;
 use App\Services\AuthService;
 
 class AuthController extends Controller
@@ -15,17 +16,26 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request){
         $loginData = $request->validated();
-        return $this->authService->login($loginData);
+        $token = $this->authService->login($loginData);
+
+        $response = new BusinessResponse(200, $token);
+        return $response->build();
     }
 
     public function register(RegisterRequest $request){
         $registerData = $request->validated();
-        $this->authService->register($registerData);
+        $user = $this->authService->register($registerData);
+
+        $response = new BusinessResponse(200, $user);
+        return $response->build();
     }
 
     public function recoveryPassword(RecoveryRequest $request){
         $recoveryData = $request->validated();
         $this->authService->recoveryPassword($recoveryData);
+
+        $response = new BusinessResponse(200, "Um email de alteração de senha foi enviado, verifique sua caixa de entrada.");
+        return $response->build();
     }
 
     public function useTerms(){
@@ -37,6 +47,9 @@ class AuthController extends Controller
     }
 
     public function logout(int $userId){
-        return $this->authService->logout($userId);
+        $this->authService->logout($userId);
+
+        $response = new BusinessResponse(200, "Logout efetuado com sucesso");
+        return $response->build();
     }
 }

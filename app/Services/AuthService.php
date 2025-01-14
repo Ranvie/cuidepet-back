@@ -22,8 +22,7 @@ class AuthService
         $token = new stdClass();
         $token->token = $user->createToken($user->username.'-AuthToken')->plainTextToken;
 
-        $response = new BusinessResponse(200, $token);
-        return $response->build();
+        return $token;
     }
 
     private function validateUser($data): UserModel{
@@ -43,7 +42,7 @@ class AuthService
     }
 
     public function register($data){
-        dd("Register");
+        return $this->userService->create($data);
     }
 
     public function recoveryPassword($data){
@@ -62,8 +61,7 @@ class AuthService
         $user = $this->userService->getById($userId, [], false);
 
         $this->deleteTokens($user);
-        $response = new BusinessResponse(200, "Logout efetuado com sucesso");
-        return $response->build();
+        return true;
     }
 
     private function deleteTokens($user){
