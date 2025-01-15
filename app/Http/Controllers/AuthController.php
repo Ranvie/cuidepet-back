@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RecoveryRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Response\BusinessResponse;
+use App\Mail\RecoverPasswordMail;
 use App\Services\AuthService;
 
 class AuthController extends Controller

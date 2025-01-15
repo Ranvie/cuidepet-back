@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
 use App\Http\Response\BusinessResponse;
 use App\Models\UserModel;
@@ -46,7 +47,10 @@ class AuthService
     }
 
     public function recoveryPassword($data){
-        dd("RecoveryPassword");
+        $user = $this->userService->getByEmail($data['email']);
+
+        RecoverPasswordEvent::dispatch($user, 'teste.com.br');
+
     }
 
     public function useTerms(){
