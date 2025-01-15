@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'checkUser' => CheckIfActionBelongsToUser::class,
+            'abilitiesBlacklist' => \App\Http\Middleware\AbilitiesBlacklist::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

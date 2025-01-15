@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RecoveryRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Response\BusinessResponse;
 use App\Mail\RecoverPasswordMail;
 use App\Services\AuthService;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -36,6 +38,15 @@ class AuthController extends Controller
         $this->authService->recoveryPassword($recoveryData);
 
         $response = new BusinessResponse(200, "Um email de alteração de senha foi enviado, verifique sua caixa de entrada.");
+        return $response->build();
+    }
+
+    public function resetPassword(ResetPasswordRequest $pwdRequest){
+        $pwdData = $pwdRequest->validated();
+        $tokenString = $pwdRequest->input('token');
+
+        $this->authService->resetPassword($tokenString, $pwdData);
+        $response = new BusinessResponse(200, "A senha de sua conta foi alterada com sucesso");
         return $response->build();
     }
 
