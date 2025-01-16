@@ -80,6 +80,7 @@ class AuthService
         $userId = auth()->user()->getOriginal()['id'];
         $this->userService->edit($userId, $pwdData);
 
+        $this->deleteResetPasswordTokens($userId);
         return true;
     }
 
