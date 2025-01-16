@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AbilitiesBlacklist
+class CheckIfUserHasRole
 {
     /**
      * Handle an incoming request.
@@ -16,10 +16,17 @@ class AbilitiesBlacklist
      */
     public function handle(Request $request, Closure $next, ...$params): Response
     {
+        $permitted = false;
+
         foreach ($params as $param) {
             if (in_array($param, auth()->user()->currentAccessToken()->abilities)) {
-                throw new BusinessException('Token inválido ou sem as permissões necessárias', 401);
+                $permitted = true;
+                break;
             }
+        }
+
+        if(!$permitted){
+            throw new BusinessException('Token inválido ou sem as permissões necessárias', 401);
         }
 
         return $next($request);

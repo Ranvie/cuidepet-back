@@ -5,14 +5,11 @@ namespace App\Services;
 use App\DTO\User\UserDTO;
 use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
-use App\Http\Response\BusinessResponse;
 use App\Models\UserModel;
 use App\Utils\PARSE_MODE;
 use App\Utils\ParseConvention;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\PersonalAccessToken;
 use stdClass;
 
 class AuthService
@@ -63,7 +60,7 @@ class AuthService
         $this->deleteResetPasswordTokens($user->id);
 
         $expiresAt = now()->addMinutes(30);
-        $token = $user->createToken($userDto->username . '-resetToken', ['reset-password'], $expiresAt->toDateTime())->plainTextToken;
+        $token = $user->createToken($userDto->username . '-ResetToken', ['reset-password'], $expiresAt->toDateTime())->plainTextToken;
 
         RecoverPasswordEvent::dispatch($userDto, config('app.url') . '/api/reset-password?token='.$token);
     }
@@ -79,10 +76,11 @@ class AuthService
         }
     }
 
-    public function resetPassword(string $tokenString, $pwdData){
-        $token = PersonalAccessToken::findToken($tokenString);
+    public function resetPassword($pwdData){
+        $userId = auth()->user()->getOriginal()['id'];
+        $this->userService->edit($userId, $pwdData);
 
-        dd($token);
+        return true;
     }
 
     public function useTerms(){

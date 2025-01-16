@@ -51,6 +51,7 @@ class UserService implements IUserService
 
     public function edit($id, $data)
     {
+        if(isset($data['password'])) $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         $user = $this->userModel->edit($id, $data);
 
         if(!$user)

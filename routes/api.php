@@ -13,13 +13,20 @@ use App\Http\Controllers\UserController;
 Route::post('/login',             [AuthController::class, 'login']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
-Route::get('/reset-password',     [AuthController::class, 'resetPassword']);
 Route::get('/use-terms',          [AuthController::class, 'useTerms']);
 Route::post('/accept-terms',      [AuthController::class, 'acceptTerms']);
 
-//TODO: Nome temporário, mas vão ser as rotas que SOMENTE admins podem acessar: criação de usuário, reports, etc;
-//Não sei se vale a pena, mas uma opção seria criar um safeDTO de cada model que tenha registros sensíveis;
-Route::prefix('admin/user')->group(function () {
+Route::prefix('announcement/{type}')->group(function () {
+
+    Route::get('/',          [AnnouncementController::class, 'list']);
+    Route::get('/{id}',      [AnnouncementController::class, 'get']);
+
+});
+
+Route::middleware(['auth:sanctum', 'hasRole:reset-password'])->group(function () {})
+    ->get('/reset-password', [AuthController::class, 'resetPassword']);
+
+Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->group(function () {
 
     Route::get('/',               [UserController::class, 'list']);
     Route::get('/{id}',           [UserController::class, 'get']);
@@ -33,14 +40,7 @@ Route::prefix('admin/user')->group(function () {
 
 });
 
-Route::prefix('announcement/{type}')->group(function () {
-
-    Route::get('/',          [AnnouncementController::class, 'list']);
-    Route::get('/{id}',      [AnnouncementController::class, 'get']);
-
-});
-
-Route::middleware(['auth:sanctum', 'abilitiesBlacklist:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
+Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
 
     Route::post('/inactivate', [UserController::class, 'inactivate']);
     Route::post('/logout',     [AuthController::class, 'logout']);
