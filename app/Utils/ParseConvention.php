@@ -72,7 +72,7 @@ class ParseConvention {
     private static function snakeToCamelParser($text): string{
         $result = '';
 
-        $result = strtolower($text[0]);
+        $result = gettype($text) === 'string' ? strtolower($text[0]) : $text;
         for($i = 1; $i < strlen($text); $i++){
             if($text[$i] === '_'){
                 $i = $i < strlen($text) ? $i+1 : $i;

@@ -20,7 +20,7 @@ class BusinessResponse
     }
 
     public function build(): JsonResponse{
-        return response()->json($this);
+        return response()->json($this, $this->code);
     }
 
 }

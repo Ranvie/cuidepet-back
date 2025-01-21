@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\User\SafeUserDTO;
 use App\DTO\User\UserDTO;
 use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
@@ -28,10 +29,10 @@ class AuthService
             $abilities[] = $role->name;
         }
 
-        $token = new stdClass();
-        $token->token = $user->createToken($user->username.'-AuthToken', $abilities)->plainTextToken;
-
-        return $token;
+        $response = new stdClass();
+        $response->token = $user->createToken($user->username.'-AuthToken', $abilities)->plainTextToken;
+        $response->user = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
+        return $response;
     }
 
     private function validateUser($data): UserModel{

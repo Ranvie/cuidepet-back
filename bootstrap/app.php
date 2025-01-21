@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\BusinessExceptionHandler;
 use App\Http\Middleware\CheckIfActionBelongsToUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,5 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (Exception $exception) {
+            return (new BusinessExceptionHandler($exception))
+                        ->render();
+        });
     })->create();
