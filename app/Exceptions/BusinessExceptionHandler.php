@@ -19,7 +19,7 @@ class BusinessExceptionHandler
     public function render(){
         $responseData = new stdClass();
         $responseData->message = $this->exception->getMessage();
-        if($this->exception->errors() !== null) $responseData->errors = $this->exception->errors();
+        if(method_exists($this->exception::class, 'errors')) $responseData->errors = $this->exception->errors();
 ;
         $response = new BusinessResponse($this->status, $responseData);
 

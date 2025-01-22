@@ -63,7 +63,7 @@ class AuthService
         $expiresAt = now()->addMinutes(30);
         $token = $user->createToken($userDto->username . '-ResetToken', ['reset-password'], $expiresAt->toDateTime())->plainTextToken;
 
-        RecoverPasswordEvent::dispatch($userDto, config('app.url') . '/api/reset-password?token='.$token);
+        RecoverPasswordEvent::dispatch($userDto, env('APP_URL_FRONT', 'APP_URL').'/reset-password?token='.$token);
     }
 
     private function deleteResetPasswordTokens($userId){
