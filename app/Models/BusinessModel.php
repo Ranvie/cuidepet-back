@@ -44,6 +44,7 @@ class BusinessModel extends Model{
             ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
+                //return $this->parser($obModel); TODO: Ver depois porque retorna os objetos dentro de um array;
             });
 
         if(isset($registers->relations))
@@ -52,10 +53,14 @@ class BusinessModel extends Model{
         return $parsed;
     }
 
-    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50) {
-        $registers = $this->paginate($limit, ['*'], 'page', $page);
+    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = []) {
+        if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
-        $parsed = $this->parser($registers->getCollection());
+        $registers = $this->with($relations)->paginate($limit, ['*'], 'page', $page);
+
+        foreach ($registers->getCollection() as $register) {
+            $parsed[] = $this->parser($register);
+        }
 
         $parsed['perPage']     = $registers->perPage();
         $parsed['lastPage']    = $registers->lastPage();

@@ -16,6 +16,7 @@ class AnnouncementService implements IAnnouncementService
         private FormService $formService
     ){}
 
+    //TODO: Está listando todos os anúncios do site, deveria mostrar somente os do usuário;
     public function getList($limit, $page) {
         return $this->obAnnouncementModel->list($limit, $page);
     }

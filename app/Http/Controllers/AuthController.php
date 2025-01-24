@@ -15,6 +15,8 @@ class AuthController extends Controller
         private AuthService $authService
     ){}
 
+    //TODO: muito importante, tratar o caso em que o usuário não existe no banco, uma vez que dá para notar a diferença de tempo na resposta
+    //quando o email existe ou não no banco (por conta da conversão da hash)
     public function login(LoginRequest $request){
         $loginData = $request->validated();
         $token = $this->authService->login($loginData);

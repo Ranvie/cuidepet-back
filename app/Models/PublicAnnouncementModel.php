@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-use App\DTO\Announcement\AnnouncementDTO;
+use App\DTO\PublicAnnouncement\PublicAnnouncementDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use function Psy\debug;
 
-class AnnouncementModel extends BusinessModel {
+class PublicAnnouncementModel extends BusinessModel {
 
     /**
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = AnnouncementDTO::class;
+    protected $class = PublicAnnouncementDTO::class;
 
     /**
      * Aponta a entidade do banco de dados
@@ -45,14 +44,26 @@ class AnnouncementModel extends BusinessModel {
         'last_seen_latitude', 'last_seen_longitude', 'user_id', 'form_id'
     ];
 
-    public function getUserAnnouncement($userId, $announcementId) {
-        return $this->where('id', $announcementId)->where('user_id', $userId)->first();
-    }
+    //TODO: Pensar melhor em como fazer isso funcionar...
+    //A ideia é que dê para colocar filtros do where ao listar os registros, mas ficou a dúvida de se devemos colocar no BusinessModel.
+    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = [], $type = 'lost') {
+        if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
-    public function create($data, $relations = [], $parse = true)
-    {
-        parent::create($data, []);
-        return parent::getById($this->original['id'], $relations, $parse);
+        $registers = $this
+            ->with($relations)
+            ->where('type', $type)
+            ->paginate($limit, ['*'], 'page', $page);
+
+        foreach ($registers->getCollection() as $register) {
+            $parsed[] = $this->parser($register);
+        }
+
+        $parsed['perPage']     = $registers->perPage();
+        $parsed['lastPage']    = $registers->lastPage();
+        $parsed['currentPage'] = $registers->currentPage();
+        $parsed['maxItems']    = $hardCodedMaxItems;
+
+        return $parsed;
     }
 
     public function user() :BelongsTo {

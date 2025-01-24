@@ -56,7 +56,12 @@ class AuthService
     }
 
     public function recoveryPassword($data){
-        $user = $this->userService->getByEmail($data['email'], false);
+        try{
+            $user = $this->userService->getByEmail($data['email'], false);
+        }catch (BusinessException $e){
+            return;
+        }
+
         $userDto = $this->parseConvention->parse($user->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
         $this->deleteResetPasswordTokens($user->id);
 

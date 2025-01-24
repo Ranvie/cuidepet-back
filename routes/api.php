@@ -6,6 +6,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\MyFormController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -16,15 +17,11 @@ Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
 Route::get('/use-terms',          [AuthController::class, 'useTerms']);
 Route::post('/accept-terms',      [AuthController::class, 'acceptTerms']);
 
-Route::prefix('announcement/{type}')->group(function () {
-
-    Route::get('/',          [AnnouncementController::class, 'list']);
-    Route::get('/{id}',      [AnnouncementController::class, 'get']);
-
-});
+Route::get('announcement/{id}',   [PublicAnnouncementController::class, 'get']);
+Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);
 
 Route::middleware(['auth:sanctum', 'hasRole:reset-password'])->group(function () {})
-    ->get('/reset-password', [AuthController::class, 'resetPassword']);
+    ->post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->group(function () {
 
