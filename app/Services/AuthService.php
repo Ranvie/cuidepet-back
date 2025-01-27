@@ -20,6 +20,8 @@ class AuthService
         private ParseConvention $parseConvention
     ){}
 
+    //TODO: Falta colocar o token para expirar
+    //TODO: Fazer uma espécie de refreshToken
     public function login($data){
         $user = $this->validateUser($data);
         $this->deleteTokens($user);

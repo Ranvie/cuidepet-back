@@ -54,10 +54,12 @@ class PublicAnnouncementModel extends BusinessModel {
             ->where('type', $type)
             ->paginate($limit, ['*'], 'page', $page);
 
+        $parsedRegisters = [];
         foreach ($registers->getCollection() as $register) {
-            $parsed[] = $this->parser($register);
+            $parsedRegisters[] = $this->parser($register);
         }
 
+        $parsed['registers']   = $parsedRegisters;
         $parsed['perPage']     = $registers->perPage();
         $parsed['lastPage']    = $registers->lastPage();
         $parsed['currentPage'] = $registers->currentPage();
