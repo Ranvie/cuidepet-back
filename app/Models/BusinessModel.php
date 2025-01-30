@@ -58,10 +58,12 @@ class BusinessModel extends Model{
 
         $registers = $this->with($relations)->paginate($limit, ['*'], 'page', $page);
 
+        $parsedRegisters = [];
         foreach ($registers->getCollection() as $register) {
-            $parsed[] = $this->parser($register);
+            $parsedRegisters[] = $this->parser($register);
         }
 
+        $parsed['registers']   = $parsedRegisters;
         $parsed['perPage']     = $registers->perPage();
         $parsed['lastPage']    = $registers->lastPage();
         $parsed['currentPage'] = $registers->currentPage();

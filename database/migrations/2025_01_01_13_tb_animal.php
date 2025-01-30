@@ -20,10 +20,10 @@ return new class extends Migration
             $table->string('color');
             $table->enum('age', ['puppy','adult','senior']);
             $table->enum('size', ['small', 'medium', 'large']);
-            $table->boolean('disability');
-            $table->boolean('vaccinated');
-            $table->boolean('dewormed');
-            $table->boolean('castrated');
+            $table->boolean('disability')->nullable();
+            $table->boolean('vaccinated')->nullable();
+            $table->boolean('dewormed')->nullable();
+            $table->boolean('castrated')->nullable();
             $table->string('image_profile');
             $table->date('last_seen_date');
         });
