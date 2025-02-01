@@ -4,6 +4,8 @@ namespace App\DTO\Announcement;
 
 class AnnouncementDTO {
     public $id;
+    public $userId;
+    public $formId;
     public $type;
     public $description;
     public $lastSeenLatitude;

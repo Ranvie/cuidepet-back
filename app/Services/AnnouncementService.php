@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\Exceptions\BusinessException;
 use App\Models\AnnouncementModel;
 use App\Services\Interfaces\IAnnouncementService;
@@ -16,9 +17,12 @@ class AnnouncementService implements IAnnouncementService
         private FormService $formService
     ){}
 
-    //TODO: Está listando todos os anúncios do site, deveria mostrar somente os do usuário;
     public function getList($limit, $page) {
         return $this->obAnnouncementModel->list($limit, $page);
+    }
+
+    public function getListByUser($limit, $page, $idUser) {
+        return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $idUser)]);
     }
 
     public function getById($id, $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {

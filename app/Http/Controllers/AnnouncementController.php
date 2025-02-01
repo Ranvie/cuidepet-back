@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnnouncementRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\AnnouncementService;
-use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
 class AnnouncementController extends Controller {
@@ -13,8 +12,8 @@ class AnnouncementController extends Controller {
         private AnnouncementService $obAnnouncementService
     ){}
 
-    public function list() :JsonResponse {
-        $registers = $this->obAnnouncementService->getList(10, 1);
+    public function list(int $userId) :JsonResponse {
+        $registers = $this->obAnnouncementService->getListByUser(10, 1, $userId);
 
         $response = new BusinessResponse(200, $registers);
         return $response->build();

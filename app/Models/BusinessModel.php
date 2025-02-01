@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Classes\Filter;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use function Psy\debug;
 
 class BusinessModel extends Model{
 
@@ -53,13 +55,28 @@ class BusinessModel extends Model{
         return $parsed;
     }
 
-    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = []) {
+    /**
+     * @param $limit
+     * @param $page
+     * @param $hardCodedMaxItems
+     * @param $relations
+     * @param array<Filter> $filters
+     * @return array
+     */
+    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = [], $filters = []) {
         if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
-        $registers = $this->with($relations)->paginate($limit, ['*'], 'page', $page);
+        $query = self::query();
+
+        foreach($filters as $filter){
+            $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+        }
+
+        $query->with('animal');
+        $registers = $query->paginate($limit, ['*'], 'page', $page);
 
         $parsedRegisters = [];
-        foreach ($registers->getCollection() as $register) {
+        foreach ($registers as $register) {
             $parsedRegisters[] = $this->parser($register);
         }
 
