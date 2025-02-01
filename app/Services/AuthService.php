@@ -25,7 +25,7 @@ class AuthService
     public function login($data){
         $user = $this->validateUser($data);
         $this->deleteTokens($user);
-        $abilities = null;
+        $abilities = [];
 
         foreach ($user->roles as $role) {
             $abilities[] = $role->name;

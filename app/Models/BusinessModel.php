@@ -72,7 +72,7 @@ class BusinessModel extends Model{
             $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
         }
 
-        $query->with('animal');
+        $query->with($relations);
         $registers = $query->paginate($limit, ['*'], 'page', $page);
 
         $parsedRegisters = [];
