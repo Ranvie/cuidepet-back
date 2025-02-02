@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('breed_id')->constrained('tb_breed')->onDelete('cascade');
             $table->foreignId('specie_id')->constrained('tb_specie')->onDelete('cascade');
             $table->string('name');
-            $table->string('gender');
+            $table->enum('gender', ['male', 'female']);
             $table->string('color');
             $table->enum('age', ['puppy','adult','senior']);
             $table->enum('size', ['small', 'medium', 'large']);

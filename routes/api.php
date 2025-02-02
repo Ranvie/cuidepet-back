@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BreedSpecieController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\MyFormController;
@@ -51,6 +52,8 @@ Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->p
         Route::put('/{announcementId}',         [AnnouncementController::class, 'update']);
         Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
     });
+
+    Route::get('/species', [BreedSpecieController::class, 'list']);
 
     Route::get('/notification',                     [NotificationController::class, 'list']);
     Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
