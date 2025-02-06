@@ -61,7 +61,7 @@ class AnnouncementRequest extends FormRequest
             'animal.dewormed'         => 'nullable|boolean',
             'animal.castrated'        => 'nullable|boolean',
             'animal.imageProfile'     => 'required|string',
-            'animal.lastSeenDate'     => 'required|date',
+            'animal.lastSeenDate'     => 'missing|date',
             'animal.breedId'          => 'required|exists:tb_breed,id',
             'animal.specieId'         => 'required|exists:tb_specie,id',
         ];

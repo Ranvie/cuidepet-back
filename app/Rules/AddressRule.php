@@ -14,7 +14,7 @@ class AddressRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $regex = '/^(\d+)\|([^|]+)\|(\d+)\|([A-Z]{2})\|([^|]+)\|([^|]+)\|([^|]*)$/';
+        $regex = '/^(\d{5}-\d{3})\|([^|]+)\|(\d+)\|([A-Z]{2})\|([^|]+)\|([^|]+)\|([^|]*)$/';
 
         if(!preg_match($regex, $value)){
             $fail('O endereço enviado é inválido. Formato: \'CEP|RUA|NUMERO|UF|CIDADE|BAIRRO|COMPLEMENTO\'');

@@ -21,7 +21,7 @@ class PublicAnnouncementService implements IPublicAnnouncementService
         return $this->obPublicAnnouncementModel->list($limit, $page, relations: ['user', 'animal'], type: $type);
     }
 
-    public function getById($id, $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {
+    public function getById($id, $relations = ['user', 'animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {
         $obAnnouncementDTO = $this->obPublicAnnouncementModel->getById($id, $relations, true);
         if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
