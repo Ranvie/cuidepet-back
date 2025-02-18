@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\Models\FormModel;
 use App\Services\Interfaces\IFormService;
 
@@ -15,6 +16,11 @@ class FormService implements Interfaces\IFormService
     public function getList($limit, $page)
     {
         // TODO: Implement getList() method.
+    }
+
+    public function listFormByUser($userId)
+    {
+        return $this->formModel->listFormByUser($userId);
     }
 
     public function getById($id, $relations = [])

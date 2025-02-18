@@ -65,7 +65,7 @@ Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->p
     Route::delete('/form/{formId}', [FormController::class, 'delete']);
     Route::put('/form/{formId}',    [FormController::class, 'update']);
 
-    Route::prefix('/myForms')->group(function () {
+    Route::prefix('/my-forms')->group(function () {
 
         Route::get('/',            [MyFormController::class, 'list']);
         Route::get('/{formId}',    [MyFormController::class, 'get']);

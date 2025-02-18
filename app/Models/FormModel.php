@@ -38,10 +38,15 @@ class FormModel extends BusinessModel {
      */
     public $timestamps = true;
 
-    public $fillable = ['user_id', 'url', 'payload'];
+    public $fillable = ['user_id', 'title', 'url', 'payload'];
 
     public function getUserForm($userId, $formId){
         return $this->where('id', $formId)->where('user_id', $userId)->first();
+    }
+
+    public function listFormByUser($userId){
+        $registers = $this->where('user_id', $userId)->get();
+        return $this->parser($registers);
     }
 
     public function create($data, $relations = [], $parse = true)
