@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create("tb_form", function (Blueprint $table) {
            $table->id();
            $table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
-           $table->string("title", 255)->unique();
+           $table->string("title", 255);
            $table->string("url", 255);
            $table->string('payload', 10000);
            $table->timestamps();
