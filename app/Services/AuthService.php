@@ -32,7 +32,8 @@ class AuthService
         }
 
         $response = new stdClass();
-        $response->token = $user->createToken($user->username.'-AuthToken', $abilities)->plainTextToken;
+        $expiresAt = now()->addMinutes(env('TOKEN_LOGIN_EXPIRE_MINUTES'));
+        $response->token = $user->createToken($user->username.'-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
         $response->user = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
         return $response;
     }
@@ -67,9 +68,10 @@ class AuthService
         $userDto = $this->parseConvention->parse($user->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
         $this->deleteResetPasswordTokens($user->id);
 
-        $expiresAt = now()->addMinutes(30);
+        $expiresAt = now()->addMinutes(env('TOKEN_RESETPASSWORD_EXPIRE_MINUTES'));
         $token = $user->createToken($userDto->username . '-ResetToken', ['reset-password'], $expiresAt->toDateTime())->plainTextToken;
 
+        //TODO: APP_URL não vai funcionar, ele vai literalmente escrever isso na URL
         RecoverPasswordEvent::dispatch($userDto, env('APP_URL_FRONT', 'APP_URL').'/reset-password?token='.$token);
     }
 

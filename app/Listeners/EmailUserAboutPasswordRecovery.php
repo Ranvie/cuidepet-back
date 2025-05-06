@@ -17,9 +17,7 @@ class EmailUserAboutPasswordRecovery implements ShouldQueue
     public function __construct(
         private UserService $userService
     )
-    {
-        //
-    }
+    {}
 
     /**
      * Handle the event.

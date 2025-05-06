@@ -10,6 +10,5 @@ class Filter
         public string $value = '',
         public string $boolean = 'AND'
     )
-    {
-    }
+    {}
 }
