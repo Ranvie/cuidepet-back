@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BreedSpecieController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FormController;
-use App\Http\Controllers\MyFormController;
+use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\ReportController;
@@ -59,19 +59,19 @@ Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->p
     Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
     Route::patch('/notification/{notificationId}',  [NotificationController::class, 'setViewed']);
 
-    Route::get('/form',             [FormController::class, 'list']);
-    Route::get('/form/{formId}',    [FormController::class, 'get']);
-    Route::post('/form',            [FormController::class, 'create']);
-    Route::delete('/form/{formId}', [FormController::class, 'delete']);
-    Route::put('/form/{formId}',    [FormController::class, 'update']);
+    Route::get('/form',             [FormResponseController::class, 'list']);
+    Route::get('/form/{formId}',    [FormResponseController::class, 'get']);
+    Route::post('/form',            [FormResponseController::class, 'create']);
+    Route::delete('/form/{formId}', [FormResponseController::class, 'delete']);
+    Route::put('/form/{formId}',    [FormResponseController::class, 'update']);
 
     Route::prefix('/my-forms')->group(function () {
 
-        Route::get('/',            [MyFormController::class, 'list']);
-        Route::get('/{formId}',    [MyFormController::class, 'get']);
-        Route::post('/',           [MyFormController::class, 'create']);
-        Route::delete('/{formId}', [MyFormController::class, 'delete']);
-        Route::put('/{formId}',    [MyFormController::class, 'update']);
+        Route::get('/',            [FormController::class, 'list']);
+        Route::get('/{formId}',    [FormController::class, 'get']);
+        Route::post('/',           [FormController::class, 'create']);
+        Route::delete('/{formId}', [FormController::class, 'delete']);
+        Route::put('/{formId}',    [FormController::class, 'update']);
 
     });
 

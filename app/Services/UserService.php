@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
+use App\Http\Enums\DefaultUserForm;
 use App\Models\UserModel;
 use App\Services\Interfaces\IUserService;
 
@@ -44,7 +45,11 @@ class UserService implements IUserService
         $user->roles()->sync([2]);
 
         $userId = $user->getOriginal()['id'];
-        $this->formService->create(['userId' => $userId]);
+        $this->formService->create([
+            'userId'  => $userId,
+            'title'   => DefaultUserForm::TITLE,
+            'payload' => DefaultUserForm::PAYLOAD
+        ]);
 
         return $this->userModel->getById($userId, ['preference', 'roles', 'forms']);
     }

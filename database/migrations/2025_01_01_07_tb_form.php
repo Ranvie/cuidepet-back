@@ -15,8 +15,8 @@ return new class extends Migration
            $table->id();
            $table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
            $table->string("title", 255);
-           $table->string("url", 255);
            $table->string('payload', 10000);
+           $table->boolean('active')->default(false);
            $table->timestamps();
         });
     }

@@ -6,6 +6,8 @@ class FormDTO {
 
     public int $id;
     public string $title;
-    public string $url;
+    public string $payload;
+    public string $createdAt;
+    public string $updatedAt;
 
 }
