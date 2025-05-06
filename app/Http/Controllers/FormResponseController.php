@@ -3,24 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Http\Response\BusinessResponse;
-use App\Services\FormService;
 use Illuminate\Http\Request;
 
-class MyFormController extends Controller
+class FormResponseController extends Controller
 {
-
-    public function __construct(
-        private FormService $obFormService
-    ){}
-
     //
-    public function list(int $userId)
+    public function list()
     {
-        $registers = $this->obFormService->listFormByUser($userId);
-
-        $response = new BusinessResponse(200, $registers);
-        return $response->build();
+        // TODO: Implement list() method.
     }
 
     public function get(int $userId)

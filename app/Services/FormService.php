@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Classes\Filter;
 use App\Models\FormModel;
-use App\Services\Interfaces\IFormService;
 
 class FormService implements Interfaces\IFormService
 {
@@ -34,11 +32,7 @@ class FormService implements Interfaces\IFormService
 
     public function create($data)
     {
-        $data['url'] = 'Url muito legal, me altera depois kkkkjk';
-        $data['payload'] = 'Não há nada aqui, além de lágrimas, PHP';
-        $data['title']   = 'Um título muito legal :)';
-
-        $this->formModel->create($data);
+        return $this->formModel->create($data);
     }
 
     public function edit($id, $data)

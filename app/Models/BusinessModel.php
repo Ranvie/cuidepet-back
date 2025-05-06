@@ -9,7 +9,6 @@ use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use function Psy\debug;
 
 class BusinessModel extends Model{
 
@@ -46,7 +45,6 @@ class BusinessModel extends Model{
             ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
             : $registers->map(function($obModel){
                 return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
-                //return $this->parser($obModel); TODO: Ver depois porque retorna os objetos dentro de um array;
             });
 
         if(isset($registers->relations))
@@ -63,7 +61,7 @@ class BusinessModel extends Model{
      * @param array<Filter> $filters
      * @return array
      */
-    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = [], $filters = []) {
+    public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) {
         if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
         $query = self::query();
