@@ -31,10 +31,11 @@ class AuthService
             $abilities[] = $role->name;
         }
 
-        $response = new stdClass();
-        $expiresAt = now()->addMinutes(env('TOKEN_LOGIN_EXPIRE_MINUTES'));
-        $response->token = $user->createToken($user->username.'-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
-        $response->user = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
+        $response         = new stdClass();
+        $expirationTime   = floatval(env('TOKEN_LOGIN_EXPIRE_MINUTES'));
+        $expiresAt        = now()->addMinutes($expirationTime);
+        $response->token  = $user->createToken($user->username.'-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
+        $response->user   = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
         return $response;
     }
 
