@@ -22,18 +22,14 @@ class UserService implements IUserService
     public function getById($id, $relations = ['preference', 'roles', 'forms'], $parse = true) :UserDTO|UserModel {
         $user = $this->userModel->getById($id, $relations, $parse);
 
-        if(!$user)
-            throw new BusinessException('O usuário não foi encontrado.', 404);
-
+        $this->validateIfUserExists($user);
         return $user;
     }
 
     public function getByEmail($email, $parse = true) {
         $user = $this->userModel->getByEmail($email, $parse);
 
-        if(!$user)
-            throw new BusinessException('O email não foi encontrado.', 404);
-
+        $this->validateIfUserExists($user);
         return $user;
     }
 
@@ -59,9 +55,7 @@ class UserService implements IUserService
         if(isset($data['password'])) $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         $user = $this->userModel->edit($id, $data);
 
-        if(!$user)
-            throw new BusinessException('O usuário não foi encontrado.', 404);
-
+        $this->validateIfUserExists($user);
         return $user;
     }
 
@@ -73,5 +67,10 @@ class UserService implements IUserService
     public function inactivate($id = null)
     {
         return $this->userModel->inactivate($id);
+    }
+
+    private function validateIfUserExists($user) {
+        if(!$user)
+            throw new BusinessException('O usuário não foi encontrado.', 404);
     }
 }

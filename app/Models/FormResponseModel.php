@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\DTO\Form\FormDTO;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,7 +12,7 @@ class FormResponseModel extends Model
      * Define a classe de saída dos objetos. (Formato: Classe::class)
      * @var string
      */
-    protected $class = FormResponseDTO::class;
+    protected $class = FormDTO::class;
 
     /**
      * Aponta a entidade do banco de dados

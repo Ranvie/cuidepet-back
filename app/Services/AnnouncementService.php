@@ -27,8 +27,8 @@ class AnnouncementService implements IAnnouncementService
 
     public function getById($id, $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {
         $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
-        if(!$obAnnouncementDTO){ throw new BusinessException('O anúncio não foi encontrado', 404); }
 
+        $this->validateAnnouncementExists($obAnnouncementDTO);
         return $obAnnouncementDTO;
     }
 
@@ -122,5 +122,10 @@ class AnnouncementService implements IAnnouncementService
 
     public function remove($id = null) :bool {
         return $this->obAnnouncementModel->remove($id);
+    }
+
+    private function validateAnnouncementExists($obAnnouncement) {
+        if(!$obAnnouncement)
+            throw new BusinessException('O anúncio não foi encontrado', 404); 
     }
 }

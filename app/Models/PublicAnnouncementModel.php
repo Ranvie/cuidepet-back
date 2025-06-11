@@ -44,30 +44,6 @@ class PublicAnnouncementModel extends BusinessModel {
         'last_seen_latitude', 'last_seen_longitude', 'user_id', 'form_id'
     ];
 
-    //TODO: Pensar melhor em como fazer isso funcionar...
-    //A ideia é que dê para colocar filtros do where ao listar os registros, mas ficou a dúvida de se devemos colocar no BusinessModel.
-    public function list($limit = 10, $page = 1, $hardCodedMaxItems = 50, $relations = [], $type = 'lost') {
-        if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
-
-        $registers = $this
-            ->with($relations)
-            ->where('type', $type)
-            ->paginate($limit, ['*'], 'page', $page);
-
-        $parsedRegisters = [];
-        foreach ($registers->getCollection() as $register) {
-            $parsedRegisters[] = $this->parser($register);
-        }
-
-        $parsed['registers']   = $parsedRegisters;
-        $parsed['perPage']     = $registers->perPage();
-        $parsed['lastPage']    = $registers->lastPage();
-        $parsed['currentPage'] = $registers->currentPage();
-        $parsed['maxItems']    = $hardCodedMaxItems;
-
-        return $parsed;
-    }
-
     public function user() :BelongsTo {
         return $this->belongsTo(UserModel::class, 'user_id', 'id');
     }

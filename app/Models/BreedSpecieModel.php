@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\DTO\Animal\AnimalDTO;
 use App\DTO\Specie\SpecieDTO;
 use App\Models\BusinessModel;
 

@@ -20,7 +20,6 @@ class AuthService
         private ParseConvention $parseConvention
     ){}
 
-    //TODO: Falta colocar o token para expirar
     //TODO: Fazer uma espécie de refreshToken
     public function login($data){
         $user = $this->validateUser($data);
@@ -32,7 +31,7 @@ class AuthService
         }
 
         $response         = new stdClass();
-        $expirationTime   = floatval(env('TOKEN_LOGIN_EXPIRE_MINUTES'));
+        $expirationTime   = floatval(config('token.login_expire_minutes'));
         $expiresAt        = now()->addMinutes($expirationTime);
         $response->token  = $user->createToken($user->username.'-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
         $response->user   = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
