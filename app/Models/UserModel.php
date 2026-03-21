@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\DTO\User\UserDTO;
-use App\Services\FormService;
 use Illuminate\Auth\Authenticatable as TraitAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,7 +49,7 @@ class UserModel extends BusinessModel implements Authenticatable{
    */
   public $timestamps = true;
 
-  public $fillable = ['username','email','password','image_profile','phone','active','created_at','updated_at'];
+  public $fillable = ['username','email','password','image_profile','phone','active'];
 
   public function getByEmail($email, $parse) {
     $user = $this->where('email',$email)->first();
@@ -88,8 +87,8 @@ class UserModel extends BusinessModel implements Authenticatable{
     return $this->BelongsToMany(UseTermsModel::class, UseTermsAcceptanceModel::class, 'user_id', 'use_terms_id');
   }
 
-  public function favorites(): HasMany{
-    return $this->hasMany(FavoriteModel::class, 'user_id', 'id');
+  public function favorites(): BelongsToMany{
+    return $this->belongsToMany(AnnouncementModel::class, FavoriteModel::class, 'user_id', 'announcement_id');
   }
 
   public function reports(): HasMany{
@@ -106,6 +105,14 @@ class UserModel extends BusinessModel implements Authenticatable{
 
   public function responses(): HasMany{
     return $this->hasMany(FormResponseModel::class, 'user_id', 'id');
+  }
+
+  public function userResponseHistory(): HasMany{
+    return $this->hasMany(UserResponseHistoryModel::class, 'user_id', 'id');
+  }
+
+  public function newsletter(): HasOne{
+    return $this->hasOne(NewsletterModel::class, 'user_id', 'id');
   }
 
 }

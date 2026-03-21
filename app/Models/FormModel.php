@@ -8,58 +8,63 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormModel extends BusinessModel {
 
-    /**
-     * Define a classe de saída dos objetos. (Formato: Classe::class)
-     * @var string
-     */
-    protected $class = FormDTO::class;
+  /**
+   * Define a classe de saída dos objetos. (Formato: Classe::class)
+   * @var string
+   */
+  protected $class = FormDTO::class;
 
-    /**
-     * Aponta a entidade do banco de dados
-     * @var string
-     */
-    public $table = 'tb_form';
+  /**
+   * Aponta a entidade do banco de dados
+   * @var string
+   */
+  public $table = 'tb_form';
 
-    /**
-     * Aponta a chave primária no banco de dados
-     * @var string
-     */
-    public $primaryKey = 'id';
+  /**
+   * Aponta a chave primária no banco de dados
+   * @var string
+   */
+  public $primaryKey = 'id';
 
-    /**
-     * Define a chave primária como auto incremento
-     * @var bool
-     */
-    public $incrementing = true;
+  /**
+   * Define a chave primária como auto incremento
+   * @var bool
+   */
+  public $incrementing = true;
 
-    /**
-     * Define campos created_at e updated_at gerenciados pelo láravel
-     * @var bool
-     */
-    public $timestamps = true;
+  /**
+   * Define campos created_at e updated_at gerenciados pelo láravel
+   * @var bool
+   */
+  public $timestamps = true;
 
-    public $fillable = ['user_id', 'title', 'url', 'payload'];
+  /**
+   * Desativa o campo updated_at, já que não é necessário para a entidade
+   */
+  const UPDATED_AT = null;
 
-    public function getUserForm($userId, $formId){
-        return $this->where('id', $formId)->where('user_id', $userId)->first();
-    }
+  public $fillable = ['user_id', 'title', 'url', 'payload', 'active'];
 
-    public function listFormByUser($userId){
-        $registers = $this->where('user_id', $userId)->get();
-        return $this->parser($registers);
-    }
+  public function getUserForm($userId, $formId){
+    return $this->where('id', $formId)->where('user_id', $userId)->first();
+  }
 
-    public function create($data, $relations = [], $parse = true)
-    {
-        return parent::create($data, $relations);
-    }
+  public function listFormByUser($userId){
+    $registers = $this->where('user_id', $userId)->get();
+    return $this->parser($registers);
+  }
 
-    public function announcements() :HasMany {
-        return $this->hasMany(AnnouncementModel::class, 'form_id', 'id');
-    }
+  public function create($data, $relations = [], $parse = true)
+  {
+    return parent::create($data, $relations);
+  }
 
-    public function user() :BelongsTo {
-        return $this->belongsTo(UserModel::class, 'id', 'user_id');
-    }
+  public function announcements() :HasMany {
+    return $this->hasMany(AnnouncementModel::class, 'form_id', 'id');
+  }
+
+  public function user() :BelongsTo {
+    return $this->belongsTo(UserModel::class, 'id', 'user_id');
+  }
 
 }

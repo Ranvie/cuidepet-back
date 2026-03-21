@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
-use App\DTO\Notification\NotificationDTO;
+use App\DTO\Newsletter\NewsletterDTO;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class NotificationModel extends BusinessModel {
+class NewsletterModel extends BusinessModel {
 
   /**
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = NotificationDTO::class;
+  protected $class = NewsletterDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_notification';
+  public $table = 'tb_newsletter';
 
   /**
    * Aponta a chave primária no banco de dados
@@ -35,21 +36,21 @@ class NotificationModel extends BusinessModel {
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = true;
+  public $timestamps = false;
 
-  /**
-   * Define o campo updated_at como nulo, já que não é necessário para a entidade
-   */
-  const UPDATED_AT = null;
+  public $fillable = ['user_id', 'email', 'email_confirmed'];
 
-  public $fillable = ['viewed'];
-
-  public function user() :BelongsTo {
+  public function user(): BelongsTo{
     return $this->belongsTo(UserModel::class, 'user_id', 'id');
   }
 
-  public function notificationTemplate() :BelongsTo {
-    return $this->belongsTo(NotificationTemplateModel::class, 'notification_template_id', 'id');
+  public function addresses(): BelongsToMany{
+    return $this->belongsToMany(
+      IntegrationAddressCacheModel::class, 
+      NewsletterIntegrationAddressCacheModel::class, 
+      'newsletter_id', 
+      'integration_address_cache_id'
+    );
   }
 
 }

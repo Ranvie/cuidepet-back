@@ -2,22 +2,22 @@
 
 namespace App\Models;
 
-use App\DTO\Notification\NotificationDTO;
+use App\DTO\UserResponseHistory\UserResponseHistoryDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class NotificationModel extends BusinessModel {
+class UserResponseHistoryModel extends BusinessModel {
 
   /**
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = NotificationDTO::class;
+  protected $class = UserResponseHistoryDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_notification';
+  public $table = 'tb_user_response_history';
 
   /**
    * Aponta a chave primária no banco de dados
@@ -38,18 +38,18 @@ class NotificationModel extends BusinessModel {
   public $timestamps = true;
 
   /**
-   * Define o campo updated_at como nulo, já que não é necessário para a entidade
+   * Inativa o campo updated_at do laravel, pois não é necessário para a entidade.
    */
   const UPDATED_AT = null;
 
-  public $fillable = ['viewed'];
+  public $fillable = ['expires_at'];
 
-  public function user() :BelongsTo {
-    return $this->belongsTo(UserModel::class, 'user_id', 'id');
+  public function announcements() :BelongsTo {
+    return $this->BelongsTo(AnnouncementModel::class, 'id', 'announcement_id');
   }
 
-  public function notificationTemplate() :BelongsTo {
-    return $this->belongsTo(NotificationTemplateModel::class, 'notification_template_id', 'id');
+  public function users() :BelongsTo {
+    return $this->belongsTo(UserModel::class, 'id', 'user_id');
   }
 
 }

@@ -2,22 +2,21 @@
 
 namespace App\Models;
 
-use App\DTO\UseTerms\UseTermsDTO;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\DTO\Notification\NotificationDTO;
 
-class UseTermsModel extends BusinessModel {
+class NotificationTemplateModel extends BusinessModel {
 
   /**
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = UseTermsDTO::class;
+  protected $class = NotificationDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_use_terms';
+  public $table = 'tb_notification';
 
   /**
    * Aponta a chave primária no banco de dados
@@ -35,12 +34,8 @@ class UseTermsModel extends BusinessModel {
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = true;
+  public $timestamps = false;
 
-  public $fillable = ['title','description','active'];
-
-  public function users() :BelongsToMany {
-    return $this->belongsToMany(UserModel::class, UseTermsAcceptanceModel::class, 'use_term_id', 'user_id');
-  }
+  public $fillable = ['title', 'type', 'message'];
 
 }

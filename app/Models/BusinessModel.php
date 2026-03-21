@@ -12,157 +12,157 @@ use Illuminate\Support\Facades\DB;
 
 class BusinessModel extends Model{
 
-    /**
-     * Define a classe de saída dos objetos. (Formato: Classe::class)
-     * @var string
-     */
-    protected $class = '';
+  /**
+   * Define a classe de saída dos objetos. (Formato: Classe::class)
+   * @var string
+   */
+  protected $class = '';
 
-    /**
-     * Define campos created_at e updated_at gerenciados pelo láravel
-     * @var bool
-     */
-    public $timestamps = false;
+  /**
+   * Define campos created_at e updated_at gerenciados pelo láravel
+   * @var bool
+   */
+  public $timestamps = false;
 
-    /**
-     * Objeto de conversão de classes
-     * @var ParseConvention
-     */
-    private ParseConvention $obParseConvention;
+  /**
+   * Objeto de conversão de classes
+   * @var ParseConvention
+   */
+  private ParseConvention $obParseConvention;
 
-    /**
-     * Método Construtor
-     */
-    public function __construct(){
-        $this->obParseConvention = new ParseConvention;
+  /**
+   * Método Construtor
+   */
+  public function __construct(){
+    $this->obParseConvention = new ParseConvention;
+  }
+
+  /**
+   * Método responsável por converter de snake_case para camelCase
+   */
+  public function parser(Model|Collection $registers, $class = null) {
+    $parsed = !$registers instanceof Collection
+      ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
+      : $registers->map(function($obModel){
+        return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
+      });
+
+    if(isset($registers->relations))
+      foreach ($registers->relations as $key => $register) is_null($register) ?: $parsed->$key = $this->parser($register);
+
+    return $parsed;
+  }
+
+  /**
+   * @param $limit
+   * @param $page
+   * @param $hardCodedMaxItems
+   * @param $relations
+   * @param array<Filter> $filters
+   * @return array
+   */
+  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) {
+    if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
+
+    $query = self::query();
+
+    foreach($filters as $filter){
+      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
     }
 
-    /**
-     * Método responsável por converter de snake_case para camelCase
-     */
-    public function parser(Model|Collection $registers, $class = null) {
-        $parsed = !$registers instanceof Collection
-            ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
-            : $registers->map(function($obModel){
-                return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
-            });
+    $query->with($relations);
+    $registers = $query->paginate($limit, ['*'], 'page', $page);
 
-        if(isset($registers->relations))
-            foreach ($registers->relations as $key => $register) is_null($register) ?: $parsed->$key = $this->parser($register);
-
-        return $parsed;
+    $parsedRegisters = [];
+    foreach ($registers as $register) {
+      $parsedRegisters[] = $this->parser($register);
     }
 
-    /**
-     * @param $limit
-     * @param $page
-     * @param $hardCodedMaxItems
-     * @param $relations
-     * @param array<Filter> $filters
-     * @return array
-     */
-    public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) {
-        if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
+    $parsed['registers']   = $parsedRegisters;
+    $parsed['perPage']     = $registers->perPage();
+    $parsed['lastPage']    = $registers->lastPage();
+    $parsed['currentPage'] = $registers->currentPage();
+    $parsed['maxItems']    = $hardCodedMaxItems;
 
-        $query = self::query();
+    return $parsed;
+  }
 
-        foreach($filters as $filter){
-            $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
-        }
+  /**
+   * Procura um registro por ID
+   * @param integer $id
+   * @param array<string> $relations
+   * @return null|object
+   */
+  public function getById($id, $relations = [], bool $parse = true) {
+    $model = parent::where($this->primaryKey, $id)->with($relations)->first();
+    if(!$model instanceof $this) return null;
+    if(!$parse) return $model;
 
-        $query->with($relations);
-        $registers = $query->paginate($limit, ['*'], 'page', $page);
+    return $this->parser($model);
+  }
 
-        $parsedRegisters = [];
-        foreach ($registers as $register) {
-            $parsedRegisters[] = $this->parser($register);
-        }
-
-        $parsed['registers']   = $parsedRegisters;
-        $parsed['perPage']     = $registers->perPage();
-        $parsed['lastPage']    = $registers->lastPage();
-        $parsed['currentPage'] = $registers->currentPage();
-        $parsed['maxItems']    = $hardCodedMaxItems;
-
-        return $parsed;
+  /**
+   * @param array $data
+   * @param array<string> $relations
+   * @return null|object
+   */
+  public function create($data, $relations = [], $parse = true) {
+    if(empty($data)) {
+      $this->save();
+      return $this->getById($this->original[$this->primaryKey], $relations, $parse);
     }
 
-    /**
-     * Procura um registro por ID
-     * @param integer $id
-     * @param array<string> $relations
-     * @return null|object
-     */
-    public function getById($id, $relations = [], bool $parse = true) {
-        $model = parent::where($this->primaryKey, $id)->with($relations)->first();
-        if(!$model instanceof $this) return null;
-        if(!$parse) return $model;
+    return
+      DB::transaction(function() use($data, $relations, $parse) {
+      $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
 
-        return $this->parser($model);
-    }
+      $this->fill($origin);
+      $this->save();
 
-    /**
-     * @param array $data
-     * @param array<string> $relations
-     * @return null|object
-     */
-    public function create($data, $relations = [], $parse = true) {
-        if(empty($data)) {
-            $this->save();
-            return $this->getById($this->original[$this->primaryKey], $relations, $parse);
-        }
+      foreach($relations as $relation){
+        $content = $origin[$relation];
+        $this->saveRelations($content, $relation);
+      }
 
-        return
-            DB::transaction(function() use($data, $relations, $parse) {
-            $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
+      return $this->getById($this->original[$this->primaryKey], $relations, $parse);
+    });
+  }
 
-            $this->fill($origin);
-            $this->save();
+  /**
+   * Atualiza o registro no banco de dados
+   * @param integer $id
+   * @param array|object $data
+   * @param boolean $ignoreNulls
+   * @return null|object
+   */
+  public function edit($id, $data, $ignoreNulls = true, $parse = true) {
+    $register = parent::find($id);
+    if(!$register instanceof $this) return null;
 
-            foreach($relations as $relation){
-                $content = $origin[$relation];
-                $this->saveRelations($content, $relation);
-            }
+    $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
+    $destin = $register->original;
+    $obj = Objectfy::transferTo($origin, $destin, $ignoreNulls);
 
-            return $this->getById($this->original[$this->primaryKey], $relations, $parse);
-        });
-    }
+    $register->fill($obj);
+    $register->save();
 
-    /**
-     * Atualiza o registro no banco de dados
-     * @param integer $id
-     * @param array|object $data
-     * @param boolean $ignoreNulls
-     * @return null|object
-     */
-    public function edit($id, $data, $ignoreNulls = true, $parse = true) {
-        $register = parent::find($id);
-        if(!$register instanceof $this) return null;
+    return $this->getById($id, [], $parse);
+  }
 
-        $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
-        $destin = $register->original;
-        $obj = Objectfy::transferTo($origin, $destin, $ignoreNulls);
+  /**
+   * Apaga um registro no banco de dados
+   * @param integer $id
+   * @return boolean
+   */
+  public function remove($id = null) {
+    $id = $id ?? $this->original['id'];
 
-        $register->fill($obj);
-        $register->save();
+    if(!$id) return false;
+    return $this->where('id', $id)->delete();
+  }
 
-        return $this->getById($id, [], $parse);
-    }
-
-    /**
-     * Apaga um registro no banco de dados
-     * @param integer $id
-     * @return boolean
-     */
-    public function remove($id = null) {
-        $id = $id ?? $this->original['id'];
-
-        if(!$id) return false;
-        return $this->where('id', $id)->delete();
-    }
-
-    public function newModel(){
-        return new static();
-    }
+  public function newModel(){
+    return new static();
+  }
 
 }

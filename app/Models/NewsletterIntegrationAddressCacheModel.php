@@ -2,22 +2,13 @@
 
 namespace App\Models;
 
-use App\DTO\Specie\SpecieDTO;
-use App\Models\BusinessModel;
-
-class BreedSpecieModel extends BusinessModel {
-  
-  /**
-   * Define a classe de saída dos objetos. (Formato: Classe::class)
-   * @var string
-   */
-  protected $class = SpecieDTO::class;
+class NewsletterIntegrationAddressCacheModel extends BusinessModel {
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_specie';
+  public $table = 'tb_newsletter_integration_address_cache';
 
   /**
    * Aponta a chave primária no banco de dados
@@ -37,9 +28,4 @@ class BreedSpecieModel extends BusinessModel {
    */
   public $timestamps = false;
 
-  public $fillable = ['name'];
-
-  public function breed() {
-    return $this->hasMany(BreedModel::class, 'specie_id');
-  }
 }
