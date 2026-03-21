@@ -2,16 +2,24 @@
 
 namespace App\DTO\User;
 
+use App\DTO\Preference\PreferenceDTO;
+use App\DTO\Role\RoleDTO;
+
 class UserDTO{
-    public $id;
-    public $username;
-    public $email;
-    public $password;
-    public $imageProfile;
-    public $phone;
-    public $active;
-    public $createdAt;
-    public $updatedAt;
-    public $preference;
-    public $roles;
+  public int $id;
+  public string $username;
+  public string $email;
+  public string $password;
+  public ?string $imageProfile;
+  public ?string $phone;
+  public ?string $emailVerifiedAt;
+  public bool $active;
+  public string $createdAt;
+  public string $updatedAt;
+  
+  /** @var PreferenceDTO[] */
+  public array $preference;
+  
+  /** @var RoleDTO[] */
+  public array $roles;
 }

@@ -22,7 +22,8 @@ return new class extends Migration {
       $table->boolean('active')->default(true);
       $table->boolean('blocked')->default(false);
       $table->boolean('status')->default(false);
-      $table->timestamps();
+      $table->timestamp('created_at', 0)->useCurrent();
+      $table->timestamp('updated_at', 0)->useCurrent()->useCurrentOnUpdate();
     });
   }
 

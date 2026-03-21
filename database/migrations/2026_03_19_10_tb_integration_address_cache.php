@@ -20,7 +20,7 @@ return new class extends Migration {
       $table->string('neighborhood', 255)->nullable();
       $table->string('street', 255)->nullable();
       $table->string('source', 255);
-      $table->timestamp('expires_at')->useCurrent()->useCurrentOnUpdate();
+      $table->timestamp('expires_at')->useCurrent();
       $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
     });
 

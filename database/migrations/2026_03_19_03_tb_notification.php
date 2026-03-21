@@ -14,7 +14,7 @@ return new class extends Migration {
 			$table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
 			$table->foreignId('notification_template_id')->constrained('tb_notification_template')->onDelete('cascade');
 			$table->boolean('viewed')->default(false);
-			$table->timestamp('created_at', 0)->nullable();
+      $table->timestamp('created_at', 0)->useCurrent();
 		});
 	}
 

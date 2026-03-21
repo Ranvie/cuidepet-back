@@ -16,7 +16,8 @@ return new class extends Migration {
 			$table->string('title', 255);
 			$table->text('description');
 			$table->boolean('active')->default(true);
-			$table->timestamps();
+      $table->timestamp('created_at', 0)->useCurrent();
+      $table->timestamp('updated_at', 0)->useCurrent()->useCurrentOnUpdate();
 		});
 
 		Artisan::call('db:seed', ['--class' => 'UseTermsSeeder']);

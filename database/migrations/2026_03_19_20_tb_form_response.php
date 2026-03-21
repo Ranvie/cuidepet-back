@@ -15,7 +15,7 @@ return new class extends Migration {
 			$table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
 			$table->foreignId('announcement_id')->constrained('tb_announcement')->onDelete('cascade');
 			$table->text('payload');
-			$table->timestamp('created_at')->useCurrent();
+      $table->timestamp('created_at', 0)->useCurrent();
 			$table->unique(['user_id', 'announcement_id'], 'FORM_RESPONSE_UK_01');
 		});
 	}

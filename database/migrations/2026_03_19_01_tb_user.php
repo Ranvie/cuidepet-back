@@ -18,7 +18,8 @@ return new class extends Migration {
 			$table->string('phone', 20)->nullable();
 			$table->timestamp('email_verified_at')->nullable();
 			$table->boolean('active')->default(false);
-			$table->timestamps();
+      $table->timestamp('created_at', 0)->useCurrent();
+      $table->timestamp('updated_at', 0)->useCurrent()->useCurrentOnUpdate();
 		});
 	}
 

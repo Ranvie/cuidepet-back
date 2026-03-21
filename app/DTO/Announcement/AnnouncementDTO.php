@@ -2,21 +2,23 @@
 
 namespace App\DTO\Announcement;
 
+use App\DTO\Form\FormDTO;
+use App\DTO\User\UserDTO;
+use App\DTO\Address\AddressDTO;
+
 class AnnouncementDTO {
-    public $id;
-    public $userId;
-    public $formId;
-    public $type;
-    public $description;
-    public $lastSeenLatitude;
-    public $lastSeenLongitude;
-    public $mainImage;
-    public $address;
-    public $contactEmail;
-    public $contactPhone;
-    public $timesFavorited;
-    public $active;
-    public $status;
-    public $createdAt;
-    public $updatedAt;
+  public int $id;
+  public UserDTO $user;
+  public ?FormDTO $form;
+  public AddressDTO $address;
+  public string $type;
+  public string $description;
+  public ?string $mainImage;
+  public ?string $contactEmail;
+  public ?string $contactPhone;
+  public bool $active;
+  public bool $blocked;
+  public string $status;
+  public string $createdAt;
+  public string $updatedAt;
 }
