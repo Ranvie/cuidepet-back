@@ -9,7 +9,7 @@ class NewsletterDTO{
    * Identificador da newsletter
    * @var int
    */
-  public int $id = 0;
+  public int $id;
 
   /**
    * Objeto do usuário
@@ -21,12 +21,12 @@ class NewsletterDTO{
    * Email do usuário que se inscreveu na newsletter
    * @var string
    */  
-  public string $email = '';
+  public string $email;
 
   /**
    * Status de confirmação do email
    * @var bool
    */
-  public bool $emailConfirmed = false;
+  public bool $emailConfirmed;
 
 }

@@ -11,37 +11,37 @@ class AnimalModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = AnimalDTO::class;
+  protected string $class = AnimalDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_animal';
+  public string $table = 'tb_animal';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public $primaryKey = 'announcement_id';
+  public string $primaryKey = 'announcement_id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public $incrementing = true;
+  public bool $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = false;
+  public bool $timestamps = false;
 
   /**
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public $fillable = [
+  public array $fillable = [
     'announcement_id',
     'name',
     'gender',
@@ -54,8 +54,7 @@ class AnimalModel extends BusinessModel {
     'castrated',
     'image_profile',
     'last_seen_date',
-    'breed_id',
-    'specie_id'
+    'breed_id'
   ];
 
   /**
@@ -65,8 +64,8 @@ class AnimalModel extends BusinessModel {
    * @param bool $parse
    * @return AnimalDTO
    */
-  public function create($data, $relations = [], $parse = true) {
-    parent::create($data, []);
+  public function create(array $data, array $relations = [], bool $parse = true) :AnimalDTO {
+    parent::create($data, $relations, $parse);
     return parent::getById($this->original['announcement_id'], ['breed', 'species']);
   }
 
@@ -74,7 +73,7 @@ class AnimalModel extends BusinessModel {
    * Define o relacionamento entre os modelos de Animal e Anúncio. Um animal pertence a um anúncio.
    * @return BelongsTo
    */
-  public function announcement(): BelongsTo {
+  public function announcement() :BelongsTo {
     return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
   }
 
@@ -82,7 +81,7 @@ class AnimalModel extends BusinessModel {
    * Define o relacionamento entre os modelos de Animal e Raça. Um animal pertence a uma raça.
    * @return BelongsTo
    */
-  public function breed(): BelongsTo {
+  public function breed() :BelongsTo {
     return $this->belongsTo(BreedModel::class, 'breed_id', 'id');
   }
 }

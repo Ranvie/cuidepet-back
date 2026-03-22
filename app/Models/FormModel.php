@@ -5,6 +5,7 @@ namespace App\Models;
 use App\DTO\Form\FormDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Ramsey\Collection\Collection;
 
 class FormModel extends BusinessModel {
 
@@ -12,59 +13,93 @@ class FormModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = FormDTO::class;
+  protected string $class = FormDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_form';
+  public string $table = 'tb_form';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public $primaryKey = 'id';
+  public string $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public $incrementing = true;
+  public bool $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = true;
+  public bool $timestamps = true;
 
   /**
    * Desativa o campo updated_at, já que não é necessário para a entidade
    */
   const UPDATED_AT = null;
 
-  public $fillable = ['user_id', 'title', 'url', 'payload', 'active'];
+  /**
+   * Define os campos que podem ser preenchidos em massa
+   * @var array
+   */
+  public array $fillable = [
+    'user_id',
+    'title',
+    'payload',
+    'active'
+  ];
 
-  public function getUserForm($userId, $formId){
+  /**
+   * Recupera um formulário específico de um usuário
+   * @param  int $userId
+   * @param  int $formId
+   * @return null|object
+   */
+  public function getUserForm(int $userId, int $formId) :?object {
     return $this->where('id', $formId)->where('user_id', $userId)->first();
   }
 
-  public function listFormByUser($userId){
+  /**
+   * Lista todos os formulários de um usuário
+   * @param  int $userId
+   * @return Collection
+   */
+  public function listFormByUser(int $userId) :Collection {
     $registers = $this->where('user_id', $userId)->get();
     return $this->parser($registers);
   }
 
-  public function create($data, $relations = [], $parse = true)
-  {
-    return parent::create($data, $relations);
+  /**
+   * Cria um novo formulário
+   * @param  array $data
+   * @param  array $relations
+   * @param  bool  $parse
+   * @return FormDTO
+   */
+  public function create(array $data, array $relations = [], bool $parse = true) :FormDTO {
+    return parent::create($data, $relations, $parse);
   }
 
+  /**
+   * Recupera os anúncios relacionados ao formulário. Um formulário pode ter vários anúncios relacionados a ele.
+   * @return HasMany
+   */
   public function announcements() :HasMany {
     return $this->hasMany(AnnouncementModel::class, 'form_id', 'id');
   }
 
+  /**
+   * Recupera o usuário relacionado ao formulário. Um formulário pertence a um usuário.
+   * @return BelongsTo
+   */
   public function user() :BelongsTo {
-    return $this->belongsTo(UserModel::class, 'id', 'user_id');
+    return $this->belongsTo(UserModel::class, 'user_id', 'id');
   }
 
 }

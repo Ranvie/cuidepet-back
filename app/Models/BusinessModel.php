@@ -33,18 +33,21 @@ class BusinessModel extends Model{
   /**
    * Método Construtor
    */
-  public function __construct(){
+  public function __construct() {
     $this->obParseConvention = new ParseConvention;
   }
 
   /**
-   * Método responsável por converter de snake_case para camelCase
+   * Converte os objetos do banco de dados para o formato definido na propriedade $class
+   * @param  Model|Collection $registers
+   * @param  string|null      $class
+   * @return object|Collection
    */
-  public function parser(Model|Collection $registers, $class = null) {
+  public function parser(Model|Collection $registers, ?string $class = null) :object|Collection {
     $parsed = !$registers instanceof Collection
       ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
       : $registers->map(function($obModel){
-        return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class);
+        return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class); //TODO: Está inserindo objetos via método mágico no DTO
       });
 
     if(isset($registers->relations))
@@ -54,14 +57,15 @@ class BusinessModel extends Model{
   }
 
   /**
-   * @param $limit
-   * @param $page
-   * @param $hardCodedMaxItems
-   * @param $relations
-   * @param array<Filter> $filters
+   * Lista os registros do banco de dados
+   * @param  int      $limit
+   * @param  int      $page
+   * @param  int      $hardCodedMaxItems
+   * @param  string[] $relations
+   * @param  Filter[] $filters
    * @return array
    */
-  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) {
+  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) :array {
     if($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
     $query = self::query();
@@ -89,11 +93,12 @@ class BusinessModel extends Model{
 
   /**
    * Procura um registro por ID
-   * @param integer $id
-   * @param array<string> $relations
+   * @param  int      $id
+   * @param  string[] $relations
+   * @param  boolean  $parse
    * @return null|object
    */
-  public function getById($id, $relations = [], bool $parse = true) {
+  public function getById(int $id, array $relations = [], bool $parse = true) :?object {
     $model = parent::where($this->primaryKey, $id)->with($relations)->first();
     if(!$model instanceof $this) return null;
     if(!$parse) return $model;
@@ -102,11 +107,12 @@ class BusinessModel extends Model{
   }
 
   /**
-   * @param array $data
-   * @param array<string> $relations
-   * @return null|object
+   * @param  array    $data
+   * @param  string[] $relations
+   * @param  boolean  $parse
+   * @return object
    */
-  public function create($data, $relations = [], $parse = true) {
+  public function create(array $data, array $relations = [], bool $parse = true) :object {
     if(empty($data)) {
       $this->save();
       return $this->getById($this->original[$this->primaryKey], $relations, $parse);
@@ -130,12 +136,13 @@ class BusinessModel extends Model{
 
   /**
    * Atualiza o registro no banco de dados
-   * @param integer $id
-   * @param array|object $data
-   * @param boolean $ignoreNulls
+   * @param  int          $id
+   * @param  array|object $data
+   * @param  boolean      $ignoreNulls
+   * @param  boolean      $parse
    * @return null|object
    */
-  public function edit($id, $data, $ignoreNulls = true, $parse = true) {
+  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true) :?object {
     $register = parent::find($id);
     if(!$register instanceof $this) return null;
 
@@ -151,17 +158,21 @@ class BusinessModel extends Model{
 
   /**
    * Apaga um registro no banco de dados
-   * @param integer $id
+   * @param  int|null $id
    * @return boolean
    */
-  public function remove($id = null) {
+  public function remove(?int $id = null) :bool {
     $id = $id ?? $this->original['id'];
 
     if(!$id) return false;
     return $this->where('id', $id)->delete();
   }
 
-  public function newModel(){
+  /**
+   * Cria uma nova instância do modelo
+   * @return static
+   */
+  public function newModel() :static {
     return new static();
   }
 
