@@ -22,63 +22,60 @@ Route::get('announcement/{id}',   [PublicAnnouncementController::class, 'get']);
 Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);
 
 Route::middleware(['auth:sanctum', 'hasRole:reset-password'])->group(function () {})
-    ->post('/reset-password', [AuthController::class, 'resetPassword']);
+  ->post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->group(function () {
 
-    Route::get('/',               [UserController::class, 'list']);
-    Route::get('/{id}',           [UserController::class, 'get']);
-    Route::post('/',              [UserController::class, 'create']);
-    Route::put('/{id}',           [UserController::class, 'update']);
-    Route::delete('/{id}',        [UserController::class, 'delete']);
+  Route::get('/',               [UserController::class, 'list']);
+  Route::get('/{id}',           [UserController::class, 'get']);
+  Route::post('/',              [UserController::class, 'create']);
+  Route::put('/{id}',           [UserController::class, 'update']);
+  Route::delete('/{id}',        [UserController::class, 'delete']);
 
-    Route::get('/report/',        [ReportController::class, 'list']);
-    Route::get('/report/{id}',    [ReportController::class, 'get']);
-    Route::delete('/report/{id}', [ReportController::class, 'delete']);
-
+  Route::get('/report/',        [ReportController::class, 'list']);
+  Route::get('/report/{id}',    [ReportController::class, 'get']);
+  Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
 
 Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
 
-    Route::post('/inactivate', [UserController::class, 'inactivate']);
-    Route::post('/logout',     [AuthController::class, 'logout']);
+  Route::post('/inactivate', [UserController::class, 'inactivate']);
+  Route::post('/logout',     [AuthController::class, 'logout']);
 
-    //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
-    Route::prefix('my-announcements')->group(function () {
-        Route::get('/',                         [AnnouncementController::class, 'list']);
-        Route::get('/{announcementId}',         [AnnouncementController::class, 'get']);
-        Route::get('/answers/{announcementId}', [AnnouncementController::class, 'listAnswers']);
-        Route::post('/',                        [AnnouncementController::class, 'create']);
-        Route::put('/{announcementId}',         [AnnouncementController::class, 'update']);
-        Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
-    });
+  //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
+  Route::prefix('my-announcements')->group(function () {
+    Route::get('/',                         [AnnouncementController::class, 'list']);
+    Route::get('/{announcementId}',         [AnnouncementController::class, 'get']);
+    Route::get('/answers/{announcementId}', [AnnouncementController::class, 'listAnswers']);
+    Route::post('/',                        [AnnouncementController::class, 'create']);
+    Route::put('/{announcementId}',         [AnnouncementController::class, 'update']);
+    Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
+  });
 
-    Route::get('/species', [BreedSpecieController::class, 'list']);
+  Route::get('/species', [BreedSpecieController::class, 'list']);
 
-    Route::get('/notification',                     [NotificationController::class, 'list']);
-    Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
-    Route::patch('/notification/{notificationId}',  [NotificationController::class, 'setViewed']);
+  Route::get('/notification',                     [NotificationController::class, 'list']);
+  Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
+  Route::patch('/notification/{notificationId}',  [NotificationController::class, 'setViewed']);
 
-    Route::get('/form',             [FormResponseController::class, 'list']);
-    Route::get('/form/{formId}',    [FormResponseController::class, 'get']);
-    Route::post('/form',            [FormResponseController::class, 'create']);
-    Route::delete('/form/{formId}', [FormResponseController::class, 'delete']);
-    Route::put('/form/{formId}',    [FormResponseController::class, 'update']);
+  Route::get('/form',             [FormResponseController::class, 'list']);
+  Route::get('/form/{formId}',    [FormResponseController::class, 'get']);
+  Route::post('/form',            [FormResponseController::class, 'create']);
+  Route::delete('/form/{formId}', [FormResponseController::class, 'delete']);
+  Route::put('/form/{formId}',    [FormResponseController::class, 'update']);
 
-    Route::prefix('/my-forms')->group(function () {
+  Route::prefix('/my-forms')->group(function () {
 
-        Route::get('/',            [FormController::class, 'list']);
-        Route::get('/{formId}',    [FormController::class, 'get']);
-        Route::post('/',           [FormController::class, 'create']);
-        Route::delete('/{formId}', [FormController::class, 'delete']);
-        Route::put('/{formId}',    [FormController::class, 'update']);
+    Route::get('/',            [FormController::class, 'list']);
+    Route::get('/{formId}',    [FormController::class, 'get']);
+    Route::post('/',           [FormController::class, 'create']);
+    Route::delete('/{formId}', [FormController::class, 'delete']);
+    Route::put('/{formId}',    [FormController::class, 'update']);
+  });
 
-    });
+  Route::get('/favorite',    [FavoriteController::class, 'list']);
+  Route::post('/favorite',   [FavoriteController::class, 'create']);
+  Route::delete('/favorite', [FavoriteController::class, 'delete']);
 
-    Route::get('/favorite',    [FavoriteController::class, 'list']);
-    Route::post('/favorite',   [FavoriteController::class, 'create']);
-    Route::delete('/favorite', [FavoriteController::class, 'delete']);
-
-    Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
-
+  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 });

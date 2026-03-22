@@ -5,14 +5,14 @@ namespace App\Services;
 use App\Classes\Filter;
 use App\Exceptions\BusinessException;
 use App\Http\Enums\AnnouncementTypes;
-use App\Models\PublicAnnouncementModel;
+use App\Models\AnnouncementModel;
 use App\Services\Interfaces\IPublicAnnouncementService;
 
 class PublicAnnouncementService implements IPublicAnnouncementService
 {
 
     public function __construct(
-        private PublicAnnouncementModel $obPublicAnnouncementModel,
+        private AnnouncementModel $obPublicAnnouncementModel,
     ){}
 
     public function getList($limit, $page, $type) {

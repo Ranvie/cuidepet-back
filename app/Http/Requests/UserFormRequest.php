@@ -1,14 +1,19 @@
 <?php
 
 namespace App\Http\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserFormRequest extends FormRequest{
-    public function rules()
-    {
-        return [
-            'title'    => 'required|string|max:255',
-            'payload'  => 'required|string|max:10000'
-        ];
-    }
+class UserFormRequest extends FormRequest {
+  
+  /**
+   * Regras de validação para o formulário do usuário.
+   * @return array
+   */
+  public function rules() :array {
+    return [
+      'title'    => 'required|string|max:255',
+      'payload'  => 'required|string|max:10000'
+    ];
+  }
 }

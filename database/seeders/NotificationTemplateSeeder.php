@@ -5,13 +5,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class NotificationTemplateSeeder extends Seeder
-{
+class NotificationTemplateSeeder extends Seeder {
+	
 	/**
-	 * Run the database seeds.
-	 */
-	public function run(): void
-	{
+   * Roda os seeders para popular a tabela de templates de notificação.
+   * @return void
+   */
+	public function run(): void {
 		DB::table('tb_notification_template')->insert([
 			['id' => 1, 'type' => 'welcome', 'title' => 'Bem-vindo(a)!', 'message' => 'Seja bem-vindo(a) ao CuidePet! Crie seu anúncio clicando aqui.'],
 			['id' => 2, 'type' => 'announcement-alert', 'title' => 'Há um novo anúncio de pet {type} na sua região!', 'message' => 'Você pode conferir os detalhes clicando aqui.'],

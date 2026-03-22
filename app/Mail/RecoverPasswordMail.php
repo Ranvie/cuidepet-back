@@ -9,46 +9,46 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RecoverPasswordMail extends Mailable
-{
-    use Queueable, SerializesModels;
+class RecoverPasswordMail extends Mailable {
+  use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct(
-        public string $username,
-        public string $email,
-        public string $resetUrl,
-    ){}
+  /**
+   * Cria uma nova instância da mensagem de email de recuperação de senha
+   * @param string $username Nome de usuário do destinatário
+   * @param string $email    Endereço de email do destinatário
+   * @param string $resetUrl URL para a página de redefinição de senha
+   */
+  public function __construct(
+    public string $username,
+    public string $email,
+    public string $resetUrl,
+  ) {}
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Recuperação de senha',
-        );
-    }
+  /**
+   * Obtem o envelope da mensagem.
+   * @return Envelope O envelope da mensagem, contendo o assunto do email
+   */
+  public function envelope(): Envelope {
+    return new Envelope(
+      subject: 'Recuperação de senha',
+    );
+  }
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            markdown: 'mail.recoverPassword',
-        );
-    }
+  /**
+   * Obtem o conteúdo da mensagem.
+   * @return Content O conteúdo da mensagem, especificando o template markdown a ser usado
+   */
+  public function content(): Content {
+    return new Content(
+      markdown: 'mail.recoverPassword',
+    );
+  }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
-    }
+  /**
+   * Obtem os anexos da mensagem.
+   * @return array Uma matriz de anexos, que neste caso é vazia
+   */
+  public function attachments(): array {
+    return [];
+  }
 }

@@ -6,22 +6,21 @@ use Illuminate\Console\Command;
 
 class Logs extends Command
 {
+    
     /**
-     * The name and signature of the console command.
-     *
+     * Assinatura do comando
      * @var string
      */
-    protected $signature = 'log:clear';
+    protected string $signature = 'log:clear';
 
     /**
-     * The console command description.
-     *
+     * Descrição do comando
      * @var string
      */
-    protected $description = 'Clear the output log file';
+    protected string $description = 'Clear the output log file';
 
     /**
-     * Execute the console command.
+     * Executa o comando
      */
     public function handle()
     {
