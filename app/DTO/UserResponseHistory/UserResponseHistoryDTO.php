@@ -11,7 +11,7 @@ class UserResponseHistoryDTO{
    * Identificador dos termos de uso
    * @var int
    */
-  public int $id = 0;
+  public int $id;
 
   /**
    * Identificador do Usuário
@@ -29,12 +29,12 @@ class UserResponseHistoryDTO{
    * Data de expiração da resposta do usuário ao anúncio
    * @var string
    */
-  public string $expiresAt = '';
+  public string $expiresAt;
 
   /**
    * Data de criação do histórico de resposta
    * @var string
    */  
-  public string $createdAt = '';
+  public string $createdAt;
 
 }

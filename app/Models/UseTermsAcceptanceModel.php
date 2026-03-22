@@ -2,7 +2,15 @@
 
 namespace App\Models;
 
+use App\DTO\UseTermsAcceptance\UseTermsAcceptanceDTO;
+
 class UseTermsAcceptanceModel extends BusinessModel {
+
+  /**
+   * Define a classe de saída dos objetos. (Formato: Classe::class)
+   * @var string
+   */
+  public string $class = UseTermsAcceptanceDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
@@ -26,8 +34,12 @@ class UseTermsAcceptanceModel extends BusinessModel {
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = true;
+  public $timestamps = false;
 
+  /**
+   * Define os campos que podem ser preenchidos em massa
+   * @var array
+   */
   public $fillable = ['accepted_at'];
 
 }

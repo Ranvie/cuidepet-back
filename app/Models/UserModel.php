@@ -23,35 +23,52 @@ class UserModel extends BusinessModel implements Authenticatable{
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = UserDTO::class;
+  protected string $class = UserDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public $table = 'tb_user';
+  public string $table = 'tb_user';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public $primaryKey = 'id';
+  public string $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public $incrementing = true;
+  public bool $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public $timestamps = true;
+  public bool $timestamps = true;
 
-  public $fillable = ['username','email','password','image_profile','phone','active'];
+  /**
+   * Define os campos que podem ser preenchidos em massa
+   * @var array
+   */
+  public array $fillable = [
+    'username',
+    'email',
+    'password',
+    'image_profile',
+    'phone',
+    'active'
+  ];
 
-  public function getByEmail($email, $parse) {
+  /**
+   * Recupera um usuário pelo email
+   * @param string $email
+   * @param bool   $parse
+   * @return UserDTO|null
+   */
+  public function getByEmail(string $email, bool $parse = true) :?UserDTO {
     $user = $this->where('email',$email)->first();
     if(!$user) return null;
     if(!$parse) return $user;
@@ -59,59 +76,125 @@ class UserModel extends BusinessModel implements Authenticatable{
     return $this->parser($user);
   }
 
-  public function create($data, $relations = [], $parse = true)
-  {
+  /**
+   * Cria um novo usuário
+   * @param array $data
+   * @param array $relations
+   * @param bool  $parse
+   * @return UserDTO
+   */
+  public function create(array $data, array $relations = [], bool $parse = true) :UserDTO {
     parent::create($data, []);
     return parent::getById($this->original['id'], $relations, $parse);
   }
 
+  //TODO:
   //Validar se não faz sentido deletar outros dados também
-  public function inactivate($id = null): bool{
+  //Inativar os formulários
+  //Inativar os anúncios + animal + mídias + endereços dos anúncios (cuidado para não deletar os da newsletter)
+  //Inativar as respostas
+  //Inativar o histórico de respostas
+  //Inativar as notificações
+  //Inativar as preferências
+  //Inativar as denúncias
+  //Inativar os termos de uso aceitos
+  //Inativar os favoritos
+  
+  /**
+   * Inativa um usuário e seus dados relacionados, definindo o campo "active" como false. Retorna true se a operação for bem-sucedida.
+   * @param  int|null $id
+   * @return bool
+   */
+  public function inactivate($id = null) :bool {
     parent::edit($id, ['active' => 0]);
     return true;
   }
 
-  public function preference(): HasOne{
+  /**
+   * Define a relação entre um usuário e sua preferência. Um usuário possui uma preferência.
+   * @return HasOne
+   */
+  public function preference() :HasOne {
     return $this->hasOne(PreferenceModel::class, 'user_id', 'id');
   }
 
-  public function notifications(): HasMany{
+  /**
+   * Define a relação entre um usuários e notificações. Um usuário pode ter muitas notificações.
+   * @return HasMany
+   */
+  public function notifications() :HasMany {
     return $this->hasMany(NotificationModel::class, 'user_id', 'id');
   }
 
-  public function roles(): BelongsToMany{
+  /**
+   * Define a relação entre usuários e cargos. Um usuário pode ter muitos cargos (permissões).
+   * @return BelongsToMany
+   */
+  public function roles() :BelongsToMany {
     return $this->BelongsToMany(RoleModel::class, UserRoleModel::class, 'user_id', 'role_id');
   }
   
-  public function useTerms(): BelongsToMany{
+  /**
+   * Define a relação entre usuários e termos de uso aceitos. Um usuário pode aceitar muitos termos de uso.
+   * @return BelongsToMany
+   */
+  public function useTerms() :BelongsToMany {
     return $this->BelongsToMany(UseTermsModel::class, UseTermsAcceptanceModel::class, 'user_id', 'use_terms_id');
   }
 
-  public function favorites(): BelongsToMany{
+  /**
+   * Define a relação entre usuários e anúncios favoritos. Um usuário pode ter muitos anúncios favoritos.
+   * @return BelongsToMany
+   */
+  public function favorites() :BelongsToMany {
     return $this->belongsToMany(AnnouncementModel::class, FavoriteModel::class, 'user_id', 'announcement_id');
   }
 
-  public function reports(): HasMany{
+  /**
+   * Define a relação entre usuários e denúncias. Um usuário pode fazer muitas denúncias.
+   * @return HasMany
+   */
+  public function reports() :HasMany {
     return $this->hasMany(ReportModel::class, 'user_id', 'id');
   }
 
-  public function announcements(): HasMany{
+  /**
+   * Define a relação entre usuários e anúncios. Um usuário pode criar muitos anúncios.
+   * @return HasMany
+   */
+  public function announcements() :HasMany {
     return $this->hasMany(AnnouncementModel::class, 'user_id', 'id');
   }
 
-  public function forms(): HasMany{
+  /**
+   * Define a relação entre usuários e formulários. Um usuário pode criar muitos formulários.
+   * @return HasMany
+   */
+  public function forms() :HasMany {
     return $this->hasMany(FormModel::class, 'user_id', 'id');
   }
 
-  public function responses(): HasMany{
+  /**
+   * Define a relação entre usuários e respostas de formulários. Um usuário pode ter muitas respostas de formulários.
+   * @return HasMany
+   */
+  public function responses() :HasMany {
     return $this->hasMany(FormResponseModel::class, 'user_id', 'id');
   }
 
+  /**
+   * Define a relação entre usuários e histórico de respostas de formulários. Um usuário pode criar muitas entradas no histórico de respostas de formulários.
+   * @return HasMany
+   */
   public function userResponseHistory(): HasMany{
     return $this->hasMany(UserResponseHistoryModel::class, 'user_id', 'id');
   }
 
-  public function newsletter(): HasOne{
+  /**
+   * Define a relação entre usuários e newsletter. Um usuário pode ter uma newsletter associada.
+   * @return HasOne
+   */
+  public function newsletter() :HasOne {
     return $this->hasOne(NewsletterModel::class, 'user_id', 'id');
   }
 

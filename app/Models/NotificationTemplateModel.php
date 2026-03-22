@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\NotificationTemplate\NotificationTemplateDTO;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NotificationTemplateModel extends BusinessModel {
 
@@ -45,5 +46,13 @@ class NotificationTemplateModel extends BusinessModel {
     'type', 
     'message'
   ];
+
+  /**
+   * Define o relacionamento entre template de notificação e notificações. Um template de notificação pode ter muitas notificações.
+   * @return HasMany
+   */
+  public function notifications() :HasMany {
+    return $this->hasMany(NotificationModel::class, 'notification_template_id', 'id');
+  }
 
 }
