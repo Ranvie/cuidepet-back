@@ -5,7 +5,7 @@ namespace App\Models;
 use App\DTO\Form\FormDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Ramsey\Collection\Collection;
+use Illuminate\Support\Collection;
 
 class FormModel extends BusinessModel {
 
@@ -13,31 +13,31 @@ class FormModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected string $class = FormDTO::class;
+  protected $class = FormDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_form';
+  public $table = 'tb_form';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = true;
+  public $timestamps = true;
 
   /**
    * Desativa o campo updated_at, já que não é necessário para a entidade
@@ -48,7 +48,7 @@ class FormModel extends BusinessModel {
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public array $fillable = [
+  public $fillable = [
     'user_id',
     'title',
     'payload',

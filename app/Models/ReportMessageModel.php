@@ -11,33 +11,37 @@ class ReportMessageModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected string $class = ReportMessageDTO::class;
+  protected $class = ReportMessageDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_report_message';
+  public $table = 'tb_report_message';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = false;
+  public $timestamps = false;
 
-  public array $fillable = [
+  /**
+   * Define os campos que podem ser preenchidos em massa (mass assignment)
+   * @var array
+   */
+  public $fillable = [
     'motive', 
     'type'
   ];

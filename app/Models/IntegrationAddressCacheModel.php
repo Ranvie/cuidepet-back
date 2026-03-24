@@ -12,31 +12,31 @@ class IntegrationAddressCacheModel extends BusinessModel {
    * Aponta a classe DTO associada a este modelo
    * @var string
    */
-  protected string $class = IntegrationAddressCacheDTO::class;
+  protected $class = IntegrationAddressCacheDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_integration_address_cache';
+  public $table = 'tb_integration_address_cache';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = true;
+  public $timestamps = true;
 
   /**
    * Desativa o campo created_at já que não é necessário para esta tabela
@@ -47,7 +47,7 @@ class IntegrationAddressCacheModel extends BusinessModel {
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public array $fillable = [
+  public $fillable = [
     'latitude',
     'longitude',
     'zipcode',

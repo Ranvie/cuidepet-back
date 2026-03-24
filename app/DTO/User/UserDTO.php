@@ -4,6 +4,7 @@ namespace App\DTO\User;
 
 use App\DTO\Preference\PreferenceDTO;
 use App\DTO\Role\RoleDTO;
+use Illuminate\Support\Collection;
 
 class UserDTO{
 
@@ -75,7 +76,7 @@ class UserDTO{
 
   /**
    * Lista de perfis de acesso do usuário
-   * @var RoleDTO[]
+   * @var Collection<RoleDTO>
    */
-  public array $roles;
+  public Collection $roles;
 }

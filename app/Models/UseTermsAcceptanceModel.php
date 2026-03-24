@@ -10,7 +10,7 @@ class UseTermsAcceptanceModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  public string $class = UseTermsAcceptanceDTO::class;
+  public $class = UseTermsAcceptanceDTO::class;
 
   /**
    * Aponta a entidade do banco de dados

@@ -2,6 +2,5 @@
 
 namespace App\Services\Interfaces;
 
-interface IBreedSpecieService extends IService{
-
+interface IBreedSpecieService extends IService {
 }

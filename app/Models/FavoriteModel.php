@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\DTO\Favorite\FavoriteDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FavoriteModel extends BusinessModel {
@@ -11,25 +10,25 @@ class FavoriteModel extends BusinessModel {
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_favorite';
+  public $table = 'tb_favorite';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = false;
+  public $timestamps = false;
 
   /**
    * Relacionamento com a entidade de anúncio. Um favorito pertence a um anúncio.

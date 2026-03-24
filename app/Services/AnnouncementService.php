@@ -3,129 +3,203 @@
 namespace App\Services;
 
 use App\Classes\Filter;
+use App\DTO\Announcement\AnnouncementDTO;
 use App\Exceptions\BusinessException;
 use App\Models\AnnouncementModel;
 use App\Services\Interfaces\IAnnouncementService;
 
-class AnnouncementService implements IAnnouncementService
-{
+class AnnouncementService implements IAnnouncementService {
 
-    public function __construct(
-        private AnnouncementModel $obAnnouncementModel,
-        private UserService $userService,
-        private AnnouncementMediaService $announcementMediaService,
-        private FormService $formService
-    ){}
+  /**
+   * Construtor do serviço de anúncios.
+   * @param AnnouncementModel        $obAnnouncementModel      Modelo de anúncio.
+   * @param UserService              $userService              Serviço de usuários.
+   * @param AnnouncementMediaService $announcementMediaService Serviço de mídia de anúncios.
+   * @param FormService              $formService              Serviço de formulários.
+   */
+  public function __construct(
+    private AnnouncementModel $obAnnouncementModel,
+    private UserService $userService,
+    private AnnouncementMediaService $announcementMediaService,
+    private FormService $formService
+  ) {}
 
-    public function getList($limit, $page) {
-        return $this->obAnnouncementModel->list($limit, $page);
+  /**
+   * Lista os anúncios com paginação.
+   * @param  int $limit Número de anúncios por página.
+   * @param  int $page  Número da página.
+   * @return array      Lista de anúncios paginada.
+   */
+  public function getList(int $limit, int $page) :array {
+    return $this->obAnnouncementModel->list($limit, $page);
+  }
+
+  /**
+   * Lista os anúncios de um usuário específico com paginação.
+   * @param  int $limit  Número de anúncios por página.
+   * @param  int $page   Número da página.
+   * @param  int $idUser ID do usuário.
+   * @return array       Lista de anúncios do usuário paginada.
+   */
+  public function getListByUser(int $limit, int $page, int $idUser) :array {
+    return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $idUser)]);
+  }
+
+  /**
+   * Obtém um anúncio por ID.
+   * @param  int    $id        ID do anúncio.
+   * @param  array  $relations Relações a serem carregadas com o anúncio.
+   * @return AnnouncementDTO   Objeto de transferência de dados do anúncio.
+   */
+  public function getById(int $id, array $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :AnnouncementDTO {
+    $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
+
+    $this->validateAnnouncementExists($obAnnouncementDTO);
+    return $obAnnouncementDTO;
+  }
+
+  /**
+   * Obtém um anúncio específico de um usuário.
+   * @param  int $userId            ID do usuário.
+   * @param  int $announcementId    ID do anúncio.
+   * @return AnnouncementModel|null Objeto de modelo de dados do anúncio, ou null se não encontrado.
+   */
+  public function getUserAnnouncement(int $userId, int $announcementId) :?AnnouncementModel {
+    return $this->obAnnouncementModel->getUserAnnouncement($userId, $announcementId);
+  }
+
+  /**
+   * Cria um novo anúncio.
+   * @param  array $data     Dados do anúncio a ser criado.
+   * @return AnnouncementDTO Objeto de transferência de dados do anúncio criado.
+   */
+  public function create(array $data) :AnnouncementDTO {
+    $this->validateIfUserExists($data['userId']);
+    $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
+
+    $announcementModel = $this->obAnnouncementModel->create($data, [], false);
+    $announcementId    = $announcementModel->getOriginal()['id'];
+
+    $animalData                   = $data['animal'];
+    $animalData['announcementId'] = $announcementId;
+    $announcementModel->animal()->getModel()->create($animalData, [], false);
+
+    $announcementModel->form()->associate($data['formId']);
+
+    $announcementModel->address()->getModel()->create($data['address'], [], false);
+
+    $announcementMediaData = $data['announcementMedia'];
+    foreach ($announcementMediaData as $announcementMedia) {
+      $announcementMedia['announcementId'] = $announcementId;
+      $this->announcementMediaService->newInstance()->create($announcementMedia);
     }
 
-    public function getListByUser($limit, $page, $idUser) {
-        return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $idUser)]);
+    return $announcementModel->getById($announcementId, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
+  }
+
+  /**
+   * Valida se um usuário existe.
+   * @param  int  $userId      ID do usuário a ser verificado.
+   * @return void
+   * @throws BusinessException Se o usuário não for encontrado.
+   */
+  private function validateIfUserExists(int $userId) :void {
+    $this->userService->getById($userId);
+  }
+
+  /**
+   * Valida se um formulário pertence a um usuário.
+   * @param  int  $userId      ID do usuário.
+   * @param  int  $formId      ID do formulário a ser verificado.
+   * @return void
+   * @throws BusinessException Se o formulário não pertencer ao usuário.
+   */
+  private function validateIfFormBelongsToUser(int $userId, int $formId) :void {
+    $userForm = $this->formService->getUserForm($userId, $formId);
+
+    if (!$userForm)
+      throw new BusinessException('O usuário não possui o formulário requisitado.', 404);
+  }
+
+  /**
+   * Edita um anúncio existente.
+   * @param  int   $id       ID do anúncio a ser editado.
+   * @param  array $data     Dados do anúncio a ser editado.
+   * @return AnnouncementDTO Objeto de transferência de dados do anúncio editado.
+   */
+  public function edit(int $id, array $data) :AnnouncementDTO {
+    $this->validateIfUserExists($data['userId']);
+    $this->validateIfAnnouncementBelongsToUser($data['userId'], $id);
+    if (isset($data['formId'])) $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
+
+    $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
+
+    if (isset($data['animal'])) {
+      $animalData = $data['animal'];
+      $announcementModel->animal()->getModel()->edit($id, $animalData);
     }
 
-    public function getById($id, $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :object {
-        $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
+    if (isset($data['formId'])) $announcementModel->form()->associate($data['formId']);
 
-        $this->validateAnnouncementExists($obAnnouncementDTO);
-        return $obAnnouncementDTO;
+    if (isset($data['announcementMedia'])) {
+      $announcementMediaData = $data['announcementMedia'];
+      foreach ($announcementMediaData as $announcementMedia) {
+        $announcementMedia['announcementId'] = $id;
+        $this->changeMediaData($announcementMedia);
+      }
     }
 
-    public function getUserAnnouncement($userId, $announcementId){
-        return $this->obAnnouncementModel->getUserAnnouncement($userId, $announcementId);
-    }
+    return $announcementModel->getById($id, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
+  }
 
-    public function create($data) :object {
-        $this->validateIfUserExists($data['userId']);
-        $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
+  /**
+   * Valida se um anúncio pertence a um usuário.
+   * @param  int $userId         ID do usuário.
+   * @param  int $announcementId ID do anúncio a ser verificado.
+   * @return void
+   * @throws BusinessException   Se o anúncio não pertencer ao usuário.
+   */
+  private function validateIfAnnouncementBelongsToUser(int $userId, int $announcementId) :void {
+    $announcement = $this->getUserAnnouncement($userId, $announcementId);
 
-        $announcementModel = $this->obAnnouncementModel->create($data, [], false);
-        $announcementId = $announcementModel->getOriginal()['id'];
+    if (!$announcement instanceof AnnouncementModel)
+      throw new BusinessException('O anúncio requisitado não pertence ao usuário', 404);
+  }
 
-        $animalData = $data['animal'];
-        $animalData['announcementId'] = $announcementId;
-        $announcementModel->animal()->getModel()->create($animalData, [], false);
+  /**
+   * Altera os dados de uma mídia de anúncio com base na ação especificada.
+   * @param  array $announcementMedia Dados da mídia do anúncio, incluindo a ação a ser realizada.
+   * @return void
+   */
+  private function changeMediaData(array $announcementMedia) :void {
+    $mediaId = $announcementMedia['id'];
+    $option  = $announcementMedia['action'];
 
-        $announcementModel->form()->associate($data['formId']);
+    match ($option) {
+      'UPD'   => $this->announcementMediaService->newInstance()->edit($mediaId, $announcementMedia),
+      'DEL'   => $this->announcementMediaService->remove($mediaId),
+      'ADD'   => $this->announcementMediaService->newInstance()->create($announcementMedia),
+      default => null,
+    };
+  }
 
-        $announcementMediaData = $data['announcementMedia'];
-        foreach ($announcementMediaData as $announcementMedia) {
-            $announcementMedia['announcementId'] = $announcementId;
-            $this->announcementMediaService->newInstance()->create($announcementMedia);
-        }
+  /**
+   * Remove um anúncio.
+   * @param  int|null $id ID do anúncio a ser removido.
+   * @return bool         Indica se a remoção foi bem-sucedida.
+   */
+  public function remove(?int $id = null): bool {
+    return $this->obAnnouncementModel->remove($id);
+  }
 
-        return $announcementModel->getById($announcementId, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
-    }
-
-    private function validateIfUserExists($userId){
-        $this->userService->getById($userId);
-    }
-
-    private function validateIfFormBelongsToUser($userId, $formId){
-        $userForm = $this->formService->getUserForm($userId, $formId);
-
-        if(!$userForm){
-            throw new BusinessException('O usuário não possui o formulário requisitado.', 404);
-        }
-    }
-
-    public function edit($id, $data) {
-        $this->validateIfUserExists($data['userId']);
-        $this->validateIfAnnouncementBelongsToUser($data['userId'], $id);
-        if(isset($data['formId'])) $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
-
-        $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
-
-        if(isset($data['animal'])){
-            $animalData = $data['animal'];
-            $announcementModel->animal()->getModel()->edit($id, $animalData);
-        }
-
-        if(isset($data['formId'])) $announcementModel->form()->associate($data['formId']);
-
-        if(isset($data['announcementMedia'])){
-            $announcementMediaData = $data['announcementMedia'];
-            foreach ($announcementMediaData as $announcementMedia) {
-                $announcementMedia['announcementId'] = $id;
-                $this->changeMediaData($announcementMedia);
-            }
-        }
-
-        return $announcementModel->getById($id, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
-    }
-
-    private function validateIfAnnouncementBelongsToUser($userId, $announcementId){
-        $announcement = $this->getUserAnnouncement($userId, $announcementId);
-
-        if(!$announcement){
-            throw new BusinessException('O anúncio requisitado não pertence ao usuário', 404);
-        }
-    }
-
-    private function changeMediaData($announcementMedia){
-        $mediaId = $announcementMedia['id'];
-        $option = $announcementMedia['action'];
-
-        switch ($option) {
-            case 'UPD':
-                $this->announcementMediaService->newInstance()->edit($mediaId, $announcementMedia);
-                break;
-            case 'DEL':
-                $this->announcementMediaService->remove($mediaId);
-                break;
-            case 'ADD':
-                $this->announcementMediaService->newInstance()->create($announcementMedia);
-                break;
-        }
-    }
-
-    public function remove($id = null) :bool {
-        return $this->obAnnouncementModel->remove($id);
-    }
-
-    private function validateAnnouncementExists($obAnnouncement) {
-        if(!$obAnnouncement)
-            throw new BusinessException('O anúncio não foi encontrado', 404); 
-    }
+  /**
+   * Valida se um anúncio existe.
+   * @param  AnnouncementDTO|null $obAnnouncement Objeto de transferência de dados do anúncio a ser verificado.
+   * @return void
+   * @throws BusinessException Se o anúncio não for encontrado.
+   */
+  private function validateAnnouncementExists(?AnnouncementDTO $obAnnouncement) :void {
+    if (!$obAnnouncement instanceof AnnouncementDTO)
+      throw new BusinessException('O anúncio não foi encontrado', 404);
+  }
 }

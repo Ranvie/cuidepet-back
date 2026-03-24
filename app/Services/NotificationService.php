@@ -2,33 +2,74 @@
 
 namespace App\Services;
 
+use App\Models\NotificationModel;
 use App\Services\Interfaces\INotificationService;
 
-class NotificationService implements Interfaces\INotificationService
-{
+class NotificationService implements INotificationService {
 
-    public function getList($limit, $page)
-    {
-        // TODO: Implement getList() method.
-    }
+  /**
+   * Método Construtor
+   * @param NotificationModel $notificationModel
+   */
+  public function __construct(
+    private NotificationModel $notificationModel
+  ) {}
 
-    public function getById($id, $relations)
-    {
-        // TODO: Implement getById() method.
-    }
+  /**
+   * Lista os registros com paginação.
+   * @param  int $limit Número de registros por página.
+   * @param  int $page  Número da página.
+   * @return array      Lista de registros paginada.
+   */
+  public function getList(int $limit, int $page) :array {
+    // TODO: Implement getList() method.
 
-    public function create($data)
-    {
-        // TODO: Implement create() method.
-    }
+    return [];
+  }
 
-    public function edit($id, $data)
-    {
-        // TODO: Implement edit() method.
-    }
+  /**
+   * Obtém um registro por ID.
+   * @param  int   $id        ID do registro.
+   * @param  array $relations Relacionamentos a serem carregados.
+   * @return object           Objeto com os detalhes do registro.
+   */
+  public function getById(int $id, array $relations) :object {
+    // TODO: Implement getById() method.
 
-    public function remove($id = null)
-    {
-        // TODO: Implement remove() method.
-    }
+    return $this->notificationModel;
+  }
+
+  /**
+   * Cria um novo registro.
+   * @param  array  $data Dados do registro a ser criado.
+   * @return object       Objeto com os detalhes do registro criado.
+   */
+  public function create(array $data) :object {
+    // TODO: Implement create() method.
+
+    return $this->notificationModel;
+  }
+
+  /**
+   * Edita um registro existente.
+   * @param  int    $id   ID do registro a ser editado.
+   * @param  array  $data Dados atualizados do registro.
+   * @return object       Objeto com os detalhes do registro atualizado.
+   */
+  public function edit(int $id, array $data) :object {
+    // TODO: Implement edit() method.
+
+    return $this->notificationModel;
+  }
+
+  /**
+   * Remove um registro.
+   * @param  ?int $id ID do registro a ser removido.
+   * @return bool     Indica se a remoção foi bem-sucedida.
+   */
+  public function remove(?int $id = null) :bool {
+    // TODO: Implement remove() method.
+
+    return false;
+  }
 }

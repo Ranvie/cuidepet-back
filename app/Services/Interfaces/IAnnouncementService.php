@@ -2,6 +2,5 @@
 
 namespace App\Services\Interfaces;
 
-interface IAnnouncementService extends IService{
-
+interface IAnnouncementService extends IService {
 }

@@ -12,31 +12,31 @@ class FormResponseModel extends Model
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected string $class = FormResponseDTO::class;
+  protected $class = FormResponseDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_form_response';
+  public $table = 'tb_form_response';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = true;
+  public $timestamps = true;
 
   /**
    * Inativa o campo updated_at, já que não é necessário para a entidade

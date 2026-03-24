@@ -3,6 +3,7 @@
 namespace App\DTO\User;
 
 use App\DTO\Notification\NotificationDTO;
+use Illuminate\Support\Collection;
 
 class SafeUserDTO{
 
@@ -20,13 +21,13 @@ class SafeUserDTO{
 
   /**
    * Imagem de perfil do usuário
-   * @var string
+   * @var string|null
    */
-  public string $imageProfile;
+  public ?string $imageProfile;
 
   /**
    * Notificações do usuário
-   * @var NotificationDTO[]
+   * @var Collection<NotificationDTO>
    */
-  public array $notifications;
+  public Collection $notifications;
 }

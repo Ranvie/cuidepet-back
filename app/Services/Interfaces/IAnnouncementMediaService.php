@@ -2,6 +2,5 @@
 
 namespace App\Services\Interfaces;
 
-interface IAnnouncementMediaService{
-
+interface IAnnouncementMediaService extends IService {
 }

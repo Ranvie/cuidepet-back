@@ -23,37 +23,37 @@ class UserModel extends BusinessModel implements Authenticatable{
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected string $class = UserDTO::class;
+  protected $class = UserDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
    * @var string
    */
-  public string $table = 'tb_user';
+  public $table = 'tb_user';
 
   /**
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public string $primaryKey = 'id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento
    * @var bool
    */
-  public bool $incrementing = true;
+  public $incrementing = true;
 
   /**
    * Define campos created_at e updated_at gerenciados pelo láravel
    * @var bool
    */
-  public bool $timestamps = true;
+  public $timestamps = true;
 
   /**
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public array $fillable = [
+  public $fillable = [
     'username',
     'email',
     'password',
@@ -66,9 +66,9 @@ class UserModel extends BusinessModel implements Authenticatable{
    * Recupera um usuário pelo email
    * @param string $email
    * @param bool   $parse
-   * @return UserDTO|null
+   * @return UserDTO|UserModel|null
    */
-  public function getByEmail(string $email, bool $parse = true) :?UserDTO {
+  public function getByEmail(string $email, bool $parse = true) :UserDTO|UserModel|null {
     $user = $this->where('email',$email)->first();
     if(!$user) return null;
     if(!$parse) return $user;
@@ -81,9 +81,9 @@ class UserModel extends BusinessModel implements Authenticatable{
    * @param array $data
    * @param array $relations
    * @param bool  $parse
-   * @return UserDTO
+   * @return UserDTO|UserModel
    */
-  public function create(array $data, array $relations = [], bool $parse = true) :UserDTO {
+  public function create(array $data, array $relations = [], bool $parse = true) :UserDTO|UserModel {
     parent::create($data, []);
     return parent::getById($this->original['id'], $relations, $parse);
   }

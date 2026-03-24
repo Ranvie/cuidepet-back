@@ -32,6 +32,7 @@ class BusinessModel extends Model {
 
   /**
    * Método Construtor
+   * @param ParseConvention $obParseConvention
    */
   public function __construct() {
     $this->obParseConvention = new ParseConvention;
@@ -43,7 +44,7 @@ class BusinessModel extends Model {
    * @param  string|null      $class
    * @return object
    */
-  public function parser(Model|Collection $registers, ?string $class = null): object {
+  public function parser(Model|Collection $registers, ?string $class = null) :object {
     $parsed = !$registers instanceof Collection
       ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
       : $registers->map(function ($obModel) {
@@ -65,7 +66,7 @@ class BusinessModel extends Model {
    * @param  Filter[] $filters
    * @return array
    */
-  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []): array {
+  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) :array {
     if ($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
     $query = self::query();
@@ -98,7 +99,7 @@ class BusinessModel extends Model {
    * @param  boolean  $parse
    * @return null|object
    */
-  public function getById(int $id, array $relations = [], bool $parse = true): ?object {
+  public function getById(int $id, array $relations = [], bool $parse = true) :?object {
     $model = parent::where($this->primaryKey, $id)->with($relations)->first();
     if (!$model instanceof $this) return null;
     if (!$parse) return $model;
@@ -112,7 +113,7 @@ class BusinessModel extends Model {
    * @param  boolean  $parse
    * @return object
    */
-  public function create(array $data, array $relations = [], bool $parse = true): object {
+  public function create(array $data, array $relations = [], bool $parse = true) :object {
     if (empty($data)) {
       $this->save();
       return $this->getById($this->original[$this->primaryKey], $relations, $parse);
@@ -142,7 +143,7 @@ class BusinessModel extends Model {
    * @param  boolean      $parse
    * @return null|object
    */
-  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true): ?object {
+  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true) :?object {
     $register = parent::find($id);
     if (!$register instanceof $this) return null;
 
@@ -159,9 +160,9 @@ class BusinessModel extends Model {
   /**
    * Apaga um registro no banco de dados
    * @param  int|null $id
-   * @return boolean
+   * @return bool
    */
-  public function remove(?int $id = null): bool {
+  public function remove(?int $id = null) :bool {
     $id = $id ?? $this->original['id'];
 
     if (!$id) return false;
@@ -172,7 +173,7 @@ class BusinessModel extends Model {
    * Cria uma nova instância do modelo
    * @return static
    */
-  public function newModel(): static {
+  public function newModel() :static {
     return new static();
   }
 }
