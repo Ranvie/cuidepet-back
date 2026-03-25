@@ -51,9 +51,9 @@ class FormService implements Interfaces\IFormService {
    * Retorna um formulário específico criado por um usuário
    * @param  int $userId ID do usuário
    * @param  int $formId ID do formulário
-   * @return UserDTO     Objeto com os detalhes do formulário
+   * @return FormModel   Objeto com os detalhes do formulário
    */
-  public function getUserForm(int $userId, int $formId) :UserDTO {
+  public function getUserForm(int $userId, int $formId) :FormModel {
     return $this->formModel->getUserForm($userId, $formId);
   }
 
@@ -73,7 +73,7 @@ class FormService implements Interfaces\IFormService {
    * @return FormDTO     Objeto com os detalhes do formulário atualizado
    */
   public function edit(int $id, array $data) :FormDTO {
-  // TODO: Implement edit() method.
+    // TODO: Implement edit() method.
     return new FormDTO();
   }
 

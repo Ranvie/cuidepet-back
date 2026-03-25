@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\DTO\UseTerms\UseTermsDTO;
+use App\DTO\Address\AddressDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AddressModel extends BusinessModel {
 
@@ -11,7 +12,7 @@ class AddressModel extends BusinessModel {
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string
    */
-  protected $class = UseTermsDTO::class;
+  protected $class = AddressDTO::class;
 
   /**
    * Aponta a entidade do banco de dados
@@ -54,15 +55,15 @@ class AddressModel extends BusinessModel {
    * Define o relacionamento com o cache de endereços. Um endereço pertence a um cache de endereços.
    * @return BelongsTo
    */
-  public function cacheAddresses() :BelongsTo {
+  public function cacheAddress() :BelongsTo {
     return $this->belongsTo(IntegrationAddressCacheModel::class, 'integration_address_cache_id', 'id');
   }
 
   /**
    * Define o relacionamento com o anúncio. Um endereço pertence a um anúncio.
-   * @return BelongsTo
+   * @return HasOne
    */
-  public function announcement() :BelongsTo {
-    return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
+  public function announcement() :HasOne {
+    return $this->hasOne(AnnouncementModel::class, 'announcement_id');
   }
 }

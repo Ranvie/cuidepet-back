@@ -66,7 +66,7 @@ class AnimalModel extends BusinessModel {
    */
   public function create(array $data, array $relations = [], bool $parse = true) :AnimalDTO {
     parent::create($data, $relations, $parse);
-    return parent::getById($this->original['announcement_id'], ['breed', 'species']);
+    return parent::getById($this->original['announcement_id'], ['breed']);
   }
 
   /**

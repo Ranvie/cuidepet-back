@@ -7,7 +7,7 @@ use App\Mail\RecoverPasswordMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 
-class EmailUserAboutPasswordRecovery implements ShouldQueue {
+class EmailConfirmationListener implements ShouldQueue {
 
   /**
    * Envia o email de recuperação de senha para a fila de envio

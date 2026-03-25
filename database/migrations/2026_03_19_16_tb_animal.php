@@ -24,7 +24,7 @@ return new class extends Migration
 			$table->boolean('dewormed')->nullable()->default(false);
 			$table->boolean('castrated')->nullable()->default(false);
 			$table->string('image_profile');
-			$table->date('last_seen_date')->useCurrent();
+			$table->timestamp('last_seen_date')->useCurrent();
 		});
 	}
 

@@ -21,13 +21,11 @@ class AuthController extends Controller {
     private AuthService $authService
   ) {}
 
-  //TODO: muito importante, tratar o caso em que o usuário não existe no banco, uma vez que dá para notar a diferença de tempo na resposta
-  //quando o email existe ou não no banco (por conta da conversão da hash)
   /**
    * Realiza o login de um usuário
-   * @param  LoginRequest $request
-   * @return JsonResponse
-   * @throws BusinessException Se o usuário for inválido: credenciais incorretas, usuário não encontrado, conta desativada, etc.
+   * @param  LoginRequest $request Requisição contendo as credenciais de login do usuário
+   * @return JsonResponse          Resposta JSON contendo o token de acesso do usuário
+   * @throws BusinessException     Se o usuário for inválido: credenciais incorretas, usuário não encontrado, conta desativada, etc.
    */
   public function login(LoginRequest $request) :JsonResponse {
     $loginData = $request->validated();
@@ -39,8 +37,8 @@ class AuthController extends Controller {
 
   /**
    * Realiza o registro de um novo usuário
-   * @param  RegisterRequest $request
-   * @return JsonResponse
+   * @param  RegisterRequest $request Requisição contendo os dados de registro do usuário
+   * @return JsonResponse             Resposta JSON contendo os detalhes do usuário registrado
    */
   public function register(RegisterRequest $request) :JsonResponse {
     $registerData = $request->validated();
@@ -52,8 +50,8 @@ class AuthController extends Controller {
 
   /**
    * Inicia o processo de recuperação de senha para um usuário
-   * @param  RecoveryRequest $request
-   * @return JsonResponse
+   * @param  RecoveryRequest $request Requisição contendo o email do usuário para recuperação de senha
+   * @return JsonResponse             Resposta JSON indicando que um email de recuperação de senha foi enviado, caso o email exista no sistema
    */
   public function recoveryPassword(RecoveryRequest $request) :JsonResponse {
     $recoveryData = $request->validated();
@@ -65,8 +63,8 @@ class AuthController extends Controller {
 
   /**
    * Realiza a alteração da senha de um usuário
-   * @param  ResetPasswordRequest $pwdRequest
-   * @return JsonResponse
+   * @param  ResetPasswordRequest $pwdRequest Requisição contendo os dados necessários para alteração de senha (token de recuperação, nova senha, etc.)
+   * @return JsonResponse                     Resposta JSON indicando que a senha foi alterada com sucesso
    */
   public function resetPassword(ResetPasswordRequest $pwdRequest) :JsonResponse {
     $pwdData = $pwdRequest->validated();
@@ -94,8 +92,8 @@ class AuthController extends Controller {
 
   /**
    * Realiza o logout do usuário, invalidando seus tokens de acesso
-   * @param  int $userId ID do usuário a ser deslogado
-   * @return JsonResponse
+   * @param  int $userId  ID do usuário a ser deslogado
+   * @return JsonResponse Resposta JSON indicando que o logout foi efetuado com sucesso
    */
   public function logout(int $userId) :JsonResponse {
     $this->authService->logout($userId);

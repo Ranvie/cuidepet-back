@@ -6,6 +6,7 @@ use App\Classes\Filter;
 use App\DTO\Announcement\AnnouncementDTO;
 use App\Exceptions\BusinessException;
 use App\Models\AnnouncementModel;
+use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
 
 class AnnouncementService implements IAnnouncementService {
@@ -16,12 +17,14 @@ class AnnouncementService implements IAnnouncementService {
    * @param UserService              $userService              Serviço de usuários.
    * @param AnnouncementMediaService $announcementMediaService Serviço de mídia de anúncios.
    * @param FormService              $formService              Serviço de formulários.
+   * @param AddressService           $addressService           Serviço de endereços.
    */
   public function __construct(
     private AnnouncementModel $obAnnouncementModel,
     private UserService $userService,
     private AnnouncementMediaService $announcementMediaService,
-    private FormService $formService
+    private FormService $formService,
+    private AddressService $addressService
   ) {}
 
   /**
@@ -77,6 +80,10 @@ class AnnouncementService implements IAnnouncementService {
     $this->validateIfUserExists($data['userId']);
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
+    $addressData       = $data['address'];
+    $address           = $this->addressService->create($addressData);
+    $data['addressId'] = $address->id;
+
     $announcementModel = $this->obAnnouncementModel->create($data, [], false);
     $announcementId    = $announcementModel->getOriginal()['id'];
 
@@ -86,15 +93,13 @@ class AnnouncementService implements IAnnouncementService {
 
     $announcementModel->form()->associate($data['formId']);
 
-    $announcementModel->address()->getModel()->create($data['address'], [], false);
-
     $announcementMediaData = $data['announcementMedia'];
     foreach ($announcementMediaData as $announcementMedia) {
       $announcementMedia['announcementId'] = $announcementId;
       $this->announcementMediaService->newInstance()->create($announcementMedia);
     }
 
-    return $announcementModel->getById($announcementId, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
+    return $announcementModel->getById($announcementId, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
   }
 
   /**

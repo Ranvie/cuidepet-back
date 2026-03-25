@@ -146,10 +146,10 @@ class AnnouncementModel extends BusinessModel {
 
   /**
    * Define o relacionamento entre anúncio e endereço. Um anúncio tem um endereço.
-   * @return HasOne
+   * @return BelongsTo
    */
-  public function address() :HasOne {
-    return $this->hasOne(AddressModel::class, 'announcement_id', 'id');
+  public function address() :BelongsTo {
+    return $this->belongsTo(AddressModel::class, 'address_id', 'id');
   }
 
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\User\SafeUserDTO;
 use App\DTO\User\UserDTO;
+use App\Events\EmailConfirmationEvent;
 use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
 use App\Models\UserModel;
@@ -26,7 +27,6 @@ class AuthService {
     private ParseConvention $parseConvention
   ) {}
 
-  //TODO: Fazer uma espécie de refreshToken
   /**
    * Realiza o login de um usuário.
    * @param  array $data Dados de login, incluindo email e senha.
@@ -77,8 +77,27 @@ class AuthService {
    * @return UserDTO     Dados do usuário registrado.
    */
   public function register(array $data) :UserDTO {
-    return $this->userService->create($data);
+    $obUserModel = $this->userService->create($data, parse: false);
+
+    $this->sendEmailConfirmation($obUserModel);
+
+    return ParseConvention::parse($obUserModel->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
   }
+
+  /**
+   * Envia um email de confirmação para o usuário registrado.
+   * @param  UserModel $obUserModel Modelo do usuário para o qual o email de confirmação deve ser enviado.
+   * @return void
+   */  
+  private function sendEmailConfirmation(UserModel $obUserModel) :void {
+    $this->deleteTokens($obUserModel);
+
+    $expiresAt         = now()->addMinutes(env('TOKEN_CONFIRM_EMAIL_EXPIRE_MINUTES'));
+    $token             = $obUserModel->createToken("$obUserModel->username-ConfirmEmailToken", ['confirm-email'], $expiresAt->toDateTime())->plainTextToken;
+    $confirmationUrl = config('app.url') . "/confirm-email?token=" . urlencode($token);
+    EmailConfirmationEvent::dispatch($obUserModel, $confirmationUrl);
+  }
+    
 
   /**
    * Inicia o processo de recuperação de senha para um usuário.
@@ -93,7 +112,8 @@ class AuthService {
     $userDto = $this->parseConvention->parse($user->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
     $this->deleteResetPasswordTokens($userDto->id);
 
-    $expiresAt = now()->addMinutes(env('TOKEN_RESETPASSWORD_EXPIRE_MINUTES'));
+    $time      = \floatval(env('TOKEN_RESETPASSWORD_EXPIRE_MINUTES'));
+    $expiresAt = now()->addMinutes($time);
     $token     = $user->createToken("$userDto->username-ResetToken", ['reset-password'], $expiresAt->toDateTime())->plainTextToken;
 
     $frontUrl         = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
@@ -121,14 +141,10 @@ class AuthService {
    * @return void
    */
   private function deleteResetPasswordTokens(int $userId) :void {
-    $tokens = DB::table('personal_access_tokens')
+    DB::table('personal_access_tokens')
       ->where('tokenable_id', $userId)
       ->whereJsonContains('abilities', ['reset-password'])
-      ->get();
-
-    foreach ($tokens as $token) {
-      DB::table('personal_access_tokens')->where('id', $token->id)->delete();
-    }
+      ->delete();
   }
 
   /**
