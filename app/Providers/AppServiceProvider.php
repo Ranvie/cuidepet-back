@@ -30,11 +30,11 @@ class AppServiceProvider extends ServiceProvider {
    */
   private function registerRoutePatterns(): void {
     $patterns = [
-      'id'             => '[0-9]+',
-      'userId'         => '[0-9]+',
-      'announcementId' => '[0-9]+',
-      'notificationId' => '[0-9]+',
-      'formId'         => '[0-9]+',
+      'id'             => '[0-9]{1,18}',
+      'userId'         => '[0-9]{1,18}',
+      'announcementId' => '[0-9]{1,18}',
+      'notificationId' => '[0-9]{1,18}',
+      'formId'         => '[0-9]{1,18}',
       'type'           => 'lost|donation'
     ];
 

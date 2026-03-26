@@ -48,7 +48,7 @@ class SpecieModel extends BusinessModel {
 	 * @return HasMany
 	 */
 	public function breeds() :HasMany {
-		return $this->hasMany(BreedModel::class, 'id_specie', 'id');
+		return $this->hasMany(BreedModel::class, 'specie_id');
 	}
 
 }
