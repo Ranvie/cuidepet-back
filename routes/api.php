@@ -21,8 +21,11 @@ Route::post('/accept-terms',      [AuthController::class, 'acceptTerms']);
 Route::get('announcement/{id}',   [PublicAnnouncementController::class, 'get']);
 Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);
 
-Route::middleware(['auth:sanctum', 'hasRole:reset-password'])->group(function () {})
+Route::middleware(['auth:sanctum', 'hasRole:reset-password'])
   ->post('/reset-password', [AuthController::class, 'resetPassword']);
+
+Route::middleware(['auth:sanctum', 'hasRole:confirm-email'])
+  ->post('/email-confirmation', [AuthController::class, 'confirmUserEmail']);
 
 Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->group(function () {
 
@@ -37,7 +40,7 @@ Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->grou
   Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
 
-Route::middleware(['auth:sanctum', 'notHasRole:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
+Route::middleware(['auth:sanctum', 'notHasRole:confirm-email', 'notHasRole:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
 
   Route::post('/inactivate', [UserController::class, 'inactivate']);
   Route::post('/logout',     [AuthController::class, 'logout']);

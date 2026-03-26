@@ -6,7 +6,7 @@ use App\Http\Response\BusinessResponse;
 use App\Services\BreedSpecieService;
 use Illuminate\Http\JsonResponse;
 
-class BreedSpecieController extends Controller {
+class BreedSpecieController {
 
   /**
    * Método Construtor

@@ -7,7 +7,7 @@ use App\Http\Response\BusinessResponse;
 use App\Services\AnnouncementService;
 use Illuminate\Http\JsonResponse;
 
-class AnnouncementController extends Controller {
+class AnnouncementController {
 
   /**
    * Construtor do controlador de anúncios.
@@ -22,7 +22,7 @@ class AnnouncementController extends Controller {
    * @param  int $userId  ID do usuário.
    * @return JsonResponse Resposta JSON com a lista de anúncios.
    */
-  public function list(int $userId): JsonResponse {
+  public function list(int $userId) :JsonResponse {
     $registers = $this->obAnnouncementService->getListByUser(10, 1, $userId);
 
     $response = new BusinessResponse(200, $registers);
@@ -35,7 +35,7 @@ class AnnouncementController extends Controller {
    * @param  int $announcementId ID do anúncio.
    * @return JsonResponse        Resposta JSON com os detalhes do anúncio.
    */
-  public function get(int $userId, int $announcementId): JsonResponse {
+  public function get(int $userId, int $announcementId) :JsonResponse {
     $obAnnouncementDTO = $this->obAnnouncementService->getById($announcementId);
 
     $response = new BusinessResponse(200, $obAnnouncementDTO);
@@ -48,7 +48,7 @@ class AnnouncementController extends Controller {
    * @param  AnnouncementRequest $request Requisição contendo os dados do anúncio.
    * @return JsonResponse                 Resposta JSON com os detalhes do anúncio criado.
    */
-  public function create(int $userId, AnnouncementRequest $request): JsonResponse {
+  public function create(int $userId, AnnouncementRequest $request) :JsonResponse {
     $requestData           = $request->validated();
     $requestData['userId'] = $userId;
     $obAnnouncementDTO     = $this->obAnnouncementService->create($requestData);
@@ -64,7 +64,7 @@ class AnnouncementController extends Controller {
    * @param  AnnouncementRequest $request        Requisição contendo os dados atualizados do anúncio.
    * @return JsonResponse                        Resposta JSON com os detalhes do anúncio atualizado.
    */
-  public function update(int $userId, int $announcementId, AnnouncementRequest $request): JsonResponse {
+  public function update(int $userId, int $announcementId, AnnouncementRequest $request) :JsonResponse {
     $requestData           = $request->validated();
     $requestData['userId'] = $userId;
     $obAnnouncementDTO     = $this->obAnnouncementService->edit($announcementId, $requestData);
@@ -75,11 +75,12 @@ class AnnouncementController extends Controller {
 
   /**
    * Remove um anúncio.
+   * @param  int $userId         ID do usuário.
    * @param  int $announcementId ID do anúncio a ser removido.
    * @return JsonResponse        Resposta JSON indicando o sucesso da operação.
    */
-  public function delete(int $announcementId): JsonResponse {
-    $this->obAnnouncementService->remove($announcementId);
+  public function delete(int $userId, int $announcementId) :JsonResponse {
+    $this->obAnnouncementService->remove($userId, $announcementId);
     $response = new BusinessResponse(200, "O anúncio $announcementId foi removido com sucesso.");
     return $response->build();
   }

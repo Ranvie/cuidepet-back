@@ -87,6 +87,7 @@ class BusinessModel extends Model {
     $parsed['perPage']     = $registers->perPage();
     $parsed['lastPage']    = $registers->lastPage();
     $parsed['currentPage'] = $registers->currentPage();
+    $parsed['total']       = $registers->total();
     $parsed['maxItems']    = $hardCodedMaxItems;
 
     return $parsed;

@@ -32,7 +32,8 @@ class AnnouncementRequest extends FormRequest {
     return $rules;
   }
 
-  /** Regras de validação para o método POST
+  /** 
+   * Regras de validação para o método POST
    * @return array
    */
   private function postRules() :array {
@@ -68,7 +69,8 @@ class AnnouncementRequest extends FormRequest {
     ];
   }
 
-  /** Regras de validação para o método PUT
+  /** 
+   * Regras de validação para o método PUT
    * @return array
    */
   private function putRules() :array {

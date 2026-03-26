@@ -54,7 +54,7 @@ class AnnouncementService implements IAnnouncementService {
    * @param  array  $relations Relações a serem carregadas com o anúncio.
    * @return AnnouncementDTO   Objeto de transferência de dados do anúncio.
    */
-  public function getById(int $id, array $relations = ['animal.breed', 'animal.specie', 'form', 'announcementMedia']) :AnnouncementDTO {
+  public function getById(int $id, array $relations = ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia']) :AnnouncementDTO {
     $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
 
     $this->validateAnnouncementExists($obAnnouncementDTO);
@@ -154,7 +154,7 @@ class AnnouncementService implements IAnnouncementService {
       }
     }
 
-    return $announcementModel->getById($id, ['animal.breed', 'animal.specie', 'form', 'announcementMedia']);
+    return $announcementModel->getById($id, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia']);
   }
 
   /**
@@ -190,10 +190,12 @@ class AnnouncementService implements IAnnouncementService {
 
   /**
    * Remove um anúncio.
-   * @param  int|null $id ID do anúncio a ser removido.
-   * @return bool         Indica se a remoção foi bem-sucedida.
+   * @param  int|null $id     ID do anúncio a ser removido.
+   * @param  int|null $userId ID do usuário que está tentando remover o anúncio.
+   * @return bool             Indica se a remoção foi bem-sucedida.
    */
-  public function remove(?int $id = null): bool {
+  public function remove(?int $userId = null, ?int $id = null): bool {
+    $this->validateIfAnnouncementBelongsToUser($userId, $id);
     return $this->obAnnouncementModel->remove($id);
   }
 

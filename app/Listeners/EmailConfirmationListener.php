@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Events\RecoverPasswordEvent;
-use App\Mail\RecoverPasswordMail;
+use App\Events\EmailConfirmationEvent;
+use App\Mail\EmailConfirmationMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 
@@ -11,14 +11,14 @@ class EmailConfirmationListener implements ShouldQueue {
 
   /**
    * Envia o email de recuperação de senha para a fila de envio
-   * @param  RecoverPasswordEvent $event
+   * @param  EmailConfirmationEvent $event
    * @return void
    */
-  public function handle(RecoverPasswordEvent $event): void {
-    $mail = new RecoverPasswordMail(
+  public function handle(EmailConfirmationEvent $event): void {
+    $mail = new EmailConfirmationMail(
       $event->user->username,
       $event->user->email,
-      $event->resetUrl
+      $event->confirmationUrl
     );
 
     Mail::to($event->user)->queue($mail);

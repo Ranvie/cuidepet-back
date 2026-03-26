@@ -2,6 +2,8 @@
 
 use App\Exceptions\BusinessExceptionHandler;
 use App\Http\Middleware\CheckIfActionBelongsToUser;
+use \App\Http\Middleware\RejectIfUserHasRole;
+use \App\Http\Middleware\AllowIfUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,12 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
   ->withMiddleware(function (Middleware $middleware) {
     $middleware->alias([
       'checkUser' => CheckIfActionBelongsToUser::class,
-      'notHasRole' => \App\Http\Middleware\CheckIfUserDoNotHasRole::class,
-      'hasRole' => \App\Http\Middleware\CheckIfUserHasRole::class,
+      'notHasRole' => RejectIfUserHasRole::class,
+      'hasRole' => AllowIfUserHasRole::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->render(function (Exception $exception) {
+    $exceptions->render(function (\Throwable $exception) {
       return (new BusinessExceptionHandler($exception))
         ->render();
     });

@@ -12,7 +12,7 @@ return new class extends Migration {
 		Schema::create('tb_user', function (Blueprint $table) {
 			$table->id();
 			$table->string('username', 255);
-			$table->string('email', 255)->unique('ROLE_UK_01');
+			$table->string('email', 255)->unique('USER_UK_01');
 			$table->string('password', 255);
 			$table->string('image_profile', 255)->nullable();
 			$table->string('phone', 20)->nullable();

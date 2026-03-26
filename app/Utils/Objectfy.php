@@ -50,7 +50,7 @@ class Objectfy {
       if($ignoreNulls && $value === null) 
         continue;
 
-      $setter($destin, $key, $value);
+      self::$setter($destin, $key, $value);
     }
 
     return $destin;

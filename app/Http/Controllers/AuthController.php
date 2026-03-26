@@ -11,7 +11,7 @@ use App\Http\Response\BusinessResponse;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 
-class AuthController extends Controller {
+class AuthController {
   
   /**
    * Método Construtor
@@ -71,6 +71,16 @@ class AuthController extends Controller {
 
     $this->authService->resetPassword($pwdData);
     $response = new BusinessResponse(200, "A senha de sua conta foi alterada com sucesso");
+    return $response->build();
+  }
+
+  /**
+   * Realiza a confirmação de e-mail do usuário
+   * @return JsonResponse Resposta JSON indicando que o e-mail foi confirmado
+   */
+  public function confirmUserEmail() :JsonResponse {
+    $this->authService->confirmUserEmail();
+    $response = new BusinessResponse(200, "E-mail confirmado com sucesso");
     return $response->build();
   }
 

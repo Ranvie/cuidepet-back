@@ -59,7 +59,8 @@ class UserModel extends BusinessModel implements Authenticatable{
     'password',
     'image_profile',
     'phone',
-    'active'
+    'active',
+    'email_verified_at'
   ];
 
   /**

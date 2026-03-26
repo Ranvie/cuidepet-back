@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\DTO\User\UserDTO;
+use App\Models\UserModel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -17,12 +17,12 @@ class EmailConfirmationEvent {
 
   /**
    * Cria um evento para disparar e-mail de confirmação, contendo as informações do usuário e a URL de confirmação.
-   * @param UserDTO $user            O usuário que solicitou confirmação de e-mail
-   * @param string  $confirmationUrl A URL para confirmação do e-mail
+   * @param UserModel $user            O usuário que solicitou confirmação de e-mail
+   * @param string    $confirmationUrl A URL para confirmação do e-mail
    */
   public function __construct(
-    public readonly UserDTO $user,
-    public readonly string $confirmationUrl,
+    public readonly UserModel $user,
+    public readonly string    $confirmationUrl,
   ){}
 
   /**

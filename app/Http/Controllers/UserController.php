@@ -7,7 +7,7 @@ use App\Http\Response\BusinessResponse;
 use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
 
-class UserController extends Controller {
+class UserController {
 
   /**
    * Método Construtor

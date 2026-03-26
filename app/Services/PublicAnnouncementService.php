@@ -37,7 +37,7 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @param  array $relations     Relações a serem carregadas junto com o anúncio.
    * @return AnnouncementDTO|null Anúncio público ou null se não encontrado.
    */
-  public function getById(int $id, array $relations = ['user', 'animal.breed', 'animal.specie', 'form', 'announcementMedia']): ?AnnouncementDTO {
+  public function getById(int $id, array $relations = ['user', 'animal.breed', 'animal.breed.specie', 'form', 'announcementMedia']): ?AnnouncementDTO {
     $obAnnouncementDTO = $this->obPublicAnnouncementModel->getById($id, $relations, true);
 
     $this->validateAnnouncementExists($obAnnouncementDTO);

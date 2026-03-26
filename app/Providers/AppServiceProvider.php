@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -19,6 +20,26 @@ class AppServiceProvider extends ServiceProvider {
    * @return void
    */
   public function boot(): void {
-    //
+    $this->registerRoutePatterns();
+  }
+
+  /**
+   * Registra padrões de rota para parâmetros comuns.
+   * Define expressões regulares para validar os parâmetros de rota, como IDs numéricos.
+   * @return void
+   */
+  private function registerRoutePatterns(): void {
+    $patterns = [
+      'id'             => '[0-9]+',
+      'userId'         => '[0-9]+',
+      'announcementId' => '[0-9]+',
+      'notificationId' => '[0-9]+',
+      'formId'         => '[0-9]+',
+      'type'           => 'lost|donation'
+    ];
+
+    foreach ($patterns as $key => $pattern) {
+      Route::pattern($key, $pattern);
+    }
   }
 }

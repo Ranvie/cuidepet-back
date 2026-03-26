@@ -23,7 +23,7 @@ class AuthService {
    * @param ParseConvention $parseConvention Utilitário para conversão de convenções de nomenclatura.
    */
   public function __construct(
-    private UserService $userService,
+    private UserService     $userService,
     private ParseConvention $parseConvention
   ) {}
 
@@ -68,6 +68,11 @@ class AuthService {
       throw new BusinessException('Verifique suas credenciais e tente novamente', 400);
     }
 
+    if(is_null($user->email_verified_at)){
+      $this->sendEmailConfirmation($user);
+      throw new BusinessException('Confirme seu email para acessar sua conta. Enviamos um email de confirmação para você.', 403);
+    }
+
     return $user;
   }
 
@@ -92,12 +97,31 @@ class AuthService {
   private function sendEmailConfirmation(UserModel $obUserModel) :void {
     $this->deleteTokens($obUserModel);
 
-    $expiresAt         = now()->addMinutes(env('TOKEN_CONFIRM_EMAIL_EXPIRE_MINUTES'));
-    $token             = $obUserModel->createToken("$obUserModel->username-ConfirmEmailToken", ['confirm-email'], $expiresAt->toDateTime())->plainTextToken;
-    $confirmationUrl = config('app.url') . "/confirm-email?token=" . urlencode($token);
+    $time      = \floatval(env('TOKEN_CONFIRM_EMAIL_EXPIRE_MINUTES'));
+    $expiresAt = now()->addMinutes($time);
+    $token     = $obUserModel->createToken("$obUserModel->username-ConfirmEmailToken", ['confirm-email'], $expiresAt->toDateTime())->plainTextToken;
+    
+    $frontUrl        = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
+    $confirmationUrl = $frontUrl . "/confirm-email?token=" . urlencode($token);
     EmailConfirmationEvent::dispatch($obUserModel, $confirmationUrl);
   }
-    
+   
+  /**
+   * Confirma o email de um usuário usando um token de confirmação.
+   * @return bool Indica se a confirmação foi bem-sucedida.
+   */
+  public function confirmUserEmail() :bool {
+    $obUserModel = Auth::user();
+
+    if ($obUserModel->email_confirmed)
+      throw new BusinessException('Email já confirmado', 400);
+
+    $this->userService->edit($obUserModel->id, ['email_verified_at' => now(), 'active' => true]);
+
+    $this->deleteTokens($obUserModel);
+
+    return true;
+  }
 
   /**
    * Inicia o processo de recuperação de senha para um usuário.
@@ -148,7 +172,7 @@ class AuthService {
   }
 
   /**
-   * Redefine a senha de um usuário autenticado.
+   * Finaliza o processo de redefinição de senha
    * @param  array $pwdData    Dados de nova senha, incluindo a nova senha e confirmação.
    * @return bool              Indica se a redefinição foi bem-sucedida.
    * @throws BusinessException Se o usuário não estiver autenticado.
