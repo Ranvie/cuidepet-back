@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum', 'hasRole:admin'])->prefix('admin/user')->grou
   Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
 
-Route::middleware(['auth:sanctum', 'notHasRole:confirm-email', 'notHasRole:reset-password', 'checkUser'])->prefix('user/{userId}')->group(function () {
+Route::middleware(['auth:sanctum', 'notHasRole:confirm-email', 'notHasRole:reset-password'])->prefix('user')->group(function () {
 
   Route::post('/inactivate', [UserController::class, 'inactivate']);
   Route::post('/logout',     [AuthController::class, 'logout']);

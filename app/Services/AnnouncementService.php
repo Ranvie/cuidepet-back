@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Classes\Filter;
 use App\DTO\Announcement\AnnouncementDTO;
 use App\Exceptions\BusinessException;
+use App\Http\Response\BusinessResponse;
 use App\Models\AnnouncementModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
+use \App\Models\FormModel;
 
 class AnnouncementService implements IAnnouncementService {
 
@@ -55,7 +57,7 @@ class AnnouncementService implements IAnnouncementService {
    * @return AnnouncementDTO   Objeto de transferência de dados do anúncio.
    */
   public function getById(int $id, array $relations = ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia']) :AnnouncementDTO {
-    $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true);
+    $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations, true, [new Filter('user_id', '=', auth()->id())]);
 
     $this->validateAnnouncementExists($obAnnouncementDTO);
     return $obAnnouncementDTO;
@@ -77,7 +79,6 @@ class AnnouncementService implements IAnnouncementService {
    * @return AnnouncementDTO Objeto de transferência de dados do anúncio criado.
    */
   public function create(array $data) :AnnouncementDTO {
-    $this->validateIfUserExists($data['userId']);
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
     $addressData       = $data['address'];
@@ -122,8 +123,8 @@ class AnnouncementService implements IAnnouncementService {
   private function validateIfFormBelongsToUser(int $userId, int $formId) :void {
     $userForm = $this->formService->getUserForm($userId, $formId);
 
-    if (!$userForm)
-      throw new BusinessException('O usuário não possui o formulário requisitado.', 404);
+    if (!$userForm instanceof FormModel)
+      throw new BusinessException("O formulário de ID $formId não foi encontrado.", 404);
   }
 
   /**
@@ -148,10 +149,18 @@ class AnnouncementService implements IAnnouncementService {
 
     if (isset($data['announcementMedia'])) {
       $announcementMediaData = $data['announcementMedia'];
+      $announcementMediaIds  = $this->announcementMediaService->getAllMediaIds($id);
+      $errors = [];
       foreach ($announcementMediaData as $announcementMedia) {
+        if(!$this->validateIfMediaBelongsToAnnouncement($announcementMedia['id'] ?? null, $announcementMediaIds, $errors))
+          continue;
+
         $announcementMedia['announcementId'] = $id;
         $this->changeMediaData($announcementMedia);
       }
+
+      if(count($errors) > 0)
+        BusinessResponse::addErrors($errors);
     }
 
     return $announcementModel->getById($id, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia']);
@@ -168,7 +177,25 @@ class AnnouncementService implements IAnnouncementService {
     $announcement = $this->getUserAnnouncement($userId, $announcementId);
 
     if (!$announcement instanceof AnnouncementModel)
-      throw new BusinessException('O anúncio requisitado não pertence ao usuário', 404);
+      throw new BusinessException("O anúncio de ID $announcementId não foi encontrado.", 404);
+  }
+
+  /**
+   * Valida se uma mídia de anúncio pertence a um anúncio específico.
+   * @param  int|null $mediaId              ID da mídia do anúncio a ser verificada.
+   * @param  array    $announcementMediaIds Lista de IDs das mídias associadas ao anúncio.
+   * @return string                         Mensagem de erro, ou string vazia se a mídia for válida.
+   */
+  private function validateIfMediaBelongsToAnnouncement(?int $mediaId, array $announcementMediaIds, array &$errors = []) :string {
+    if (!$mediaId) 
+      return true;
+
+    if (!in_array($mediaId, $announcementMediaIds)) {
+      $errors[] = "A mídia de ID {$mediaId} não foi encontrada.";
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -177,7 +204,7 @@ class AnnouncementService implements IAnnouncementService {
    * @return void
    */
   private function changeMediaData(array $announcementMedia) :void {
-    $mediaId = $announcementMedia['id'];
+    $mediaId = $announcementMedia['id'] ?? null;
     $option  = $announcementMedia['action'];
 
     match ($option) {

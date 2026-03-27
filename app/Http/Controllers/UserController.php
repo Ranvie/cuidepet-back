@@ -80,11 +80,11 @@ class UserController {
   }
 
   /**
-   * Inativa um usuário
-   * @param  int $userId
+   * Inativa o usuário autenticado
    * @return JsonResponse
    */
-  public function inactivate(int $userId) :JsonResponse {
+  public function inactivate() :JsonResponse {
+    $userId = auth()->id();
     $this->userService->inactivate($userId);
 
     $response = new BusinessResponse(200, "O usuário {$userId} foi inativado com sucesso.");

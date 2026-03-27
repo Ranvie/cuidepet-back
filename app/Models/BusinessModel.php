@@ -98,10 +98,17 @@ class BusinessModel extends Model {
    * @param  int      $id
    * @param  string[] $relations
    * @param  boolean  $parse
+   * @param  Filter[] $filters
    * @return null|object
    */
-  public function getById(int $id, array $relations = [], bool $parse = true) :?object {
-    $model = parent::where($this->primaryKey, $id)->with($relations)->first();
+  public function getById(int $id, array $relations = [], bool $parse = true, array $filters = []) :?object {
+    $query = self::query();
+
+    foreach ($filters as $filter) {
+      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+    }
+
+    $model = $query->where($this->primaryKey, $id)->with($relations)->first();
     if (!$model instanceof $this) return null;
     if (!$parse) return $model;
 

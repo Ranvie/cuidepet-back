@@ -10,7 +10,7 @@ class FavoriteController {
     // TODO: Implement list() method.
   }
 
-  public function get(int $userId) {
+  public function get() {
     // TODO: Implement get() method.
   }
 
@@ -18,11 +18,11 @@ class FavoriteController {
     // TODO: Implement create() method.
   }
 
-  public function update(int $userId, UserRequest $request) {
+  public function update(UserRequest $request) {
     // TODO: Implement update() method.
   }
 
-  public function delete(int $userId) {
+  public function delete() {
     // TODO: Implement delete() method.
   }
 }

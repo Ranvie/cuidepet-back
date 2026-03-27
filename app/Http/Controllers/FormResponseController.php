@@ -10,7 +10,7 @@ class FormResponseController {
     // TODO: Implement list() method.
   }
 
-  public function get(int $userId) {
+  public function get(int $formId) {
     // TODO: Implement get() method.
   }
 
@@ -18,7 +18,7 @@ class FormResponseController {
     // TODO: Implement create() method.
   }
 
-  public function update(int $userId, UserRequest $request) {
+  public function update(int $formId, UserRequest $request) {
     // TODO: Implement update() method.
   }
 

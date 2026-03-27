@@ -49,11 +49,11 @@ class FormService implements Interfaces\IFormService {
 
   /**
    * Retorna um formulário específico criado por um usuário
-   * @param  int $userId ID do usuário
-   * @param  int $formId ID do formulário
-   * @return FormModel   Objeto com os detalhes do formulário
+   * @param  int $userId    ID do usuário
+   * @param  int $formId    ID do formulário
+   * @return null|FormModel Objeto com os detalhes do formulário
    */
-  public function getUserForm(int $userId, int $formId) :FormModel {
+  public function getUserForm(int $userId, int $formId) :?FormModel {
     return $this->formModel->getUserForm($userId, $formId);
   }
 

@@ -87,7 +87,7 @@ class AnnouncementRequest extends FormRequest {
       'contactPhone'                      => ['nullable', 'string', new PhoneRule()],
       'contactEmail'                      => 'nullable|string|email|max:255',
       'announcementMedia'                 => 'nullable|array',
-      'announcementMedia.*.id'            => 'required|int|exists:tb_announcement_media,id',
+      'announcementMedia.*.id'            => 'required_unless:announcementMedia.*.action,ADD|int',
       'announcementMedia.*.url'           => 'required|string',
       'announcementMedia.*.action'        => 'required|in:UPD,ADD,DEL',
       'formId'                            => 'nullable|exists:tb_form,id',

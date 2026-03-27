@@ -85,7 +85,7 @@ class AuthController {
   }
 
   /**
-   * Verifica se o usuário já aceitou os termos de uso
+   * Retorna os termos de uso para o usuário
    * @return void
    */
   public function useTerms() :void {
@@ -96,17 +96,16 @@ class AuthController {
    * Registra a aceitação dos termos de uso por parte do usuário
    * @return void
    */
-  public function acceptTerms() :void {
-    $this->authService->acceptTerms();
+  public function acceptTerm(int $useTermId, int $userId) :void {
+    $this->authService->acceptTerm($useTermId, $userId);
   }
 
   /**
-   * Realiza o logout do usuário, invalidando seus tokens de acesso
-   * @param  int $userId  ID do usuário a ser deslogado
+   * Realiza o logout do usuário autenticado, invalidando seus tokens de acesso
    * @return JsonResponse Resposta JSON indicando que o logout foi efetuado com sucesso
    */
-  public function logout(int $userId) :JsonResponse {
-    $this->authService->logout($userId);
+  public function logout() :JsonResponse {
+    $this->authService->logout(auth()->id());
 
     $response = new BusinessResponse(200, "Logout efetuado com sucesso");
     return $response->build();

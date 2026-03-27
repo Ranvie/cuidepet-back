@@ -44,6 +44,18 @@ class UseTermsModel extends BusinessModel {
   public $fillable = ['title','description','active'];
 
   /**
+   * Busca o termo de uso mais recente
+   */
+  public function getLatestUseTerms(?int $userId = null, bool $parse = true) :object {
+    $useTerms = $this->query()
+      ->when($userId, fn ($query) => $query->whereHas('users', fn ($q) => $q->where('user_id', $userId)))
+      ->orderBy('created_at', 'desc')
+      ->first();
+
+    return $parse ? $this->parser($useTerms) : $useTerms;
+  }
+
+  /**
    * Define o relacionamento muitos-para-muitos com os usuários e aceitação de termos de uso. Um aceite de termos de uso está associado a um usuário e a um termo de uso específico.
    * @return BelongsToMany
    */

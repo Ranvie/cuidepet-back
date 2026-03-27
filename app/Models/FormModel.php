@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,10 +60,10 @@ class FormModel extends BusinessModel {
    * Recupera um formulário específico de um usuário
    * @param  int $userId
    * @param  int $formId
-   * @return null|object
+   * @return null|FormModel
    */
-  public function getUserForm(int $userId, int $formId) :?object {
-    return $this->where('id', $formId)->where('user_id', $userId)->first();
+  public function getUserForm(int $userId, int $formId) :?FormModel {
+    return $this->getById($formId, [], false, [new Filter('user_id', '=', $userId)]);
   }
 
   /**

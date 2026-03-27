@@ -19,38 +19,36 @@ class FormController {
   ) {}
 
   /**
-   * Lista os formulários de um usuário específico
-   * @param int $userId ID do usuário para o qual os formulários serão listados
+   * Lista os formulários do usuário autenticado
    * @return JsonResponse Resposta JSON contendo a lista de formulários do usuário
    */
-  public function list(int $userId): JsonResponse {
-    $registers = $this->obFormService->listFormByUser($userId);
+  public function list(): JsonResponse {
+    $registers = $this->obFormService->listFormByUser(auth()->id());
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();
   }
 
-  public function get(int $userId) {
+  public function get(int $formId) {
     // TODO: Implement get() method.
   }
 
   /**
-   * Cria um novo formulário para um usuário específico
-   * @param  int             $userId  ID do usuário para o qual o formulário será criado
+   * Cria um novo formulário para o usuário autenticado
    * @param  UserFormRequest $request Objeto de requisição contendo os dados do formulário a ser criado
    * @return JsonResponse             Resposta JSON contendo os detalhes do formulário criado
    */
-  public function create(int $userId, UserFormRequest $request): JsonResponse {
-    $obFormRequest = array_merge($request->validated(), ['userId' => $userId]);
+  public function create(UserFormRequest $request): JsonResponse {
+    $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
     $registers = $this->obFormService->create($obFormRequest);
     return new BusinessResponse(200, $registers)->build();
   }
 
-  public function update(int $userId, UserRequest $request) {
+  public function update(int $formId, UserRequest $request) {
     // TODO: Implement update() method.
   }
 
-  public function delete(int $userId) {
+  public function delete(int $formId) {
     // TODO: Implement delete() method.
   }
 }

@@ -27,6 +27,15 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
   }
 
   /**
+   * Obtém os IDs de todas as mídias associadas a um anúncio específico.
+   * @param  int $announcementId ID do anúncio.
+   * @return array               Lista de IDs das mídias associadas ao anúncio.
+   */
+  public function getAllMediaIds($announcementId): array {
+    return $this->announcementMediaModel->where('announcement_id', $announcementId)->pluck('id')->toArray();
+  }
+
+  /**
    * Obtém um registro por ID.
    * @param  int   $id                                   ID do registro.
    * @param  array $relations                            Relacionamentos a serem carregados.

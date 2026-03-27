@@ -24,6 +24,7 @@ class AuthService {
    */
   public function __construct(
     private UserService     $userService,
+    private UseTermsService $useTermService,
     private ParseConvention $parseConvention
   ) {}
 
@@ -194,15 +195,15 @@ class AuthService {
    * @return void
    */
   public function useTerms() :void {
-    dd("UseTherms");
+    $this->useTermService->getNewestUseTerms();
   }
 
   /**
    * Aceita os termos de uso pelo usuário.
    * @return void
    */
-  public function acceptTerms() :void {
-    dd("AcceptTherms");
+  public function acceptTerm(int $useTermId, int $userId) :void {
+    $this->useTermService->acceptTerm($useTermId, $userId);
   }
 
   /**
