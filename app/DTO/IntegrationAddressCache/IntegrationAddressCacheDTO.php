@@ -1,7 +1,6 @@
 <?php
 
 namespace App\DTO\IntegrationAddressCache;
-use DateTime;
 
 class IntegrationAddressCacheDTO {
 

@@ -5,11 +5,18 @@ namespace App\Utils;
 use ReflectionClass;
 use Exception;
 
-//TODO: Tem como melhorar essa classe colocando para pegar as chaves por recursão... Ela só obtém no primeiro nível
 class Objectfy {
 
   /**
-   * Converte um array em uma classe (A classe deve ter um construtor que não recebe parâmetros)
+   * Converte um array em uma classe de forma recursiva.
+   * Subclasses e arrays de subclasses são resolvidos automaticamente a partir do @var do PHPDoc.
+   *
+   * Para propriedades aninhadas, documente com:
+   * @var ClassName   preenche um objeto aninhado
+   * @var ClassName[] preenche um array de objetos
+   *
+   * A classe (e subclasses) devem ter um construtor que não recebe parâmetros.
+   *
    * @param array  $origin recebe um array com os atributos da classe
    * @param string $class  recebe a classe do objeto de retorno, ex Class::class
    * @return object|null Retorna um objeto do tipo da classe passada ou null caso a classe não exista
@@ -18,20 +25,69 @@ class Objectfy {
   public static function arrayToClass(array $origin, string $class): object | null {
     if(!class_exists($class))
       throw new Exception("A classe '$class' não foi encontrada");
-  
-    $parsed  = new $class();
-    $refObj  = new ReflectionClass($parsed);
-    $arrKeys = array_keys($origin);
 
-    foreach ($arrKeys as $key) {
+    $parsed    = new $class();
+    $refObj    = new ReflectionClass($parsed);
+    $namespace = $refObj->getNamespaceName();
+
+    foreach (array_keys($origin) as $key) {
       if(!$refObj->hasProperty($key))
         continue;
 
-      $prop = $refObj->getProperty($key);
-      $prop->setValue($parsed, $origin[$key]);
+      $prop  = $refObj->getProperty($key);
+      $value = $origin[$key];
+
+      $varType = self::extractVarType($prop->getDocComment() ?: '');
+
+      if($varType !== null && is_array($value)) {
+        $isList      = str_ends_with($varType, '[]');
+        $targetClass = $isList ? substr($varType, 0, -2) : $varType;
+        $resolved    = self::resolveClass($targetClass, $namespace);
+
+        if($resolved !== null) {
+          $value = $isList
+            ? array_map(fn($item) => is_array($item) ? self::arrayToClass($item, $resolved) : $item, $value)
+            : self::arrayToClass($value, $resolved);
+        }
+      }
+
+      $prop->setValue($parsed, $value);
     }
 
     return $parsed;
+  }
+
+  /**
+   * Extrai o tipo declarado no @var do bloco PHPDoc de uma propriedade.
+   * @param string $docComment
+   * @return string|null
+   */
+  private static function extractVarType(string $docComment): ?string {
+    if(preg_match('/@var\s+(\S+)/', $docComment, $matches))
+      return $matches[1];
+
+    return null;
+  }
+
+  /**
+   * Tenta resolver o nome de uma classe dentro de um namespace.
+   * Testa primeiro com o namespace da classe pai, depois como nome global.
+   * @param  string $className
+   * @param  string $namespace
+   * @return string|null Fully qualified class name ou null se não encontrada
+   */
+  private static function resolveClass(string $className, string $namespace): ?string {
+    $candidates = [
+      $namespace . '\\' . $className,
+      $className,
+    ];
+
+    foreach($candidates as $candidate) {
+      if(class_exists($candidate))
+        return $candidate;
+    }
+
+    return null;
   }
 
   /** 

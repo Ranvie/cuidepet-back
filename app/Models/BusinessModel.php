@@ -32,7 +32,6 @@ class BusinessModel extends Model {
 
   /**
    * Método Construtor
-   * @param ParseConvention $obParseConvention
    */
   public function __construct() {
     $this->obParseConvention = new ParseConvention;
@@ -184,4 +183,5 @@ class BusinessModel extends Model {
   public function newModel() :static {
     return new static();
   }
+  
 }

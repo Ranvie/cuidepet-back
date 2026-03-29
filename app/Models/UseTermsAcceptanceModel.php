@@ -40,6 +40,6 @@ class UseTermsAcceptanceModel extends BusinessModel {
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public $fillable = ['accepted_at'];
+  public $fillable = ['use_terms_id', 'user_id', 'accepted_at'];
 
 }

@@ -15,7 +15,8 @@ class RegisterRequest extends FormRequest {
       'username'             => 'required|string',
       'email'                => 'required|string|email|unique:tb_user,email',
       'password'             => 'required|string|min:6|confirmed:passwordConfirmation',
-      'passwordConfirmation' => 'required|string'
+      'passwordConfirmation' => 'required|string',
+      'useTerms'             => 'required|boolean|accepted'
     ];
   }
 }

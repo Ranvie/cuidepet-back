@@ -2,21 +2,31 @@
 
 namespace App\Services\Interfaces;
 
+use App\DTO\UseTerms\UseTermsDTO;
+use App\Exceptions\BusinessException;
+
 interface IUseTermsService {
 
   /**
-   * Obtém um registro por ID.
-   * @param  int    $userId ID do usuário.
-   * @return object Objeto com os detalhes do registro.
+   * Busca os termos de uso mais recentes.
+   * @return UseTermsDTO       Retorna objeto de termo de uso.
+   * @throws BusinessException Lança exceção se nenhum termo de uso for encontrado.
    */
-  public function getNewestUseTerms(?int $userId = null) :object;
+  public function getNewestUseTerms() :UseTermsDTO;
+
+  /**
+   * Valida se o usuário aceitou os termos de uso mais recentes.
+   * @param  int  $userId ID do usuário.
+   * @return bool         Retorna true se o usuário aceitou os termos de uso mais recentes
+   */
+  public function validateUseTermsAcceptance(int $userId) :bool;
 
   /**
    * Aceita um termo de uso
-   * @param int $useTermId ID do Termo de uso.
-   * @param int $userId    ID do usuário que aceita o termo.
-   * @return bool          Retorna true se o termo foi aceito com sucesso, caso contrário, retorna false.
+   * @param int $userId        ID do usuário que aceita o termo.
+   * @return bool              Retorna true se o termo foi aceito com sucesso
+   * @throws BusinessException Lança exceção se o termo de uso não for o mais recente ou se o usuário já tiver aceitado os termos de uso mais recentes.
    */
-  public function acceptTerm(int $useTermId, int $userId) :bool;
+  public function acceptTerms(int $userId) :bool;
 
 }

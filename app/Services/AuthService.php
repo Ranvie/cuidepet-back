@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\User\SafeUserDTO;
 use App\DTO\User\UserDTO;
+use App\DTO\UseTerms\UseTermsDTO;
 use App\Events\EmailConfirmationEvent;
 use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
@@ -42,11 +43,12 @@ class AuthService {
       $abilities[] = $role->name;
     }
 
-    $response        = new stdClass();
-    $expirationTime  = \floatval(config('token.login_expire_minutes'));
-    $expiresAt       = now()->addMinutes($expirationTime);
-    $response->token = $user->createToken($user->username . '-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
-    $response->user  = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
+    $response                     = new stdClass();
+    $expirationTime               = \floatval(config('token.login_expire_minutes'));
+    $expiresAt                    = now()->addMinutes($expirationTime);
+    $response->token              = $user->createToken($user->username . '-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
+    $response->useTermsAcceptance = $this->validateUseTermsAcceptance($user->id);
+    $response->user               = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
     return $response;
   }
 
@@ -85,6 +87,7 @@ class AuthService {
   public function register(array $data) :UserDTO {
     $obUserModel = $this->userService->create($data, parse: false);
 
+    $this->acceptTerms($obUserModel->id);
     $this->sendEmailConfirmation($obUserModel);
 
     return ParseConvention::parse($obUserModel->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
@@ -192,18 +195,26 @@ class AuthService {
 
   /**
    * Exibe os termos de uso para o usuário.
+   * @return UseTermsDTO
+   */
+  public function getUseTerms() :UseTermsDTO {
+    return $this->useTermService->getNewestUseTerms();
+  }
+
+  /**
+   * Exibe os termos de uso para o usuário.
    * @return void
    */
-  public function useTerms() :void {
-    $this->useTermService->getNewestUseTerms();
+  public function validateUseTermsAcceptance(int $userId) :bool {
+    return $this->useTermService->validateUseTermsAcceptance($userId);
   }
 
   /**
    * Aceita os termos de uso pelo usuário.
-   * @return void
+   * @return bool
    */
-  public function acceptTerm(int $useTermId, int $userId) :void {
-    $this->useTermService->acceptTerm($useTermId, $userId);
+  public function acceptTerms(int $userId) :bool {
+    return $this->useTermService->acceptTerms($userId);
   }
 
   /**

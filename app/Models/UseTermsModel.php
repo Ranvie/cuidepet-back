@@ -45,14 +45,18 @@ class UseTermsModel extends BusinessModel {
 
   /**
    * Busca o termo de uso mais recente
+   * @param  bool $parse                    Indica se o resultado deve ser processado pela função parser (padrão: true)
+   * @return UseTermsModel|UseTermsDTO|null Retorna o termo de uso mais recente ou null se não houver nenhum.
    */
-  public function getLatestUseTerms(?int $userId = null, bool $parse = true) :object {
+  public function getLatestUseTerms(bool $parse = true) :?object {
     $useTerms = $this->query()
-      ->when($userId, fn ($query) => $query->whereHas('users', fn ($q) => $q->where('user_id', $userId)))
       ->orderBy('created_at', 'desc')
       ->first();
 
-    return $parse ? $this->parser($useTerms) : $useTerms;
+    if($useTerms instanceof UseTermsModel && $parse)
+      $useTerms = $this->parser($useTerms);
+
+    return $useTerms;
   }
 
   /**

@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Http\Response\BusinessResponse;
+use InvalidArgumentException;
 use stdClass;
 use Exception;
 use Throwable;
@@ -61,11 +62,12 @@ class BusinessExceptionHandler {
    */
   private function mapErrorCode(Throwable $exception): int {
     $statusCode = match (true) {
-      $exception instanceof AuthenticationException => 401,
-      $exception instanceof AuthorizationException  => 403,
-      $exception instanceof NotFoundHttpException   => 404,
-      $exception instanceof ValidationException     => 422,
-      default                                       => 500,
+      $exception instanceof AuthenticationException  => 401,
+      $exception instanceof AuthorizationException   => 403,
+      $exception instanceof NotFoundHttpException    => 404,
+      $exception instanceof ValidationException      => 422,
+      $exception instanceof InvalidArgumentException => 400,
+      default                                        => 500,
     };
 
     return $statusCode;

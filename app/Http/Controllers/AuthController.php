@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\UseTerms\UseTermsDTO;
 use App\Exceptions\BusinessException;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RecoveryRequest;
@@ -86,18 +87,22 @@ class AuthController {
 
   /**
    * Retorna os termos de uso para o usuário
-   * @return void
+   * @return JsonResponse
    */
-  public function useTerms() :void {
-    $this->authService->useTerms();
+  public function getUseTerms() :JsonResponse {
+    $useTerms = $this->authService->getUseTerms();
+
+    return new BusinessResponse(200, $useTerms)->build();
   }
 
   /**
    * Registra a aceitação dos termos de uso por parte do usuário
    * @return void
    */
-  public function acceptTerm(int $useTermId, int $userId) :void {
-    $this->authService->acceptTerm($useTermId, $userId);
+  public function acceptTerms() :JsonResponse {
+    $this->authService->acceptTerms(auth()->id());
+
+    return new BusinessResponse(200, "Termos de uso aceitos com sucesso")->build();
   }
 
   /**

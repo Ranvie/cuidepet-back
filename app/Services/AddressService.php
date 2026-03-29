@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\DTO\Address\AddressDTO;
+use App\Exceptions\BusinessException;
 use App\Models\AddressModel;
+use App\Services\AddressCacheService;
 use App\Services\Interfaces\IService;
 
 class AddressService implements IService {
@@ -13,7 +15,8 @@ class AddressService implements IService {
    * @param AddressModel $obAddressModel Modelo de endereço.
    */
   public function __construct(
-    private AddressModel $obAddressModel
+    private AddressModel $obAddressModel,
+    private AddressCacheService $addressCacheService
   ) {}
 
   /**
@@ -42,9 +45,11 @@ class AddressService implements IService {
    * Cria um novo endereço.
    * @param  array $data Dados do endereço a ser criado.
    * @return AddressDTO  Objeto de transferência de dados do endereço criado.
+   * @throws BusinessException Exceção lançada se o endereço não puder ser criado.
    */
   public function create(array $data) :AddressDTO {
-    return $this->obAddressModel->create($data);
+    $addressCache = $this->addressCacheService->getByZipCode($data['zip_code']); //TODO: Salvar o cache no endereço que vai ser criado
+    return $this->obAddressModel->create($data, ['cacheAddress'], true);
   }
 
   /**

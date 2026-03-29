@@ -35,7 +35,8 @@ class AppServiceProvider extends ServiceProvider {
       'announcementId' => '[0-9]{1,18}',
       'notificationId' => '[0-9]{1,18}',
       'formId'         => '[0-9]{1,18}',
-      'type'           => 'lost|donation'
+      'type'           => 'lost|donation',
+      'zipCode'        => '[0-9]{5}-?[0-9]{3}'
     ];
 
     foreach ($patterns as $key => $pattern) {
