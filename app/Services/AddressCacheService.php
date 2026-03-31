@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Services;
+
+use App\Classes\Filter;
 use App\Models\IntegrationAddressCacheModel;
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use App\Exceptions\BusinessException;
@@ -26,16 +28,16 @@ class AddressCacheService {
    * @return IntegrationAddressCacheDTO Objeto de transferência de dados do cache de endereço.
    */
   public function getByZipCode(string $zipCode) :IntegrationAddressCacheDTO {
-    $addressCache = $this->obIntegrationAddressCacheModel->where('zipcode', $zipCode)->first();
+    $addressCache = $this->obIntegrationAddressCacheModel->getByQuery([new Filter('zipcode', '=', $zipCode)], [], true);
     $expired      = $this->isCacheExpired($addressCache);
     if (!$addressCache instanceof IntegrationAddressCacheDTO || $expired) {
       $addressCache = $this->externalAddressProvider->resolve($zipCode);
       
       $this->validateCache($addressCache, $zipCode);
-      
+
       $expired
         ? $this->obIntegrationAddressCacheModel->where('zipcode', $zipCode)->update((array)$addressCache) 
-        : $this->obIntegrationAddressCacheModel->create((array)$addressCache); //TODO: Tem que fazer o POINT na hora de inserir/atualizar..
+        : $this->obIntegrationAddressCacheModel->create((array)$addressCache);
       
       return $addressCache;
     }
@@ -59,10 +61,10 @@ class AddressCacheService {
 
   /**
    * Verifica se um cache de endereço está expirado.
-   * @param  IntegrationAddressCacheDTO $addressCache Cache de endereço a ser verificado.
-   * @return bool                       Verdadeiro se o cache estiver expirado, falso caso contrário.
+   * @param  IntegrationAddressCacheDTO|null $addressCache Cache de endereço a ser verificado.
+   * @return bool                            Verdadeiro se o cache estiver expirado, falso caso contrário.
    */
-  private function isCacheExpired(IntegrationAddressCacheDTO $addressCache) :bool {
+  private function isCacheExpired(?IntegrationAddressCacheDTO $addressCache) :bool {
     if(!$addressCache instanceof IntegrationAddressCacheDTO)
       return false;
 

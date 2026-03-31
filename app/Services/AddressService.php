@@ -48,7 +48,9 @@ class AddressService implements IService {
    * @throws BusinessException Exceção lançada se o endereço não puder ser criado.
    */
   public function create(array $data) :AddressDTO {
-    $addressCache = $this->addressCacheService->getByZipCode($data['zip_code']); //TODO: Salvar o cache no endereço que vai ser criado
+    $addressCache = $this->addressCacheService->getByZipCode($data['zip_code']);
+    
+    $data['idIntegrationAddressCache'] = $addressCache->id;
     return $this->obAddressModel->create($data, ['cacheAddress'], true);
   }
 

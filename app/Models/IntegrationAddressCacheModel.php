@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
+use DB;
 
 class IntegrationAddressCacheModel extends BusinessModel {
 
@@ -48,6 +49,7 @@ class IntegrationAddressCacheModel extends BusinessModel {
    * @var array
    */
   public $fillable = [
+    'point',
     'latitude',
     'longitude',
     'zipcode',
@@ -55,8 +57,21 @@ class IntegrationAddressCacheModel extends BusinessModel {
     'city',
     'neighborhood',
     'street',
-    'source'
+    'source',
   ];
+
+  /**
+   * @param  array    $data
+   * @param  string[] $relations
+   * @param  boolean  $parse
+   * @return object
+   */
+  public function create(array $data, array $relations = [], bool $parse = true) :object {
+    $point         = "POINT({$data['longitude']} {$data['latitude']})";
+    $data['point'] = DB::raw("ST_GeomFromText('$point')");
+    
+    return parent::create($data, $relations, $parse);
+  }
 
   /**
    * Recupera as newsletters relacionadas a este cache de endereço. Um cache de endereço pode estar relacionado a muitas newsletters.

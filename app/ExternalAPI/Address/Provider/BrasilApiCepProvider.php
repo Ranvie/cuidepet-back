@@ -6,6 +6,7 @@ use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use \App\ExternalAPI\Address\DTO\Response\BrasilApiDTO;
 use App\ExternalAPI\Address\Abstract\AbstractAddressProvider;
 use App\Utils\Objectfy;
+use App\Utils\ResponseValidator;
 
 class BrasilApiCepProvider extends AbstractAddressProvider {
 
@@ -38,7 +39,7 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
    * @param  string $zipCode CEP para consulta do endereço.
    * @return string          Caminho completo para a requisição.
    */
-  protected function getZipCodeConsultPath(string $zipCode) :string {
+  protected function getZipCodeConsultPath(string $zipCode): string {
     return str_replace('{zipCode}', $zipCode, $this->baseUrl . $this->resourcePath);
   }
 
@@ -47,10 +48,10 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
    * @param  array $addressData         Dados do endereço a serem formatados.
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
-  protected function formatAddress(array $addressData) :IntegrationAddressCacheDTO {
+  protected function formatAddress(array $addressData): IntegrationAddressCacheDTO {
     $apiResponse           = Objectfy::arrayToClass($addressData, BrasilApiDTO::class);
     $address               = new IntegrationAddressCacheDTO();
-    $address->zipCode      = $apiResponse->cep;
+    $address->zipcode      = $apiResponse->cep;
     $address->state        = $apiResponse->state;
     $address->city         = $apiResponse->city;
     $address->neighborhood = $apiResponse->neighborhood;
@@ -70,11 +71,11 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
    * @param  array|null $addressData Dados do endereço a serem verificados.
    * @return bool                    Retorna true se os dados forem satisfatórios, caso contrário, false.
    */
-  protected function isResponseSatisfactory(?array $addressData) :bool {
-    if(!$addressData)
+  protected function isResponseSatisfactory(?array $addressData): bool {
+    if (!$addressData)
       return false;
-    
-    if($this->validateRequiredFields($addressData)) {
+
+    if ($this->validateRequiredFields($addressData)) {
       $this->responseSatisfactory = true;
       return true;
     }
@@ -82,22 +83,21 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
     return true;
   }
 
-  //TODO: Implementar uma forma mais automática, onde passa um array e ele percorre a response validando se os campos do array estão na response
   /**
    * Valida se os campos obrigatórios estão presentes e não estão vazios.
    * @param  array $addressData Dados do endereço a serem validados.
    * @return bool               Retorna true se os campos obrigatórios forem válidos, caso contrário, false.
    */
-  private function validateRequiredFields(array $addressData) {
-    $requiredFields = ['cep', 'state', 'city', 'neighborhood', 'street', 'location'];
-    foreach($requiredFields as $field) {
-      if(empty($addressData[$field]))
-        return false;
-    }
-
-    if(empty($addressData['location']['coordinates']['latitude']) || empty($addressData['location']['coordinates']['longitude']))
-      return false;
-
-    return true;
+  private function validateRequiredFields(array $addressData): bool {
+    return ResponseValidator::validate($addressData, [
+      'cep',
+      'state',
+      'city',
+      'neighborhood',
+      'street',
+      'location.coordinates.longitude',
+      'location.coordinates.latitude',
+    ]);
   }
+
 }

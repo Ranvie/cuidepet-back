@@ -26,7 +26,7 @@ class IntegrationAddressCacheDTO {
    * CEP do endereço
    * @var string
    */
-  public string $zipCode;
+  public string $zipcode;
 
   /**
    * Estado do endereço

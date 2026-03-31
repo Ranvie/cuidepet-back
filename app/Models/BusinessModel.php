@@ -115,6 +115,27 @@ class BusinessModel extends Model {
   }
 
   /**
+   * Procura um registro por uma query personalizada
+   * @param  Filter[] $filters
+   * @param  string[] $relations
+   * @param  boolean  $parse
+   * @return null|object
+   */
+  public function getByQuery(array $filters = [], array $relations = [], bool $parse = true) :?object {
+    $queryBuilder = self::query();
+
+    foreach ($filters as $filter) {
+      $queryBuilder->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+    }
+
+    $model = $queryBuilder->with($relations)->first();
+    if (!$model instanceof $this) return null;
+    if (!$parse) return $model;
+
+    return $this->parser($model);
+  }
+
+  /**
    * @param  array    $data
    * @param  string[] $relations
    * @param  boolean  $parse
@@ -156,7 +177,7 @@ class BusinessModel extends Model {
 
     $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
     $destin = $register->original;
-    $obj = Objectfy::transferTo($origin, $destin, $ignoreNulls);
+    $obj    = Objectfy::transferTo($origin, $destin, $ignoreNulls);
 
     $register->fill($obj);
     $register->save();

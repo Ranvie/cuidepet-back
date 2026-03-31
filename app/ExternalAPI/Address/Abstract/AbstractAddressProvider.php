@@ -129,12 +129,4 @@ abstract class AbstractAddressProvider {
    */
   abstract protected function isResponseSatisfactory(?array $addressData) :bool;
 
-  /**
-   * Obtém o identificador do provedor de endereço.
-   * @return string|null Retorna o identificador do provedor, ou null se não estiver definido.
-   */
-  public function getProvider() :?string {
-    return $this->provider;
-  }
-
 }
