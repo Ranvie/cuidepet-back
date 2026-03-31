@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -16,6 +17,8 @@ return new class extends Migration {
 			$table->timestamp('accepted_at')->useCurrent();
 			$table->unique(['user_id', 'use_terms_id'], 'USE_TERMS_ACCEPTANCE_UK_01');
 		});
+
+		Artisan::call('db:seed', ['--class' => 'UserTermsAcceptanceSeeder']);
 	}
 
 	/**

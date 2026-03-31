@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use DB;
+use Illuminate\Database\Query\Expression;
+use App\Utils\StateConversor;
 
+/**
+ * Modelo de cache de endereço para integrações com APIs externas.
+ * Esta classe representa a estrutura e as operações relacionadas ao cache de endereços obtidos de integrações externas, como a API do AwesomeCep.
+ * Ela é responsável por armazenar informações como latitude, longitude, CEP, estado, cidade, bairro, rua, fonte dos dados e data de expiração do cache.
+ * O modelo também define as relações com outras entidades do sistema, como newsletters e endereços de anúncios.
+ */
 class IntegrationAddressCacheModel extends BusinessModel {
 
   /**
@@ -58,6 +66,7 @@ class IntegrationAddressCacheModel extends BusinessModel {
     'neighborhood',
     'street',
     'source',
+    'expires_at'
   ];
 
   /**
@@ -67,10 +76,44 @@ class IntegrationAddressCacheModel extends BusinessModel {
    * @return object
    */
   public function create(array $data, array $relations = [], bool $parse = true) :object {
-    $point         = "POINT({$data['longitude']} {$data['latitude']})";
-    $data['point'] = DB::raw("ST_GeomFromText('$point')");
+    $data['point'] = $this->getPoint($data['latitude'], $data['longitude']);
+    
+    $uf            = StateConversor::isStateAbbreviation($data['state']) ? $data['state'] : StateConversor::getStateAbbreviation($data['state']);
+    $data['state'] = $uf ?? $data['state'];
     
     return parent::create($data, $relations, $parse);
+  }
+
+  /**
+   * Gera um ponto geográfico a partir de latitude e longitude para ser armazenado no banco de dados.
+   * @param  string $latitude  Latitude do ponto geográfico.
+   * @param  string $longitude Longitude do ponto geográfico.
+   * @return Expression        Representação em texto do ponto geográfico para uso em consultas SQL.
+   */
+  private function getPoint(string $latitude, string $longitude) :Expression {
+    $point = "POINT({$longitude} {$latitude})";
+    return DB::raw("ST_GeomFromText('$point')");
+  }
+
+  /**
+   * Edita um cache de endereço existente.
+   * @param  int          $id          ID do cache de endereço a ser editado.
+   * @param  array|object $data        Dados a serem atualizados no cache de endereço.
+   * @param  bool         $ignoreNulls Indica se os valores nulos devem ser ignorados na atualização.
+   * @param  bool         $parse       Indica se os dados devem ser parseados antes da atualização.
+   * @return object                    Objeto do cache de endereço atualizado.
+   */
+  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true) :object {
+    if(isset($data['latitude']) && isset($data['longitude'])){
+      $data['point'] = $this->getPoint($data['latitude'], $data['longitude']);
+    }
+
+    if(isset($data['state'])){
+      $uf            = StateConversor::isStateAbbreviation($data['state']) ? $data['state'] : StateConversor::getStateAbbreviation($data['state']);
+      $data['state'] = $uf ?? $data['state'];
+    }
+    
+    return parent::edit($id, $data, $ignoreNulls, $parse);
   }
 
   /**

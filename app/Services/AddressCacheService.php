@@ -19,7 +19,7 @@ class AddressCacheService {
    */
   public function __construct(
     private IntegrationAddressCacheModel $obIntegrationAddressCacheModel,
-    private ExternalAddressProvider $externalAddressProvider
+    private ExternalAddressProvider      $externalAddressProvider
   ) {}
 
   /**
@@ -28,21 +28,22 @@ class AddressCacheService {
    * @return IntegrationAddressCacheDTO Objeto de transferência de dados do cache de endereço.
    */
   public function getByZipCode(string $zipCode) :IntegrationAddressCacheDTO {
-    $addressCache = $this->obIntegrationAddressCacheModel->getByQuery([new Filter('zipcode', '=', $zipCode)], [], true);
-    $expired      = $this->isCacheExpired($addressCache);
-    if (!$addressCache instanceof IntegrationAddressCacheDTO || $expired) {
-      $addressCache = $this->externalAddressProvider->resolve($zipCode);
+    $addressDatabase = $this->obIntegrationAddressCacheModel->getByQuery([new Filter('zipcode', '=', $zipCode)], [], true);
+    $expired         = $this->isCacheExpired($addressDatabase);
+
+    if (!$addressDatabase instanceof IntegrationAddressCacheDTO || $expired) {
+      $addressResolved = $this->externalAddressProvider->resolve($zipCode);
       
-      $this->validateCache($addressCache, $zipCode);
+      $this->validateCache($addressResolved, $zipCode);
 
       $expired
-        ? $this->obIntegrationAddressCacheModel->where('zipcode', $zipCode)->update((array)$addressCache) 
-        : $this->obIntegrationAddressCacheModel->create((array)$addressCache);
+        ? $this->obIntegrationAddressCacheModel->edit($addressDatabase->id, (array)$addressResolved)
+        : $this->obIntegrationAddressCacheModel->create((array)$addressResolved);
       
-      return $addressCache;
+      return $addressResolved;
     }
     
-    return $addressCache;
+    return $addressDatabase;
   }
 
   /**

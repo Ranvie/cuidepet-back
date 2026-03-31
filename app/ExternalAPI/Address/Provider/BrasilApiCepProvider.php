@@ -60,7 +60,6 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
     $address->longitude    = $apiResponse->location->coordinates->longitude;
     $address->source       = $this->provider;
     $address->expiresAt    = date('Y-m-d H:i:s', time() + ($this->cacheDuration ?? 0));
-    $address->updatedAt    = date('Y-m-d H:i:s');
 
     return $address;
   }
@@ -75,29 +74,12 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
     if (!$addressData)
       return false;
 
-    if ($this->validateRequiredFields($addressData)) {
+    if (ResponseValidator::validate($addressData, ['cep','state','city','location.coordinates.longitude','location.coordinates.latitude'])) {
       $this->responseSatisfactory = true;
       return true;
     }
 
     return true;
-  }
-
-  /**
-   * Valida se os campos obrigatórios estão presentes e não estão vazios.
-   * @param  array $addressData Dados do endereço a serem validados.
-   * @return bool               Retorna true se os campos obrigatórios forem válidos, caso contrário, false.
-   */
-  private function validateRequiredFields(array $addressData): bool {
-    return ResponseValidator::validate($addressData, [
-      'cep',
-      'state',
-      'city',
-      'neighborhood',
-      'street',
-      'location.coordinates.longitude',
-      'location.coordinates.latitude',
-    ]);
   }
 
 }

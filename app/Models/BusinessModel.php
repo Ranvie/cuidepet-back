@@ -10,6 +10,10 @@ use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Modelo de negócio base para os modelos do sistema.
+ * Fornece métodos genéricos para operações comuns, como listagem, criação, edição e remoção de registros.
+ */
 class BusinessModel extends Model {
 
   /**

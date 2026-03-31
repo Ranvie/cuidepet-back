@@ -15,8 +15,8 @@ class ExternalAddressProvider {
    * @var array
    */
   protected array $providers = [
-    'brasilapi'  => BrasilApiCepProvider::class,
-    'awesomeapi' => AwesomeCepAddressProvider::class
+    'awesomeapi' => AwesomeCepAddressProvider::class,
+    'brasilapi'  => BrasilApiCepProvider::class
   ];
 
   /**

@@ -4,6 +4,8 @@ namespace App\ExternalAPI\Address\Provider;
 
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use App\ExternalAPI\Address\Abstract\AbstractAddressProvider;
+use App\ExternalAPI\Address\DTO\Response\ViaCepDTO;
+use App\Utils\Objectfy;
 
 class ViaCepAddressProvider extends AbstractAddressProvider {
 
@@ -42,14 +44,22 @@ class ViaCepAddressProvider extends AbstractAddressProvider {
 
   /**
    * Formata os dados em um cache de endereço
+   * OBS: A integração da ViaCEP não retorna latitude e longitude, ela servirá como uma populadora de dados para outros provedores
    * @param  array $addressData         Dados do endereço a serem formatados.
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
   protected function formatAddress(array $addressData) :IntegrationAddressCacheDTO {
-    dd($addressData);
-  
-    $ret = new IntegrationAddressCacheDTO();
-    return $ret;
+    $apiResponse           = Objectfy::arrayToClass($addressData, ViaCepDTO::class);
+    $address               = new IntegrationAddressCacheDTO();
+    $address->zipcode      = $apiResponse->cep;
+    $address->state        = $apiResponse->uf;
+    $address->city         = $apiResponse->localidade;
+    $address->neighborhood = $apiResponse->bairro;
+    $address->street       = $apiResponse->logradouro;
+    $address->source       = $this->provider;
+    $address->expiresAt    = date('Y-m-d H:i:s', time() + ($this->cacheDuration ?? 0));
+
+    return $address;
   }
 
   /**

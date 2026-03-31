@@ -4,6 +4,9 @@ namespace App\ExternalAPI\Address\Provider;
 
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use App\ExternalAPI\Address\Abstract\AbstractAddressProvider;
+use App\ExternalAPI\Address\DTO\Response\AwesomeCepDTO;
+use App\Utils\Objectfy;
+use App\Utils\ResponseValidator;
 
 class AwesomeCepAddressProvider extends AbstractAddressProvider {
 
@@ -46,7 +49,17 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
   protected function formatAddress(array $addressData) :IntegrationAddressCacheDTO {
-    $address = new IntegrationAddressCacheDTO();
+    $apiResponse           = Objectfy::arrayToClass($addressData, AwesomeCepDTO::class);
+    $address               = new IntegrationAddressCacheDTO();
+    $address->zipcode      = $apiResponse->cep;
+    $address->state        = $apiResponse->state;
+    $address->city         = $apiResponse->city;
+    $address->neighborhood = $apiResponse->district;
+    $address->street       = $apiResponse->address;
+    $address->latitude     = $apiResponse->lat;
+    $address->longitude    = $apiResponse->lng;
+    $address->source       = $this->provider;
+    $address->expiresAt    = date('Y-m-d H:i:s', time() + ($this->cacheDuration ?? 0));
 
     return $address;
   }
@@ -58,7 +71,14 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
    * @return bool                    Retorna true se os dados forem satisfatórios, caso contrário, false.
    */
   protected function isResponseSatisfactory(?array $addressData) :bool {
-    $this->responseSatisfactory = true;
+    if(!$addressData)
+      return false;
+
+    if(ResponseValidator::validate($addressData, ['cep','state','city','lat','lng'])){
+      $this->responseSatisfactory = true;
+      return true;
+    }
+
     return true;
   }
 }

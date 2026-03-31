@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -15,6 +16,8 @@ return new class extends Migration {
 			$table->foreignId('role_id')->constrained('tb_role')->onDelete('cascade');
 			$table->unique(['user_id', 'role_id'], 'USER_ROLE_UK_01');
 		});
+
+		Artisan::call('db:seed', ['--class' => 'UserRoleSeeder']);
 	}
 
 	/**
