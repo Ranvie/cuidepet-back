@@ -120,7 +120,7 @@ class UserService implements IUserService {
    * @param  bool                   $simulateHash Indica se deve simular a verificação de hash para evitar diferenças de tempo na resposta
    * @throws BusinessException                    Se o usuário não for encontrado
    */
-  private function validateIfUserExists(UserDTO|UserModel $user, bool $simulateHash = false) {
+  private function validateIfUserExists(UserDTO|UserModel|null $user, bool $simulateHash = false) {
     if (!$user instanceof UserDTO && !$user instanceof UserModel) {
       if($simulateHash) password_hash("simulateHash", PASSWORD_DEFAULT);
       throw new BusinessException('O usuário não foi encontrado.', 404);
