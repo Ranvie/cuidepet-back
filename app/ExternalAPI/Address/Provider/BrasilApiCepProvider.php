@@ -36,11 +36,10 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
 
   /**
    * Constrói o caminho completo para a requisição de endereço.
-   * @param  string $zipCode CEP para consulta do endereço.
-   * @return string          Caminho completo para a requisição.
+   * @return string Caminho completo para a requisição.
    */
-  protected function getZipCodeConsultPath(string $zipCode): string {
-    return str_replace('{zipCode}', $zipCode, $this->baseUrl . $this->resourcePath);
+  protected function getConsultPath(): string {
+    return str_replace('{zipCode}', $this->zipcode, $this->baseUrl . $this->resourcePath);
   }
 
   /**
@@ -48,7 +47,7 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
    * @param  array $addressData         Dados do endereço a serem formatados.
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
-  protected function formatAddress(array $addressData): IntegrationAddressCacheDTO {
+  protected function formatResponse(array $addressData): IntegrationAddressCacheDTO {
     $apiResponse           = Objectfy::arrayToClass($addressData, BrasilApiDTO::class);
     $address               = new IntegrationAddressCacheDTO();
     $address->zipcode      = $apiResponse->cep;
@@ -70,15 +69,18 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
    * @param  array|null $addressData Dados do endereço a serem verificados.
    * @return bool                    Retorna true se os dados forem satisfatórios, caso contrário, false.
    */
-  protected function isResponseSatisfactory(?array $addressData): bool {
-    if (!$addressData)
+  protected function isResponseSatisfactory(?array $addressData, array &$errors = []): bool {
+    if (!$addressData) {
+      $errors[] = "A API não retornou dados válidos.";
       return false;
+    }
 
     if (ResponseValidator::validate($addressData, ['cep','state','city','location.coordinates.longitude','location.coordinates.latitude'])) {
-      $this->responseSatisfactory = true;
+      $errors = [];
       return true;
     }
 
+    $errors[] = "A resposta da API não contém os campos necessários ou está em formato inesperado.";
     return true;
   }
 

@@ -26,11 +26,11 @@ class ExternalAddressProvider {
    */
   public function resolve(string $zipCode) :?IntegrationAddressCacheDTO {
     foreach($this->providers as $providerClass) {
-      $provider    = new $providerClass();
-      $addressData = $provider->resolve($zipCode);
+      $provider    = new $providerClass($zipCode);
+      $addressData = $provider->resolve();
       
-      if($addressData)
-        return $addressData;
+      if($addressData['success'] && $addressData['data'])
+        return $addressData['data'];
     }
 
     return null;

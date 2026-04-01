@@ -3,11 +3,10 @@
 namespace App\Services;
 
 use App\DTO\Form\FormDTO;
-use App\DTO\User\UserDTO;
 use App\Models\FormModel;
-use Illuminate\Support\Collection;
+use App\Services\Interfaces\IFormService;
 
-class FormService implements Interfaces\IFormService {
+class FormService implements IFormService {
 
   /**
    * Método Construtor
@@ -18,72 +17,95 @@ class FormService implements Interfaces\IFormService {
   ) {}
 
   /**
-   * Retorna uma lista paginada de formulários
-   * @param  int $limit Número de itens por página
-   * @param  int $page  Número da página a ser retornada
-   * @return array      Lista de formulários paginada
+   * Lista paginada de formulários de um usuário específico.
+   * @param  int $limit  Número de formulários por página.
+   * @param  int $page   Número da página atual.
+   * @param  int $userId ID do usuário.
+   * @return FormDTO[]   Lista de formulários do usuário.
    */
-  public function getList(int $limit, int $page) :array {
-    // TODO: Implement getList() method.
-    return [];
+  public function listFormsByUser(int $limit, int $page, int $userId) :array {
+    return $this->formModel->list($limit, $page, filters: ['user_id' => $userId]);
   }
 
   /**
-   * Retorna uma lista de formulários criados por um usuário específico
-   * @param  int $userId ID do usuário
-   * @return Collection  Lista de formulários criados pelo usuário
+   * Lista todos os formulários de um usuário específico, sem paginação. (para select de formulário)
+   * @param  int $userId ID do usuário.
+   * @return array       Lista de todos os formulários do usuário.
    */
-  public function listFormByUser(int $userId) :Collection {
-    return $this->formModel->listFormByUser($userId);
+  public function listAllUserForms(int $userId) :array {
+    return $this->formModel->listAll($userId);
   }
 
   /**
-   * Retorna um formulário específico por ID
-   * @param  int $id          ID do formulário
-   * @param  array $relations Relacionamentos a serem carregados
-   * @return UserDTO          Objeto com os detalhes do formulário
+   * Busca formulário de um usuário por ID.
+   * @param int $formId ID do formulário.
+   * @param int $userId ID do usuário.
+   * @return FormDTO Coleção de formulários do usuário.
    */
-  public function getById(int $id, array $relations = []) :UserDTO {
-    return $this->formModel->getById($id, $relations);
+  public function getFormById(int $formId, int $userId) :FormDTO {
+    $formResponse = $this->formModel->getById($formId, filters: ['user_id' => $userId]);
+
+    $this->validateForm($formResponse);
+    
+    return $formResponse;
   }
 
   /**
-   * Retorna um formulário específico criado por um usuário
-   * @param  int $userId    ID do usuário
-   * @param  int $formId    ID do formulário
-   * @return null|FormModel Objeto com os detalhes do formulário
+   * Busca formulário associado a um anúncio por ID.
+   * @param int $formId         ID do formulário.
+   * @param int $announcementId ID do anúncio.
+   * @return FormDTO Coleção de formulários do usuário.
    */
-  public function getUserForm(int $userId, int $formId) :?FormModel {
-    return $this->formModel->getUserForm($userId, $formId);
+  public function getFormByAnnouncement(int $formId, int $announcementId) :FormDTO {
+    $formResponse = $this->formModel->getById($formId, filters: ['announcement_id' => $announcementId]);
+    
+    $this->validateForm($formResponse);
+
+    return $formResponse;
   }
 
   /**
-   * Cria um novo formulário
-   * @param  array $data Dados do formulário a ser criado
-   * @return FormDTO     Objeto com os detalhes do formulário criado
+   * Cadastra formulários de anúncios.
+   * @param array $data Dados do formulário a ser cadastrado.
+   * @return FormDTO DTO do formulário cadastrado.
    */
   public function create(array $data) :FormDTO {
     return $this->formModel->create($data);
   }
 
   /**
-   * Edita um formulário existente
-   * @param  int $id    ID do formulário a ser editado
-   * @param  array $data Dados do formulário a ser atualizado
-   * @return FormDTO     Objeto com os detalhes do formulário atualizado
+   * Atualiza formulários de anúncios.
+   * @param int $formId ID do formulário a ser atualizado.
+   * @param int $userId ID do usuário associado.
+   * @param array $data Dados do formulário a ser atualizado.
+   * @return FormDTO DTO do formulário atualizado.
    */
-  public function edit(int $id, array $data) :FormDTO {
-    // TODO: Implement edit() method.
-    return new FormDTO();
+  public function edit(int $formId, int $userId, array $data) :FormDTO {
+    $obFormDTO = $this->formModel->edit($formId, $data, filters: ['user_id', $userId], parse: false);
+
+    if(!$obFormDTO instanceof FormDTO)
+      throw new \Exception("Ocorreu um erro ao atualizar o formulário.");
+
+    return $obFormDTO;
   }
 
   /**
-   * Remove um formulário existente
-   * @param  ?int $id ID do formulário a ser removido
-   * @return bool
+   * Exclui formulários de anúncios.
+   * @param int $formId ID do formulário a ser excluído.
+   * @param int $userId ID do usuário dono do formulário.
+   * @return bool True se a exclusão foi bem-sucedida, false caso contrário.
    */
-  public function remove(?int $id = null) :bool {
-    // TODO: Implement remove() method.
-    return false;
+  public function remove(int $formId, int $userId) :bool {
+    return $this->formModel->delete($formId, $userId);
+  }
+
+  /**
+   * Método responsável por validar um formulário
+   * @param FormDTO|null $formDTO O formulário a ser validado.
+   * @return void
+   */
+  private function validateForm(?FormDTO $formDTO) :void {
+    if (!$formDTO instanceof FormDTO)
+      throw new \Exception("O formulário solicitado não foi encontrado.");
   }
 }

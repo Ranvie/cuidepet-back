@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
+use App\Exceptions\BusinessException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Collection;
 
 class FormModel extends BusinessModel {
 
@@ -66,14 +66,19 @@ class FormModel extends BusinessModel {
     return $this->getById($formId, [], false, [new Filter('user_id', '=', $userId)]);
   }
 
+  //TODO: ver de implementar um DTO
   /**
-   * Lista todos os formulários de um usuário
-   * @param  int $userId
-   * @return Collection
+   * Lista todos os formulários de um usuário sem paginação
+   * @param  int $userId ID do usuário
+   * @return array       Lista de formulários do usuário
    */
-  public function listFormByUser(int $userId) :Collection {
-    $registers = $this->where('user_id', $userId)->get();
-    return $this->parser($registers);
+  public function listAll(int $userId) :array {
+    $listForms = $this->query()->where('user_id', $userId)->get();
+
+    return array_combine(
+      $listForms->pluck('id')->toArray(),
+      $listForms->pluck('title')->toArray()
+    );
   }
 
   /**
@@ -85,6 +90,26 @@ class FormModel extends BusinessModel {
    */
   public function create(array $data, array $relations = [], bool $parse = true) :FormDTO {
     return parent::create($data, $relations, $parse);
+  }
+
+  /**
+   * Exclui formulário de um usuário
+   * @param  int $formId
+   * @param  int $userId
+   * @return bool
+   */
+  public function delete(int $formId, int $userId) :bool {
+    $obFormModel = $this->getById($formId, ['announcements'], false, [new Filter('user_id', '=', $userId)]);
+
+    if (!$obFormModel)
+      return false;
+
+    $hasAnnouncements = $obFormModel->announcements->count() > 0;
+
+    if($hasAnnouncements)
+      throw new BusinessException('Não é possível excluir um formulário que possui anúncios relacionados.');
+
+    return $obFormModel->delete();
   }
 
   /**

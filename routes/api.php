@@ -32,7 +32,6 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('address')->group(funct
 });
 
 Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin/user')->group(function () {
-
   Route::get('/',               [UserController::class, 'list']);
   Route::get('/{id}',           [UserController::class, 'get']);
   Route::post('/',              [UserController::class, 'create']);
@@ -46,9 +45,15 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::post('/accept-terms', [AuthController::class, 'acceptTerms']);
-  Route::post('/inactivate',   [UserController::class, 'inactivate']);
-  Route::post('/logout',       [AuthController::class, 'logout']);
+  Route::get('/species',                               [SpecieController::class, 'list']);
+
+  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
+
+  Route::post('/inactivate',                           [UserController::class, 'inactivate']);
+
+  Route::post('/logout',                               [AuthController::class, 'logout']);
+
+  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 
   //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
   Route::prefix('my-announcements')->group(function () {
@@ -60,20 +65,21 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
   });
 
-  Route::get('/species', [SpecieController::class, 'list']);
+  Route::prefix('/notifications')->group(function () {
+    Route::get('/',                        [NotificationController::class, 'list']);
+    Route::delete('/{notificationId}',     [NotificationController::class, 'delete']);
+    Route::patch('/read/{notificationId}', [NotificationController::class, 'readNotification']);
+  });
 
-  Route::get('/notification',                     [NotificationController::class, 'list']);
-  Route::delete('/notification/{notificationId}', [NotificationController::class, 'delete']);
-  Route::patch('/notification/{notificationId}',  [NotificationController::class, 'setViewed']);
-
-  Route::get('/form',             [FormResponseController::class, 'list']);
-  Route::get('/form/{formId}',    [FormResponseController::class, 'get']);
-  Route::post('/form',            [FormResponseController::class, 'create']);
-  Route::delete('/form/{formId}', [FormResponseController::class, 'delete']);
-  Route::put('/form/{formId}',    [FormResponseController::class, 'update']);
+  Route::prefix('/form')->group(function () {
+    Route::get('/',            [FormResponseController::class, 'list']);
+    Route::get('/{formId}',    [FormResponseController::class, 'get']);
+    Route::post('/',           [FormResponseController::class, 'create']);
+    Route::delete('/{formId}', [FormResponseController::class, 'delete']);
+    Route::put('/{formId}',    [FormResponseController::class, 'update']);
+  });
 
   Route::prefix('/my-forms')->group(function () {
-
     Route::get('/',            [FormController::class, 'list']);
     Route::get('/{formId}',    [FormController::class, 'get']);
     Route::post('/',           [FormController::class, 'create']);
@@ -81,9 +87,9 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::put('/{formId}',    [FormController::class, 'update']);
   });
 
-  Route::get('/favorite',    [FavoriteController::class, 'list']);
-  Route::post('/favorite',   [FavoriteController::class, 'create']);
-  Route::delete('/favorite', [FavoriteController::class, 'delete']);
-
-  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
+  route::prefix('/favorite')->group(function () {
+    Route::get('/',    [FavoriteController::class, 'list']);
+    Route::post('/',   [FavoriteController::class, 'create']);
+    Route::delete('/', [FavoriteController::class, 'delete']);
+  });
 });

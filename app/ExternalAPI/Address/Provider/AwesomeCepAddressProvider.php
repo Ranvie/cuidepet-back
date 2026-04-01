@@ -39,8 +39,8 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
    * @param  string $zipCode CEP para consulta do endereço.
    * @return string          Caminho completo para a requisição.
    */
-  protected function getZipCodeConsultPath(string $zipCode) :string {
-    return str_replace('{zipCode}', $zipCode, $this->baseUrl . $this->resourcePath);
+  protected function getConsultPath() :string {
+    return str_replace('{zipCode}', $this->zipcode, $this->baseUrl . $this->resourcePath);
   }
 
   /**
@@ -48,7 +48,7 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
    * @param  array $addressData         Dados do endereço a serem formatados.
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
-  protected function formatAddress(array $addressData) :IntegrationAddressCacheDTO {
+  protected function formatResponse(array $addressData) :IntegrationAddressCacheDTO {
     $apiResponse           = Objectfy::arrayToClass($addressData, AwesomeCepDTO::class);
     $address               = new IntegrationAddressCacheDTO();
     $address->zipcode      = $apiResponse->cep;
@@ -67,18 +67,22 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
   /**
    * Verifica se os dados de endereço retornados pelo serviço são satisfatórios.
    * Deve setar $this->responseSatisfactory = true quando a resposta for válida.
-   * @param  array|null $addressData Dados do endereço a serem verificados.
-   * @return bool                    Retorna true se os dados forem satisfatórios, caso contrário, false.
+   * @param  array|object|null $addressData Dados do endereço a serem verificados.
+   * @param  array             $errors      Array para acumular mensagens de erro, caso a resposta não seja satisfatória.
+   * @return bool                           Retorna true se os dados forem satisfatórios, caso contrário, false.
    */
-  protected function isResponseSatisfactory(?array $addressData) :bool {
-    if(!$addressData)
+  protected function isResponseSatisfactory(array|object|null $addressData, array &$errors = []) :bool {
+    if(!$addressData){
+      $errors[] = "A API não retornou dados válidos.";
       return false;
+    }
 
     if(ResponseValidator::validate($addressData, ['cep','state','city','lat','lng'])){
-      $this->responseSatisfactory = true;
+      $errors = [];
       return true;
     }
 
+    $errors[] = "Há campos obrigatórios ausentes.";
     return true;
   }
 }

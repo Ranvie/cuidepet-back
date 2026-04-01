@@ -69,7 +69,7 @@ class BusinessModel extends Model {
    * @param  Filter[] $filters
    * @return array
    */
-  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 50, array $relations = [], array $filters = []) :array {
+  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 100, array $relations = [], array $filters = []) :array {
     if ($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
     $query = self::query();
@@ -173,10 +173,11 @@ class BusinessModel extends Model {
    * @param  array|object $data
    * @param  boolean      $ignoreNulls
    * @param  boolean      $parse
+   * @param  Filter[]     $filters
    * @return null|object
    */
-  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true) :?object {
-    $register = parent::find($id);
+  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true, array $filters = []) :?object {
+    $register = $this->getById($id, parse: false, filters: $filters);
     if (!$register instanceof $this) return null;
 
     $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);

@@ -35,11 +35,10 @@ class ViaCepAddressProvider extends AbstractAddressProvider {
 
   /**
    * Constrói o caminho completo para a requisição de endereço.
-   * @param  string $zipCode CEP para consulta do endereço.
-   * @return string          Caminho completo para a requisição.
+   * @return string Caminho completo para a requisição.
    */
-  protected function getZipCodeConsultPath(string $zipCode) :string {
-    return str_replace('{zipCode}', $zipCode, $this->baseUrl . $this->resourcePath);
+  protected function getConsultPath() :string {
+    return str_replace('{zipCode}', $this->zipcode, $this->baseUrl . $this->resourcePath);
   }
 
   /**
@@ -48,7 +47,7 @@ class ViaCepAddressProvider extends AbstractAddressProvider {
    * @param  array $addressData         Dados do endereço a serem formatados.
    * @return IntegrationAddressCacheDTO Modelo de cache de endereço formatado.
    */
-  protected function formatAddress(array $addressData) :IntegrationAddressCacheDTO {
+  protected function formatResponse(array $addressData) :IntegrationAddressCacheDTO {
     $apiResponse           = Objectfy::arrayToClass($addressData, ViaCepDTO::class);
     $address               = new IntegrationAddressCacheDTO();
     $address->zipcode      = $apiResponse->cep;
@@ -66,10 +65,10 @@ class ViaCepAddressProvider extends AbstractAddressProvider {
    * Verifica se os dados de endereço retornados pelo serviço são satisfatórios.
    * Deve setar $this->responseSatisfactory = true quando a resposta for válida.
    * @param  array|null $addressData Dados do endereço a serem verificados.
+   * @param  array      $errors      Array para coletar erros de validação, se necessário.
    * @return bool                    Retorna true se os dados forem satisfatórios, caso contrário, false.
    */
-  protected function isResponseSatisfactory(?array $addressData) :bool {
-    $this->responseSatisfactory = true;
+  protected function isResponseSatisfactory(?array $addressData, array &$errors = []) :bool {
     return true;
   }
 }

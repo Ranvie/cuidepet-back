@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserFormRequest;
-use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\FormService;
 use Illuminate\Http\JsonResponse;
@@ -19,36 +18,82 @@ class FormController {
   ) {}
 
   /**
-   * Lista os formulários do usuário autenticado
-   * @return JsonResponse Resposta JSON contendo a lista de formulários do usuário
+   * Lista paginada de formulários de um usuário específico.
+   * @return JsonResponse Resposta JSON do serviço.
    */
-  public function list(): JsonResponse {
-    $registers = $this->obFormService->listFormByUser(auth()->id());
+  public function listFormsByUser() :JsonResponse {
+    $registers = $this->obFormService->listFormsByUser(10, 1, auth()->id());
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();
   }
 
-  public function get(int $formId) {
-    // TODO: Implement get() method.
+  /**
+   * Lista todos os formulários de um usuário específico, sem paginação. (para select de formulário)
+   * @return JsonResponse Resposta JSON do serviço.
+   */
+  public function listAllUserForms() :JsonResponse {
+    $registers = $this->obFormService->listAllUserForms(auth()->id());
+
+    $response = new BusinessResponse(200, $registers);
+    return $response->build();
+  }
+
+  /**
+   * Busca formulário de um usuário por ID.
+   * @param int $formId ID do formulário.
+   * @return JsonResponse Resposta JSON do serviço.
+   */
+  public function getFormById(int $formId) :JsonResponse{
+    $register = $this->obFormService->getFormById($formId, auth()->id());
+
+    $response = new BusinessResponse(200, $register);
+    return $response->build();
+  }
+
+  /**
+   * Busca formulário associado a um anúncio por ID.
+   * @param int $formId         ID do formulário.
+   * @param int $announcementId ID do anúncio.
+   * @return JsonResponse Resposta JSON do serviço.
+   */
+  public function getFormByAnnouncement(int $formId, int $announcementId) :JsonResponse {
+    $register = $this->obFormService->getFormByAnnouncement($formId, $announcementId);
+
+    $response = new BusinessResponse(200, $register);
+    return $response->build();
   }
 
   /**
    * Cria um novo formulário para o usuário autenticado
    * @param  UserFormRequest $request Objeto de requisição contendo os dados do formulário a ser criado
-   * @return JsonResponse             Resposta JSON contendo os detalhes do formulário criado
+   * @return JsonResponse             Resposta JSON do serviço.
    */
   public function create(UserFormRequest $request): JsonResponse {
     $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
-    $registers = $this->obFormService->create($obFormRequest);
+    $registers     = $this->obFormService->create($obFormRequest);
     return new BusinessResponse(200, $registers)->build();
   }
 
-  public function update(int $formId, UserRequest $request) {
-    // TODO: Implement update() method.
+  /**
+   * Atualiza formulários de anúncios.
+   * @param  int $formId              ID do formulário a ser atualizado.
+   * @param  UserFormRequest $request Objeto de requisição contendo os dados do formulário a ser atualizado
+   * @return JsonResponse             Resposta JSON do serviço.
+   */
+  public function update(int $formId, UserFormRequest $request) :JsonResponse {
+    $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
+    $registers     = $this->obFormService->update($formId, auth()->id(), $obFormRequest);
+    return new BusinessResponse(200, $registers)->build();
   }
 
-  public function delete(int $formId) {
-    // TODO: Implement delete() method.
+  /**
+   * Exclui formulários de anúncios.
+   * @param  int $formId  ID do formulário a ser excluído.
+   * @return JsonResponse Resposta JSON do serviço.
+   */
+  public function delete(int $formId) :JsonResponse {
+    $this->obFormService->remove($formId, auth()->id());
+    return new BusinessResponse(200, 'Formulário excluído com sucesso')->build();
   }
 }

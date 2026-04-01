@@ -43,11 +43,11 @@ class AnnouncementService implements IAnnouncementService {
    * Lista os anúncios de um usuário específico com paginação.
    * @param  int $limit  Número de anúncios por página.
    * @param  int $page   Número da página.
-   * @param  int $idUser ID do usuário.
+   * @param  int $userId ID do usuário.
    * @return array       Lista de anúncios do usuário paginada.
    */
-  public function getListByUser(int $limit, int $page, int $idUser) :array {
-    return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $idUser)]);
+  public function getListByUser(int $limit, int $page, int $userId) :array {
+    return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $userId)]);
   }
 
   /**

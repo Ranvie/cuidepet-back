@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Validator as FormValidator;
 use \Illuminate\Contracts\Validation\Validator;
 
 class UserFormRequest extends FormRequest {
@@ -12,41 +13,63 @@ class UserFormRequest extends FormRequest {
    * @return array
    */
   public function rules() :array {
-    $payload = json_decode($this->input('payload'), true);
-    
-    $this->merge([
-      'pages' => $payload['pages'] ?? []
-    ]);
-
     return [
-      'pages'                     => 'required|array|min:1|max:1',
-      'pages.*.title'             => 'required|string|max:255',
-      'pages.*.inputs'            => 'required|array|min:1|max:10',
-      'pages.*.inputs.*.title'    => 'required|string|max:255',
-      'pages.*.inputs.*.type'     => 'required|in:checkbox,textarea,number,radio,dropdown,text,date',
-      'pages.*.inputs.*.options'  => 'required_if:pages.*.inputs.*.type,checkbox,radio,dropdown|array|min:1|max:10',
-      'pages.*.inputs.*.value'    => 'present|nullable',
-      'pages.*.inputs.*.required' => 'required|boolean'
+      'title'   => 'required|string|max:255',
+      'payload' => 'required|string|max:10000'
     ];
   }
 
   /**
    * Configura o validador para adicionar validações personalizadas após as regras básicas.
-   * @param  Validator $validator
+   * @param  Validator $validator Validador para adicionar erros de validação.
    * @return void
    */
   public function withValidator(Validator $validator): void {
     $validator->after(function (Validator $validator) {
-      foreach ($this->input('pages', []) as $pageIndex => $page) {
-        foreach ($page['inputs'] ?? [] as $inputIndex => $input) {
-          $this->validateInputValue(
-            $validator,
-            $input,
-            "pages.{$pageIndex}.inputs.{$inputIndex}.value"
-          );
-        }
+      if ($validator->errors()->isNotEmpty())
+        return;
+
+      $payload = json_decode($this->input('payload'), true);
+
+      $formValidator = FormValidator::make($payload ?? [], [
+        'pages'                     => 'required|array|min:1|max:1',
+        'pages.*.title'             => 'required|string|max:255',
+        'pages.*.inputs'            => 'required|array|min:1|max:10',
+        'pages.*.inputs.*.title'    => 'required|string|max:255',
+        'pages.*.inputs.*.type'     => 'required|in:checkbox,textarea,number,radio,dropdown,text,date',
+        'pages.*.inputs.*.options'  => 'required_if:pages.*.inputs.*.type,checkbox,radio,dropdown|array|min:1|max:10',
+        'pages.*.inputs.*.value'    => 'present|nullable',
+        'pages.*.inputs.*.required' => 'required|boolean'
+      ]);
+
+      if ($formValidator->fails()) {
+        foreach ($formValidator->errors()->messages() as $field => $messages)
+          foreach ($messages as $message)
+            $validator->errors()->add($field, $message);
+
+        return;
       }
+
+      $this->validateFormInputs($validator, $payload['pages'] ?? []);
     });
+  }
+
+  /**
+   * Realiza validação dos inputs do formulário, verificando se os valores estão de acordo com o tipo de entrada especificado.
+   * @param  Validator $validator Validador para adicionar erros de validação.
+   * @param  array     $pages     Páginas do formulário a serem validadas.
+   * @return void
+   */
+  public function validateFormInputs(Validator $validator, array $pages) :void {
+    foreach ($pages as $pageIndex => $page) {
+      foreach ($page['inputs'] ?? [] as $inputIndex => $input) {
+        $this->validateInputValue(
+          $validator,
+          $input,
+          "pages.{$pageIndex}.inputs.{$inputIndex}.value"
+        );
+      }
+    }
   }
 
   /**
