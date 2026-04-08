@@ -7,6 +7,7 @@ use App\Models\IntegrationAddressCacheModel;
 use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use App\Exceptions\BusinessException;
 use App\ExternalAPI\Address\Provider\ExternalAddressProvider;
+use \App\Utils\Functions;
 
 /**
  * Serviço de cache de endereços, responsável por gerenciar o cache de endereços e resolver endereços a partir de serviços externos quando necessário.
@@ -23,11 +24,23 @@ class AddressCacheService {
   ) {}
 
   /**
+   * Obtém um cache de endereço por ID.
+   * @param  int $id                    ID do cache de endereço a ser obtido.
+   * @param  array $relations           Relações a serem carregadas com o cache de endereço.
+   * @param  bool $parse                Indica se o resultado deve ser parseado para DTO.
+   * @return IntegrationAddressCacheDTO Objeto de transferência de dados do cache de endereço.
+   */
+  public function getById(int $id, array $relations = [], bool $parse = true) :IntegrationAddressCacheDTO {
+    return $this->obIntegrationAddressCacheModel->getById($id, $relations, $parse);
+  }
+
+  /**
    * Obtém um cache de endereço por CEP.
    * @param  string $zipCode CEP do endereço a ser obtido.
    * @return IntegrationAddressCacheDTO Objeto de transferência de dados do cache de endereço.
    */
   public function getByZipCode(string $zipCode) :IntegrationAddressCacheDTO {
+    $zipCode         = Functions::getNumbersOnly($zipCode);
     $addressDatabase = $this->obIntegrationAddressCacheModel->getByQuery([new Filter('zipcode', '=', $zipCode)], [], true);
     $expired         = $this->isCacheExpired($addressDatabase);
 

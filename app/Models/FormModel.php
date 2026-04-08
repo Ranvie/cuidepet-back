@@ -82,6 +82,21 @@ class FormModel extends BusinessModel {
   }
 
   /**
+   * Busca um formulário a partir de um anúncio
+   * @param int $announcementId ID do anúncio associado ao formulário
+   * @return FormDTO|null
+   */
+  public function getFormByAnnouncement(int $announcementId) :?FormDTO {
+    $obFormModel = $this->query()
+      ->whereHas('announcements', function ($query) use ($announcementId) {
+        $query->where('id', $announcementId);
+      })
+      ->first();
+
+    return $obFormModel ? $this->parser($obFormModel) : null;
+  }
+
+  /**
    * Cria um novo formulário
    * @param  array $data
    * @param  array $relations
@@ -94,15 +109,14 @@ class FormModel extends BusinessModel {
 
   /**
    * Exclui formulário de um usuário
-   * @param  int $formId
-   * @param  int $userId
+   * @param  int|null $formId
    * @return bool
    */
-  public function delete(int $formId, int $userId) :bool {
-    $obFormModel = $this->getById($formId, ['announcements'], false, [new Filter('user_id', '=', $userId)]);
+  public function remove(?int $formId = null) :bool {
+    $obFormModel = $this->getById($formId ?? 0, ['announcements'], false);
 
-    if (!$obFormModel)
-      return false;
+    if (!$obFormModel instanceof FormModel)
+      throw new BusinessException('O formulário solicitado não foi encontrado.');
 
     $hasAnnouncements = $obFormModel->announcements->count() > 0;
 

@@ -82,7 +82,7 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
       return true;
     }
 
-    $errors[] = "Há campos obrigatórios ausentes.";
+    $errors[] = "A resposta da API não contém os campos necessários ou está em formato inesperado.";
     return true;
   }
 }

@@ -25,17 +25,16 @@ interface IFormService {
    * Busca formulário de um usuário por ID.
    * @param  int $formId ID do formulário.
    * @param  int $userId ID do usuário.
-   * @return FormDTO Coleção de formulários do usuário.
+   * @return FormDTO     Coleção de formulários do usuário.
    */
-  public function getFormById(int $formId, int $userId) :FormDTO;
+  public function getUserFormById(int $formId, int $userId) :FormDTO;
 
   /**
    * Busca formulário associado a um anúncio por ID.
-   * @param  int $formId         ID do formulário.
    * @param  int $announcementId ID do anúncio.
    * @return FormDTO Coleção de formulários do usuário.
    */
-  public function getFormByAnnouncement(int $formId, int $announcementId) :FormDTO;
+  public function getFormByAnnouncement(int $announcementId) :FormDTO;
 
   /**
    * Cadastra formulários de anúncios.
@@ -47,17 +46,15 @@ interface IFormService {
   /**
    * Atualiza formulários de anúncios.
    * @param  int $formId ID do formulário a ser atualizado.
-   * @param  int $userId ID do usuário associado.
    * @param  array $data Dados do formulário a ser atualizado.
    * @return FormDTO DTO do formulário atualizado.
    */
-  public function edit(int $formId, int $userId, array $data) :FormDTO;
+  public function edit(int $formId, array $data) :FormDTO;
 
   /**
    * Exclui formulários de anúncios.
    * @param  int $formId ID do formulário a ser excluído.
-   * @param  int $userId ID do usuário dono do formulário.
    * @return bool True se a exclusão foi bem-sucedida, false caso contrário.
    */
-  public function remove(int $formId, int $userId) :bool;
+  public function remove(int $formId) :bool;
 }

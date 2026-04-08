@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\AddressRule;
 use App\Rules\PhoneRule;
+use App\Rules\ZipcodeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AnnouncementRequest extends FormRequest {
@@ -42,7 +42,7 @@ class AnnouncementRequest extends FormRequest {
       'description'                       => 'nullable|string|max:1000',
       'mainImage'                         => 'nullable|string',
       'address'                           => 'required|array',
-      'address.integrationAddressCacheId' => 'required|exists:tb_integration_address_cache,id',
+      'address.zipCode'                   => ['required', 'string', new ZipcodeRule()],
       'address.street'                    => 'nullable|string|max:255',
       'address.neighborhood'              => 'nullable|string|max:255',
       'address.number'                    => 'required|string|max:10',
@@ -63,7 +63,7 @@ class AnnouncementRequest extends FormRequest {
       'animal.dewormed'                   => 'nullable|boolean',
       'animal.castrated'                  => 'nullable|boolean',
       'animal.imageProfile'               => 'required|string',
-      'animal.lastSeenDate'               => 'missing|date',
+      'animal.lastSeenDate'               => 'missing_if:type,donation|date',
       'animal.breedId'                    => 'required|exists:tb_breed,id',
       'animal.specieId'                   => 'required|exists:tb_specie,id',
     ];
@@ -79,7 +79,7 @@ class AnnouncementRequest extends FormRequest {
       'description'                       => 'nullable|string|max:1000',
       'mainImage'                         => 'nullable|string',
       'address'                           => 'nullable|array',
-      'address.integrationAddressCacheId' => 'nullable|exists:tb_integration_address_cache,id',
+      'address.zipCode'                   => ['nullable', 'string', new ZipcodeRule()],
       'address.street'                    => 'nullable|string|max:255',
       'address.neighborhood'              => 'nullable|string|max:255',
       'address.number'                    => 'nullable|string|max:10',
@@ -102,7 +102,7 @@ class AnnouncementRequest extends FormRequest {
       'animal.dewormed'                   => 'nullable|boolean',
       'animal.castrated'                  => 'nullable|boolean',
       'animal.imageProfile'               => 'nullable|string',
-      'animal.lastSeenDate'               => 'nullable|date',
+      'animal.lastSeenDate'               => 'missing_if:type,donation|date',
       'animal.breedId'                    => 'nullable|exists:tb_breed,id',
       'animal.specieId'                   => 'nullable|exists:tb_specie,id',
     ];

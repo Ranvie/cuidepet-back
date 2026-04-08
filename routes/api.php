@@ -18,7 +18,7 @@ Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
 Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
 
-Route::get('announcement/{id}',   [PublicAnnouncementController::class, 'get']);
+Route::get('announcement/{id}',    [PublicAnnouncementController::class, 'get']);
 Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);
 
 Route::middleware(['auth:sanctum', 'hasRole:reset-password'])
@@ -45,18 +45,20 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::get('/species',                               [SpecieController::class, 'list']);
+  Route::get('/species',                               [SpecieController::class, 'list']); //Não precisa validação
 
-  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
+  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']); //Pega pelo token
 
-  Route::post('/inactivate',                           [UserController::class, 'inactivate']);
+  Route::post('/inactivate',                           [UserController::class, 'inactivate']); //Valida pelo token
 
-  Route::post('/logout',                               [AuthController::class, 'logout']);
+  Route::post('/logout',                               [AuthController::class, 'logout']); //Só valida pelo token direto
 
-  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
+  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']); // Não precisa validação
+
+  Route::get('/announcement/{announcementId}/form',    [FormController::class, 'getByAnnouncement']); // Busca form por anúncio
 
   //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
-  Route::prefix('my-announcements')->group(function () {
+  Route::middleware(['validate:BelongsToUser,AnnouncementModel,list|listAnswers|create'])->prefix('my-announcements')->group(function () {
     Route::get('/',                         [AnnouncementController::class, 'list']);
     Route::get('/{announcementId}',         [AnnouncementController::class, 'get']);
     Route::get('/answers/{announcementId}', [AnnouncementController::class, 'listAnswers']);
@@ -65,13 +67,13 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::delete('/{announcementId}',      [AnnouncementController::class, 'delete']);
   });
 
-  Route::prefix('/notifications')->group(function () {
+  Route::middleware(['validate:BelongsToUser,NotificationModel,list'])->prefix('/notifications')->group(function () {
     Route::get('/',                        [NotificationController::class, 'list']);
     Route::delete('/{notificationId}',     [NotificationController::class, 'delete']);
     Route::patch('/read/{notificationId}', [NotificationController::class, 'readNotification']);
   });
 
-  Route::prefix('/form')->group(function () {
+  Route::middleware(['validate:BelongsToUser,FormResponseModel,list|create'])->prefix('/form-responses')->group(function () {
     Route::get('/',            [FormResponseController::class, 'list']);
     Route::get('/{formId}',    [FormResponseController::class, 'get']);
     Route::post('/',           [FormResponseController::class, 'create']);
@@ -79,17 +81,18 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::put('/{formId}',    [FormResponseController::class, 'update']);
   });
 
-  Route::prefix('/my-forms')->group(function () {
+  Route::middleware(['validate:BelongsToUser,FormModel,list|listAll|getByAnnouncement|create'])->prefix('/my-forms')->group(function () {
     Route::get('/',            [FormController::class, 'list']);
-    Route::get('/{formId}',    [FormController::class, 'get']);
+    Route::get('/all',         [FormController::class, 'listAll']);
+    Route::get('/{formId}',    [FormController::class, 'getById']);
     Route::post('/',           [FormController::class, 'create']);
-    Route::delete('/{formId}', [FormController::class, 'delete']);
     Route::put('/{formId}',    [FormController::class, 'update']);
+    Route::delete('/{formId}', [FormController::class, 'delete']);
   });
 
-  route::prefix('/favorite')->group(function () {
-    Route::get('/',    [FavoriteController::class, 'list']);
-    Route::post('/',   [FavoriteController::class, 'create']);
-    Route::delete('/', [FavoriteController::class, 'delete']);
+  Route::middleware(['validate:BelongsToUser,FavoriteModel,list|create'])->prefix('/favorite')->group(function () {
+    Route::get('/',                [FavoriteController::class, 'list']);
+    Route::post('/',               [FavoriteController::class, 'create']);
+    Route::delete('/{favoriteId}', [FavoriteController::class, 'delete']);
   });
 });

@@ -34,7 +34,7 @@ class AnnouncementController {
    * @return JsonResponse        Resposta JSON com os detalhes do anúncio.
    */
   public function get(int $announcementId) :JsonResponse {
-    $obAnnouncementDTO = $this->obAnnouncementService->getById($announcementId);
+    $obAnnouncementDTO = $this->obAnnouncementService->getUserAnnouncement($announcementId, auth()->id());
 
     $response = new BusinessResponse(200, $obAnnouncementDTO);
     return $response->build();
@@ -75,7 +75,7 @@ class AnnouncementController {
    * @return JsonResponse        Resposta JSON indicando o sucesso da operação.
    */
   public function delete(int $announcementId) :JsonResponse {
-    $this->obAnnouncementService->remove(auth()->id(), $announcementId);
+    $this->obAnnouncementService->remove($announcementId);
     $response = new BusinessResponse(200, "O anúncio $announcementId foi removido com sucesso.");
     return $response->build();
   }

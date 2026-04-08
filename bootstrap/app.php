@@ -4,6 +4,7 @@ use App\Exceptions\BusinessExceptionHandler;
 use App\Http\Middleware\CheckUser;
 use \App\Http\Middleware\RejectIfUserHasRole;
 use \App\Http\Middleware\AllowIfUserHasRole;
+use App\Http\Middleware\Validate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,9 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
   )
   ->withMiddleware(function (Middleware $middleware) {
     $middleware->alias([
-      'checkUser'  => CheckUser::class,
-      'notHasRole' => RejectIfUserHasRole::class,
-      'hasRole'    => AllowIfUserHasRole::class,
+      'checkUser'     => CheckUser::class,
+      'notHasRole'    => RejectIfUserHasRole::class,
+      'hasRole'       => AllowIfUserHasRole::class,
+      'validate'      => Validate::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {

@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
 use App\Models\FormModel;
 use App\Services\Interfaces\IFormService;
 
+/**
+ * Serviço de gerenciamento de formulários.
+ * Fornece métodos para criar, editar, listar e remover formulários, além de validações relacionadas a formulários.
+ */
 class FormService implements IFormService {
 
   /**
@@ -24,7 +29,7 @@ class FormService implements IFormService {
    * @return FormDTO[]   Lista de formulários do usuário.
    */
   public function listFormsByUser(int $limit, int $page, int $userId) :array {
-    return $this->formModel->list($limit, $page, filters: ['user_id' => $userId]);
+    return $this->formModel->list($limit, $page, filters: [new Filter('user_id', $userId)]);
   }
 
   /**
@@ -38,12 +43,12 @@ class FormService implements IFormService {
 
   /**
    * Busca formulário de um usuário por ID.
-   * @param int $formId ID do formulário.
-   * @param int $userId ID do usuário.
-   * @return FormDTO Coleção de formulários do usuário.
+   * @param  int $formId ID do formulário.
+   * @param  int $userId ID do usuário.
+   * @return FormDTO     Coleção de formulários do usuário.
    */
-  public function getFormById(int $formId, int $userId) :FormDTO {
-    $formResponse = $this->formModel->getById($formId, filters: ['user_id' => $userId]);
+  public function getUserFormById(int $formId, int $userId) :FormDTO {
+    $formResponse = $this->formModel->getByQuery([new Filter('id', '=', $formId, 'AND'), new Filter('user_id', '=', $userId)]);
 
     $this->validateForm($formResponse);
     
@@ -52,12 +57,11 @@ class FormService implements IFormService {
 
   /**
    * Busca formulário associado a um anúncio por ID.
-   * @param int $formId         ID do formulário.
    * @param int $announcementId ID do anúncio.
    * @return FormDTO Coleção de formulários do usuário.
    */
-  public function getFormByAnnouncement(int $formId, int $announcementId) :FormDTO {
-    $formResponse = $this->formModel->getById($formId, filters: ['announcement_id' => $announcementId]);
+  public function getFormByAnnouncement(int $announcementId) :FormDTO {
+    $formResponse = $this->formModel->getFormByAnnouncement($announcementId);
     
     $this->validateForm($formResponse);
 
@@ -75,13 +79,12 @@ class FormService implements IFormService {
 
   /**
    * Atualiza formulários de anúncios.
-   * @param int $formId ID do formulário a ser atualizado.
-   * @param int $userId ID do usuário associado.
-   * @param array $data Dados do formulário a ser atualizado.
-   * @return FormDTO DTO do formulário atualizado.
+   * @param  int   $formId ID do formulário a ser atualizado.
+   * @param  array $data   Dados do formulário a ser atualizado.
+   * @return FormDTO       DTO do formulário atualizado.
    */
-  public function edit(int $formId, int $userId, array $data) :FormDTO {
-    $obFormDTO = $this->formModel->edit($formId, $data, filters: ['user_id', $userId], parse: false);
+  public function edit(int $formId, array $data) :FormDTO {
+    $obFormDTO = $this->formModel->edit($formId, $data);
 
     if(!$obFormDTO instanceof FormDTO)
       throw new \Exception("Ocorreu um erro ao atualizar o formulário.");
@@ -92,11 +95,10 @@ class FormService implements IFormService {
   /**
    * Exclui formulários de anúncios.
    * @param int $formId ID do formulário a ser excluído.
-   * @param int $userId ID do usuário dono do formulário.
    * @return bool True se a exclusão foi bem-sucedida, false caso contrário.
    */
-  public function remove(int $formId, int $userId) :bool {
-    return $this->formModel->delete($formId, $userId);
+  public function remove(int $formId) :bool {
+    return $this->formModel->remove($formId);
   }
 
   /**

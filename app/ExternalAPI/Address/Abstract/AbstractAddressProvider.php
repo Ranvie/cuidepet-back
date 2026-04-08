@@ -3,6 +3,7 @@
 namespace App\ExternalAPI\Address\Abstract;
 
 use App\ExternalAPI\Integration\Abstract\AbstractIntegrationProvider;
+use App\Utils\Functions;
 
 /**
  * Classe base para provedores de endereço, fornecendo a estrutura e métodos comuns para resolver endereços a partir de serviços externos.
@@ -44,7 +45,7 @@ abstract class AbstractAddressProvider extends AbstractIntegrationProvider {
    * @return bool            Retorna true se o CEP for válido, caso contrário, false.
    */
   protected function isZipCodeValid(string $zipCode) :bool {
-    return preg_match('/^\d{5}-?\d{3}$/', $zipCode);
+    return Functions::isZipCodeValid($zipCode);
   }
 
 }

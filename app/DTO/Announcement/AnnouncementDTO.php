@@ -21,6 +21,12 @@ class AnnouncementDTO {
   public UserDTO $user;
 
   /**
+   * Identificador do usuário dono do anúncio
+   * @var int|null
+   */
+  public ?int $userId;
+
+  /**
    * Objeto do formulário vinculado ao anúncio
    * @var FormDTO|null
    */
@@ -31,6 +37,12 @@ class AnnouncementDTO {
    * @var AddressDTO
    */
   public AddressDTO $address;
+
+  /**
+   * Identificador do endereço do anúncio
+   * @var int|null
+   */
+  public ?int $addressId;
 
   /**
    * Tipo do anúncio

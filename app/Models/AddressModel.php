@@ -64,6 +64,6 @@ class AddressModel extends BusinessModel {
    * @return HasOne
    */
   public function announcement() :HasOne {
-    return $this->hasOne(AnnouncementModel::class, 'announcement_id');
+    return $this->hasOne(AnnouncementModel::class, 'id');
   }
 }

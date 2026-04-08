@@ -7,6 +7,7 @@ use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -73,10 +74,7 @@ class BusinessModel extends Model {
     if ($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
 
     $query = self::query();
-
-    foreach ($filters as $filter) {
-      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
-    }
+    $this->addFilters($query, $filters);
 
     $query->with($relations);
     $registers = $query->paginate($limit, ['*'], 'page', $page);
@@ -101,15 +99,11 @@ class BusinessModel extends Model {
    * @param  int      $id
    * @param  string[] $relations
    * @param  boolean  $parse
-   * @param  Filter[] $filters
    * @return null|object
    */
-  public function getById(int $id, array $relations = [], bool $parse = true, array $filters = []) :?object {
+  public function getById(int $id, array $relations = [], bool $parse = true) :?object {
     $query = self::query();
-
-    foreach ($filters as $filter) {
-      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
-    }
+    $this->addFilters($query);
 
     $model = $query->where($this->primaryKey, $id)->with($relations)->first();
     if (!$model instanceof $this) return null;
@@ -120,23 +114,31 @@ class BusinessModel extends Model {
 
   /**
    * Procura um registro por uma query personalizada
-   * @param  Filter[] $filters
    * @param  string[] $relations
    * @param  boolean  $parse
    * @return null|object
    */
-  public function getByQuery(array $filters = [], array $relations = [], bool $parse = true) :?object {
+  public function getByQuery(array $filters, array $relations = [], bool $parse = true) :?object {
     $queryBuilder = self::query();
-
-    foreach ($filters as $filter) {
-      $queryBuilder->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
-    }
+    $this->addFilters($queryBuilder, $filters);
 
     $model = $queryBuilder->with($relations)->first();
     if (!$model instanceof $this) return null;
     if (!$parse) return $model;
 
     return $this->parser($model);
+  }
+
+  /**
+   * Adiciona filtros a uma query
+   * @param  Builder $query
+   * @param  Filter[] $filters
+   * @return void
+   */
+  private function addFilters(Builder $query, array $filters = []) :void {
+    foreach ($filters as $filter) {
+      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+    }
   }
 
   /**
@@ -158,11 +160,6 @@ class BusinessModel extends Model {
         $this->fill($origin);
         $this->save();
 
-        foreach ($relations as $relation) {
-          $content = $origin[$relation];
-          $this->saveRelations($content, $relation);
-        }
-
         return $this->getById($this->original[$this->primaryKey], $relations, $parse);
       });
   }
@@ -173,11 +170,10 @@ class BusinessModel extends Model {
    * @param  array|object $data
    * @param  boolean      $ignoreNulls
    * @param  boolean      $parse
-   * @param  Filter[]     $filters
    * @return null|object
    */
-  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true, array $filters = []) :?object {
-    $register = $this->getById($id, parse: false, filters: $filters);
+  public function edit(int $id, array|object $data, bool $ignoreNulls = true, bool $parse = true) :?object {
+    $register = $this->getById($id, parse: false);
     if (!$register instanceof $this) return null;
 
     $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
@@ -197,9 +193,14 @@ class BusinessModel extends Model {
    */
   public function remove(?int $id = null) :bool {
     $id = $id ?? $this->original['id'];
+    
+    if (!$id) 
+      return false;
 
-    if (!$id) return false;
-    return $this->where('id', $id)->delete();
+    $query = self::query();
+    $query->where('id', $id);
+
+    return $query->delete();
   }
 
   /**

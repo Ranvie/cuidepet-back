@@ -21,7 +21,7 @@ class FormController {
    * Lista paginada de formulários de um usuário específico.
    * @return JsonResponse Resposta JSON do serviço.
    */
-  public function listFormsByUser() :JsonResponse {
+  public function list() :JsonResponse {
     $registers = $this->obFormService->listFormsByUser(10, 1, auth()->id());
 
     $response = new BusinessResponse(200, $registers);
@@ -32,7 +32,7 @@ class FormController {
    * Lista todos os formulários de um usuário específico, sem paginação. (para select de formulário)
    * @return JsonResponse Resposta JSON do serviço.
    */
-  public function listAllUserForms() :JsonResponse {
+  public function listAll() :JsonResponse {
     $registers = $this->obFormService->listAllUserForms(auth()->id());
 
     $response = new BusinessResponse(200, $registers);
@@ -44,8 +44,8 @@ class FormController {
    * @param int $formId ID do formulário.
    * @return JsonResponse Resposta JSON do serviço.
    */
-  public function getFormById(int $formId) :JsonResponse{
-    $register = $this->obFormService->getFormById($formId, auth()->id());
+  public function getById(int $formId) :JsonResponse{
+    $register = $this->obFormService->getUserFormById($formId, auth()->id());
 
     $response = new BusinessResponse(200, $register);
     return $response->build();
@@ -53,12 +53,11 @@ class FormController {
 
   /**
    * Busca formulário associado a um anúncio por ID.
-   * @param int $formId         ID do formulário.
    * @param int $announcementId ID do anúncio.
    * @return JsonResponse Resposta JSON do serviço.
    */
-  public function getFormByAnnouncement(int $formId, int $announcementId) :JsonResponse {
-    $register = $this->obFormService->getFormByAnnouncement($formId, $announcementId);
+  public function getByAnnouncement(int $announcementId) :JsonResponse {
+    $register = $this->obFormService->getFormByAnnouncement($announcementId);
 
     $response = new BusinessResponse(200, $register);
     return $response->build();
@@ -83,7 +82,7 @@ class FormController {
    */
   public function update(int $formId, UserFormRequest $request) :JsonResponse {
     $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
-    $registers     = $this->obFormService->update($formId, auth()->id(), $obFormRequest);
+    $registers     = $this->obFormService->edit($formId, $obFormRequest);
     return new BusinessResponse(200, $registers)->build();
   }
 
@@ -93,7 +92,7 @@ class FormController {
    * @return JsonResponse Resposta JSON do serviço.
    */
   public function delete(int $formId) :JsonResponse {
-    $this->obFormService->remove($formId, auth()->id());
+    $this->obFormService->remove($formId);
     return new BusinessResponse(200, 'Formulário excluído com sucesso')->build();
   }
 }
