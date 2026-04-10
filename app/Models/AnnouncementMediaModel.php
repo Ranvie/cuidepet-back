@@ -43,7 +43,8 @@ class AnnouncementMediaModel extends BusinessModel {
    */
   public $fillable = [
     'announcement_id', 
-    'url'
+    'url',
+    'file_path'
   ];
 
   /**

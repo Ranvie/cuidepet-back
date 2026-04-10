@@ -10,6 +10,7 @@ use App\Http\Response\BusinessResponse;
 use App\Models\AnnouncementModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Serviço de gerenciamento de anúncios.
@@ -61,7 +62,19 @@ class AnnouncementService implements IAnnouncementService {
    */
   public function getById(int $id, array $relations = ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']) :AnnouncementDTO {
     $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
+    foreach($obAnnouncementDTO->announcementMedia as $media) {
+      $media->url = $this->getMediaUrlPath($media->url);
+    }
     return $obAnnouncementDTO;
+  }
+
+  /**
+   * Obtém o caminho completo de um arquivo de mídia.
+   * @param  string $url URL do arquivo de mídia.
+   * @return string      Caminho completo do arquivo de mídia.
+   */
+  private function getMediaUrlPath(string $url) :string {
+    return Storage::path($url);
   }
 
   /**
@@ -103,10 +116,11 @@ class AnnouncementService implements IAnnouncementService {
     $announcementMediaData = $data['announcementMedia'];
     foreach ($announcementMediaData as $announcementMedia) {
       $announcementMedia['announcementId'] = $announcementId;
-      $this->announcementMediaService->newInstance()->create($announcementMedia);
+      $announcementMedia['userId']         = $data['userId'];
+      $this->announcementMediaService->create($announcementMedia);
     }
 
-    return $announcementModel->getById($announcementId, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
+    return $this->getById($announcementId, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
   }
 
   /**
@@ -162,10 +176,16 @@ class AnnouncementService implements IAnnouncementService {
       $announcementMediaIds  = $this->announcementMediaService->getAllMediaIds($id);
       $errors = [];
       foreach ($announcementMediaData as $announcementMedia) {
-        if(!$this->validateIfMediaBelongsToAnnouncement($announcementMedia['id'] ?? null, $announcementMediaIds, $errors))
+        if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
+          $errors[] = "O anúncio não pode conter mais do que 4 mídias.";
+          break;
+        }
+
+        if($announcementMedia['action'] !== 'ADD' && !$this->validateIfMediaBelongsToAnnouncement($announcementMedia['id'] ?? null, $announcementMediaIds, $errors))
           continue;
 
         $announcementMedia['announcementId'] = $id;
+        $announcementMedia['userId']         = $data['userId'];
         $this->changeMediaData($announcementMedia);
       }
 
@@ -173,7 +193,7 @@ class AnnouncementService implements IAnnouncementService {
         BusinessResponse::addErrors($errors);
     }
 
-    return $announcementModel->getById($id, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
+    return $this->getById($id, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
   }
 
   /**
@@ -186,10 +206,22 @@ class AnnouncementService implements IAnnouncementService {
     if (!$mediaId) 
       return true;
 
-    if (!in_array($mediaId, $announcementMediaIds)) {
+    if (!\in_array($mediaId, $announcementMediaIds)) {
       $errors[] = "A mídia de ID {$mediaId} não foi encontrada.";
       return false;
     }
+
+    return true;
+  }
+
+  /**
+   * Valida se o limite de mídias associadas a um anúncio foi atingido.
+   * @param  int $currentMediaCount Quantidade atual de mídias associadas ao anúncio.
+   * @return bool                   Indica se o limite de mídias foi atingido ou não.
+   */
+  private function validateMediaLimit(int $currentMediaCount) :bool {
+    if($currentMediaCount > 4)
+      return false;
 
     return true;
   }
@@ -203,12 +235,10 @@ class AnnouncementService implements IAnnouncementService {
     $mediaId = $announcementMedia['id'] ?? null;
     $option  = $announcementMedia['action'];
 
-    //TODO: Verificar se pertence ao usuário..
-
     match ($option) {
-      'UPD'   => $this->announcementMediaService->newInstance()->edit($mediaId, $announcementMedia),
+      'UPD'   => $this->announcementMediaService->edit($mediaId, $announcementMedia),
       'DEL'   => $this->announcementMediaService->remove($mediaId),
-      'ADD'   => $this->announcementMediaService->newInstance()->create($announcementMedia),
+      'ADD'   => $this->announcementMediaService->create($announcementMedia),
       default => null,
     };
   }
@@ -216,7 +246,6 @@ class AnnouncementService implements IAnnouncementService {
   /**
    * Remove um anúncio.
    * @param  int|null $id     ID do anúncio a ser removido.
-   * @param  int|null $userId ID do usuário que está tentando remover o anúncio.
    * @return bool             Indica se a remoção foi bem-sucedida.
    */
   public function remove(?int $id = null): bool {

@@ -10,6 +10,7 @@ use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StorageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -17,6 +18,8 @@ Route::post('/login',             [AuthController::class, 'login']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
 Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
+
+Route::get('/storage/{path}', [StorageController::class, 'get']);
 
 Route::get('announcement/{id}',    [PublicAnnouncementController::class, 'get']);
 Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);

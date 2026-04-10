@@ -5,6 +5,9 @@ namespace App\DTO\Announcement;
 use App\DTO\Form\FormDTO;
 use App\DTO\User\UserDTO;
 use App\DTO\Address\AddressDTO;
+use App\DTO\Animal\AnimalDTO;
+use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
+use Illuminate\Support\Collection;
 
 class AnnouncementDTO {
 
@@ -103,4 +106,16 @@ class AnnouncementDTO {
    * @var string
    */
   public string $updatedAt;
+
+  /**
+   * Objeto do animal vinculado ao anúncio
+   * @var AnimalDTO
+   */
+  public AnimalDTO $animal;
+
+  /**
+   * Lista de mídias associadas ao anúncio
+   * @var Collection<AnnouncementMediaDTO>
+   */
+  public Collection $announcementMedia;
 }

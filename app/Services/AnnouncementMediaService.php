@@ -5,7 +5,12 @@ namespace App\Services;
 use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
 use App\Models\AnnouncementMediaModel;
 use App\Services\Interfaces\IAnnouncementMediaService;
+use App\Utils\File;
 
+/**
+ * Serviço de gerenciamento de mídias de anúncios.
+ * Fornece métodos para criar, editar, listar e remover mídias associadas a anúncios.
+ */
 class AnnouncementMediaService implements IAnnouncementMediaService {
   
   /**
@@ -51,6 +56,9 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    * @return AnnouncementMediaDTO|AnnouncementMediaModel Objeto com os detalhes do registro criado.
    */
   public function create(array $data) :AnnouncementMediaDTO|AnnouncementMediaModel {
+    $imagePath = (new File("user/{$data['userId']}/announcement/{$data['announcementId']}/media/"))->save($data['file'], width: 300, height: 300);
+
+    $data['url'] = $imagePath;
     return $this->announcementMediaModel->create($data);
   }
 
@@ -61,7 +69,27 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    * @return AnnouncementMediaDTO|AnnouncementMediaModel Objeto com os detalhes do registro atualizado.
    */
   public function edit(int $id, array $data) :AnnouncementMediaDTO|AnnouncementMediaModel {
+    $this->removeOldMedia($id);
+    $imagePath = (new File("user/{$data['userId']}/announcement/{$data['announcementId']}/media/"))->save($data['file'], width: 300, height: 300);
+
+    $data['url'] = $imagePath;
     return $this->announcementMediaModel->edit($id, $data);
+  }
+
+  /**
+   * Remove a mídia antiga associada a um registro, caso exista.
+   * @param  int  $idMedia
+   * @return void
+   */
+  private function removeOldMedia(int $idMedia) :void {
+    $media = $this->getById($idMedia, relations: ['announcement']);
+
+    if($media){
+      $announcementId = $media->announcement->id;
+      $userId         = $media->announcement->userId;
+
+      (new File("user/{$userId}/announcement/{$announcementId}/media/"))->remove($media->url);
+    }
   }
 
   /**
@@ -70,14 +98,8 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    * @return bool     Indica se a remoção foi bem-sucedida.
    */
   public function remove(?int $id = null) :bool {
+    $this->removeOldMedia($id);
     return $this->announcementMediaModel->remove($id);
   }
 
-  /**
-   * Inicia nova instância de Mídia do anúncio
-   * @return AnnouncementMediaModel
-   */
-  public function newInstance() :AnnouncementMediaModel {
-    return $this->announcementMediaModel->newModel();
-  }
 }
