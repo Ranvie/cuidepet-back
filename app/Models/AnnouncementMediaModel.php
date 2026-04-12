@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
+use App\Utils\Url;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnnouncementMediaModel extends BusinessModel {
@@ -44,8 +45,25 @@ class AnnouncementMediaModel extends BusinessModel {
   public $fillable = [
     'announcement_id', 
     'url',
-    'file_path'
+    'image_url'
   ];
+
+  /**
+   * Define os atributos que devem ser adicionados ao array de saída do modelo
+   * @var array
+   */
+  protected $appends = ['image_url'];
+
+  /**
+   * Acessor para obter a URL completa do arquivo de mídia.
+   * @return string|null URL completa do arquivo de mídia.
+   */
+  public function getImageUrlAttribute() :?string {
+    if(empty($this->attributes['url']))
+      return null;
+
+    return $this->attributes['image_url'] = (new Url())->setResource('media')->getMediaUrlPath($this->attributes['url']);
+  }
 
   /**
    * Define o relacionamento entre mídias e anúncios. Uma mídia pertence a um anúncio.

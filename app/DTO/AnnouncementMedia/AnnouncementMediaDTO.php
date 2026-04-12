@@ -22,4 +22,10 @@ class AnnouncementMediaDTO {
    * @var string
    */
   public string $url;
+
+  /**
+   * URL completa da mídia
+   * @var string|null
+   */
+  public ?string $imageUrl;
 }

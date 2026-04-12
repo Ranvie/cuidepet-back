@@ -86,6 +86,12 @@ class AnimalDTO {
   public string $imageProfile;
 
   /**
+   * URL completa da imagem de perfil do animal
+   * @var string|null
+   */
+  public ?string $imageProfileUrl;
+
+  /**
    * Data do último avistamento
    * @var string
    */

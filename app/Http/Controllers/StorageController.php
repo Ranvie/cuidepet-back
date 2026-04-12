@@ -21,9 +21,8 @@ class StorageController {
   public function get(string $path) :BinaryFileResponse {
     $fullPath = Storage::disk('public')->path($path);
     
-    if(!file_exists($fullPath)) {
+    if(!file_exists($fullPath))
       throw new BusinessException('Arquivo não encontrado', 404);
-    }
     
     $mimeType = mime_content_type($fullPath);
     return response()->file($fullPath, ['Content-Type' => $mimeType]);

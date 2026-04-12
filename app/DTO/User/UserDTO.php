@@ -6,6 +6,9 @@ use App\DTO\Preference\PreferenceDTO;
 use App\DTO\Role\RoleDTO;
 use Illuminate\Support\Collection;
 
+/**
+ * Data Transfer Object (DTO) para representar os dados de um usuário.
+ */
 class UserDTO{
 
   /**
@@ -27,16 +30,16 @@ class UserDTO{
   public string $email;
 
   /**
-   * Senha do usuário
-   * @var string
-   */
-  public string $password;
-
-  /**
    * Imagem de perfil do usuário
    * @var string|null
    */
   public ?string $imageProfile;
+
+  /**
+   * URL da imagem de perfil do usuário
+   * @var string|null
+   */  
+  public ?string $imageProfileUrl;
 
   /**
    * Telefone do usuário

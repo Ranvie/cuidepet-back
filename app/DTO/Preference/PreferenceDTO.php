@@ -8,7 +8,7 @@ class PreferenceDTO {
    * Identificador da preferência
    * @var int
    */
-  public int $id;
+  public int $userId;
 
   /**
    * Indica se o usuário deseja receber alertas regionais

@@ -48,17 +48,22 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::get('/species',                               [SpecieController::class, 'list']); //Não precisa validação
+  Route::get('/species',                               [SpecieController::class, 'list']);
 
-  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']); //Pega pelo token
+  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
 
-  Route::post('/inactivate',                           [UserController::class, 'inactivate']); //Valida pelo token
+  Route::post('/logout',                               [AuthController::class, 'logout']);
 
-  Route::post('/logout',                               [AuthController::class, 'logout']); //Só valida pelo token direto
+  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
 
-  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']); // Não precisa validação
+  Route::get('/announcement/{announcementId}/form',    [FormController::class, 'getByAnnouncement']);
 
-  Route::get('/announcement/{announcementId}/form',    [FormController::class, 'getByAnnouncement']); // Busca form por anúncio
+  Route::prefix('profile')->group(function () {
+    Route::get('/',            [UserController::class, 'getProfile']);
+    Route::put('/',            [UserController::class, 'updateProfile']);
+    Route::put('/password',    [UserController::class, 'updatePassword']);
+    Route::post('/inactivate', [UserController::class, 'inactivate']);
+  });
 
   //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
   Route::middleware(['validate:BelongsToUser,AnnouncementModel,list|listAnswers|create'])->prefix('my-announcements')->group(function () {

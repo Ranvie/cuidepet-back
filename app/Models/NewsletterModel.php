@@ -65,7 +65,7 @@ class NewsletterModel extends BusinessModel {
       IntegrationAddressCacheModel::class, 
       NewsletterIntegrationAddressCacheModel::class, 
       'newsletter_id', 
-      'integration_address_cache_id'
+      'address_cache_id'
     );
   }
 

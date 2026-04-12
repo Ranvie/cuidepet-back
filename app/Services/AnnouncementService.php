@@ -10,7 +10,7 @@ use App\Http\Response\BusinessResponse;
 use App\Models\AnnouncementModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
-use Illuminate\Support\Facades\Storage;
+use App\Utils\File;
 
 /**
  * Serviço de gerenciamento de anúncios.
@@ -20,18 +20,20 @@ class AnnouncementService implements IAnnouncementService {
 
   /**
    * Construtor do serviço de anúncios.
-   * @param AnnouncementModel        $obAnnouncementModel      Modelo de anúncio.
-   * @param UserService              $userService              Serviço de usuários.
-   * @param AnnouncementMediaService $announcementMediaService Serviço de mídia de anúncios.
-   * @param FormService              $formService              Serviço de formulários.
-   * @param AddressService           $addressService           Serviço de endereços.
+   * @param AnnouncementModel        $obAnnouncementModel        Modelo de anúncio.
+   * @param UserService              $obUserService              Serviço de usuários.
+   * @param AnnouncementMediaService $obAnnouncementMediaService Serviço de mídia de anúncios.
+   * @param FormService              $obFormService              Serviço de formulários.
+   * @param AddressService           $obAddressService           Serviço de endereços.
+   * @param AnimalService            $obAnimalService            Serviço de animais.
    */
   public function __construct(
     private AnnouncementModel        $obAnnouncementModel,
-    private UserService              $userService,
-    private AnnouncementMediaService $announcementMediaService,
-    private FormService              $formService,
-    private AddressService           $addressService
+    private UserService              $obUserService,
+    private AnnouncementMediaService $obAnnouncementMediaService,
+    private FormService              $obFormService,
+    private AddressService           $obAddressService,
+    private AnimalService            $obAnimalService
   ) {}
 
   /**
@@ -62,19 +64,8 @@ class AnnouncementService implements IAnnouncementService {
    */
   public function getById(int $id, array $relations = ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']) :AnnouncementDTO {
     $obAnnouncementDTO = $this->obAnnouncementModel->getById($id, $relations);
-    foreach($obAnnouncementDTO->announcementMedia as $media) {
-      $media->url = $this->getMediaUrlPath($media->url);
-    }
-    return $obAnnouncementDTO;
-  }
 
-  /**
-   * Obtém o caminho completo de um arquivo de mídia.
-   * @param  string $url URL do arquivo de mídia.
-   * @return string      Caminho completo do arquivo de mídia.
-   */
-  private function getMediaUrlPath(string $url) :string {
-    return Storage::path($url);
+    return $obAnnouncementDTO;
   }
 
   /**
@@ -101,15 +92,24 @@ class AnnouncementService implements IAnnouncementService {
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
     $addressData       = $data['address'];
-    $address           = $this->addressService->create($addressData);
+    $address           = $this->obAddressService->create($addressData);
     $data['addressId'] = $address->id;
 
+    $mainImage = $data['mainImage'] ?? null;
+    unset($data['mainImage']);
+    
     $announcementModel = $this->obAnnouncementModel->create($data, [], false);
     $announcementId    = $announcementModel->getOriginal()['id'];
 
+    if(isset($mainImage)) {
+      $mainImagePath = (new File("user/{$data['userId']}/announcement/{$announcementId}/media/"))->save($mainImage, width: 1200, height: 700);
+      $announcementModel->update(['main_image' => $mainImagePath]);
+    }
+
     $animalData                   = $data['animal'];
     $animalData['announcementId'] = $announcementId;
-    $announcementModel->animal()->getModel()->create($animalData, [], false);
+    $animalData['userId']         = $data['userId'];
+    $this->obAnimalService->create($animalData);
 
     $announcementModel->form()->associate($data['formId']);
 
@@ -117,7 +117,7 @@ class AnnouncementService implements IAnnouncementService {
     foreach ($announcementMediaData as $announcementMedia) {
       $announcementMedia['announcementId'] = $announcementId;
       $announcementMedia['userId']         = $data['userId'];
-      $this->announcementMediaService->create($announcementMedia);
+      $this->obAnnouncementMediaService->create($announcementMedia);
     }
 
     return $this->getById($announcementId, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
@@ -130,7 +130,7 @@ class AnnouncementService implements IAnnouncementService {
    * @throws BusinessException Se o usuário não for encontrado.
    */
   private function validateIfUserExists(int $userId) :void {
-    $this->userService->getById($userId);
+    $this->obUserService->getById($userId);
   }
 
   /**
@@ -141,7 +141,7 @@ class AnnouncementService implements IAnnouncementService {
    * @throws BusinessException Se o formulário não pertencer ao usuário.
    */
   private function validateIfFormBelongsToUser(int $userId, int $formId) :void {
-    $userForm = $this->formService->getUserFormById($formId, $userId);
+    $userForm = $this->obFormService->getUserFormById($formId, $userId);
 
     if (!$userForm instanceof FormDTO)
       throw new BusinessException("O formulário de ID $formId não foi encontrado.", 404);
@@ -159,21 +159,31 @@ class AnnouncementService implements IAnnouncementService {
     if(isset($data['formId']))  
       $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
+    if(isset($data['mainImage'])) {
+      $obFile            = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
+      $obAnnouncementDTO = $this->getById($id, ['announcementMedia']);
+      $obFile->remove($obAnnouncementDTO->mainImage);
+      
+      $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
+    }
+
     $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
 
-    if(isset($data['animal']))
-      $announcementModel->animal()->getModel()->edit($id, $data['animal']);
+    if(isset($data['animal'])) {
+      $data['animal']['userId']         = $data['userId'];
+      $data['animal']['announcementId'] = $id;
+      $this->obAnimalService->edit($id, $data['animal']);
+    }
 
     if(isset($data['formId'])) 
       $announcementModel->form()->associate($data['formId']);
 
-    if(isset($data['address'])) {
-      $this->addressService->edit($announcementModel->address->id, $data['address']);
-    }
+    if(isset($data['address']))
+      $this->obAddressService->edit($announcementModel->address->id, $data['address']);
 
     if (isset($data['announcementMedia'])) {
       $announcementMediaData = $data['announcementMedia'];
-      $announcementMediaIds  = $this->announcementMediaService->getAllMediaIds($id);
+      $announcementMediaIds  = $this->obAnnouncementMediaService->getAllMediaIds($id);
       $errors = [];
       foreach ($announcementMediaData as $announcementMedia) {
         if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
@@ -236,19 +246,23 @@ class AnnouncementService implements IAnnouncementService {
     $option  = $announcementMedia['action'];
 
     match ($option) {
-      'UPD'   => $this->announcementMediaService->edit($mediaId, $announcementMedia),
-      'DEL'   => $this->announcementMediaService->remove($mediaId),
-      'ADD'   => $this->announcementMediaService->create($announcementMedia),
+      'UPD'   => $this->obAnnouncementMediaService->edit($mediaId, $announcementMedia),
+      'DEL'   => $this->obAnnouncementMediaService->remove($mediaId),
+      'ADD'   => $this->obAnnouncementMediaService->create($announcementMedia),
       default => null,
     };
   }
 
   /**
    * Remove um anúncio.
-   * @param  int|null $id     ID do anúncio a ser removido.
-   * @return bool             Indica se a remoção foi bem-sucedida.
+   * @param  int|null $id ID do anúncio a ser removido.
+   * @return bool         Indica se a remoção foi bem-sucedida.
    */
   public function remove(?int $id = null): bool {
+    $obAnnouncement = $this->obAnnouncementModel->getById($id);
+    $userId         = $obAnnouncement->userId;
+
+    (new File("user/$userId/announcement/{$id}/"))->removeAll();
     return $this->obAnnouncementModel->remove($id);
   }
 

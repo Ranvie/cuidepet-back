@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
+use App\Exceptions\BusinessException;
 use App\Models\AnnouncementMediaModel;
 use App\Services\Interfaces\IAnnouncementMediaService;
 use App\Utils\File;
@@ -56,9 +57,7 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    * @return AnnouncementMediaDTO|AnnouncementMediaModel Objeto com os detalhes do registro criado.
    */
   public function create(array $data) :AnnouncementMediaDTO|AnnouncementMediaModel {
-    $imagePath = (new File("user/{$data['userId']}/announcement/{$data['announcementId']}/media/"))->save($data['file'], width: 300, height: 300);
-
-    $data['url'] = $imagePath;
+    $data['url'] = $this->handleMedia($data);
     return $this->announcementMediaModel->create($data);
   }
 
@@ -69,11 +68,26 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    * @return AnnouncementMediaDTO|AnnouncementMediaModel Objeto com os detalhes do registro atualizado.
    */
   public function edit(int $id, array $data) :AnnouncementMediaDTO|AnnouncementMediaModel {
-    $this->removeOldMedia($id);
-    $imagePath = (new File("user/{$data['userId']}/announcement/{$data['announcementId']}/media/"))->save($data['file'], width: 300, height: 300);
-
-    $data['url'] = $imagePath;
+    $data['url'] = $this->handleMedia($data, $id);
     return $this->announcementMediaModel->edit($id, $data);
+  }
+
+  /**
+   * Método responsável por lidar com o upload e armazenamento da mídia, bem como a remoção da mídia antiga, se aplicável.
+   * @param  array    $data       Dados relacionados à mídia, incluindo o arquivo, ID do usuário e ID do anúncio.
+   * @param  int|null $resourceId ID do recurso existente para o qual a mídia está sendo editada (opcional).
+   * @return string               Caminho da mídia salva.
+   * @throws BusinessException    Exceção lançada se os dados necessários não forem fornecidos.
+   */
+  private function handleMedia(array $data, ?int $resourceId = null) :string {
+    $userId         = $data['userId'];
+    $announcementId = $data['announcementId'];
+    
+    if(!isset($data['file']) | !$userId | !$announcementId)
+      throw new BusinessException("O arquivo, usuário e anúncio são obrigatórios para criar uma mídia de anúncio.", 400);
+
+    if($resourceId) $this->removeOldMedia($resourceId);
+    return (new File("user/{$userId}/announcement/{$announcementId}/media/"))->save($data['file'], width: 300, height: 300);
   }
 
   /**

@@ -17,10 +17,10 @@ class Objectfy {
    *
    * A classe (e subclasses) devem ter um construtor que não recebe parâmetros.
    *
-   * @param array  $origin recebe um array com os atributos da classe
-   * @param string $class  recebe a classe do objeto de retorno, ex Class::class
-   * @return object|null Retorna um objeto do tipo da classe passada ou null caso a classe não exista
-   * @throws Exception Lança uma exceção caso a classe não exista
+   * @param  array  $origin recebe um array com os atributos da classe
+   * @param  string $class  recebe a classe do objeto de retorno, ex Class::class
+   * @return object|null    Retorna um objeto do tipo da classe passada ou null caso a classe não exista
+   * @throws Exception      Lança uma exceção caso a classe não exista
    */
   public static function arrayToClass(array $origin, string $class): object | null {
     if(!class_exists($class))
@@ -39,14 +39,14 @@ class Objectfy {
 
       $varType = self::extractVarType($prop->getDocComment() ?: '');
 
-      if($varType !== null && is_array($value)) {
+      if($varType !== null && \is_array($value)) {
         $isList      = str_ends_with($varType, '[]');
         $targetClass = $isList ? substr($varType, 0, -2) : $varType;
         $resolved    = self::resolveClass($targetClass, $namespace);
 
         if($resolved !== null) {
           $value = $isList
-            ? array_map(fn($item) => is_array($item) ? self::arrayToClass($item, $resolved) : $item, $value)
+            ? array_map(fn($item) => \is_array($item) ? self::arrayToClass($item, $resolved) : $item, $value)
             : self::arrayToClass($value, $resolved);
         }
       }
@@ -113,7 +113,7 @@ class Objectfy {
   }
 
   /** 
-   * Transfere os atributos de um objeto para outro objeto, ignorando os valores nulos
+   * Transfere os atributos de um objeto para outro objeto
    * @param object $obj   O objeto de origem
    * @param object $key   A chave do objeto
    * @param mixed  $value Valor a ser atribuído

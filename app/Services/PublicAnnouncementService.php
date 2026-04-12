@@ -16,7 +16,7 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @param AnnouncementModel $obPublicAnnouncementModel
    */
   public function __construct(
-    private AnnouncementModel $obPublicAnnouncementModel,
+    private AnnouncementModel $obPublicAnnouncementModel
   ) {}
 
   /**

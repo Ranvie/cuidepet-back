@@ -17,7 +17,7 @@ class File {
    * Caminho base para recursos, como arquivos de mídia.
    * @var string $resourcePath
    */
-  protected string $resourcePath = __DIR__ . '/../../storage/app/public/';
+  protected string $resourcePath;
 
   /**
    * Subdiretório opcional dentro do diretório de recursos.
@@ -32,6 +32,8 @@ class File {
    * @param string $subdirectory Subdiretório opcional dentro do diretório de recursos.
    */
   public function __construct(string $subdirectory) {
+    $this->resourcePath = storage_path('\\app\\public') . DIRECTORY_SEPARATOR;
+
     if(!file_exists($this->resourcePath)) {
       mkdir($this->resourcePath, 0755, true);
     }
@@ -74,12 +76,90 @@ class File {
    * @return bool              Indica se a remoção foi bem-sucedida ou se o arquivo não existia.
    */
   public function remove(string|null $path) :bool {
+    if(trim($path) === '')
+      return true;
+    
+    $this->securityMeasures($path);
     $path = $this->getResourcePath() . $path;
 
     if (file_exists($path))
       return unlink($path);
 
     return true;
+  }
+
+  /**
+   * Método para remover todos os arquivos e subdiretórios dentro do diretório de recursos.
+   * @return bool Indica se a remoção foi bem-sucedida ou se o diretório não existia.
+   */
+  public function removeAll() :bool {
+    return $this->removeDirectory(rtrim($this->getFullPath(), '/'));
+  }
+
+  /**
+   * Método para remover um diretório e todo o seu conteúdo recursivamente.
+   * @param  string|null $subdirectory Subdiretório a ser removido dentro do diretório de recursos. Se null, o diretório de recursos será removido.
+   * @return bool                      Indica se a remoção foi bem-sucedida ou se o diretório não existia.
+   */
+  private function removeDirectory(string $subdirectory = '') :bool {
+    $this->securityMeasures($subdirectory);
+
+    if (!is_dir($subdirectory))
+      return false;
+    
+    $items = array_diff(scandir($subdirectory), ['.', '..']);
+    foreach ($items as $item) {
+      $itemPath = $subdirectory . DIRECTORY_SEPARATOR . $item;
+      
+      if (is_dir($itemPath)) {
+        $this->removeDirectory($itemPath);
+      } else {
+        unlink($itemPath);
+      }
+    }
+    
+    return rmdir($subdirectory);
+  }
+
+  /**
+   * Método para aplicar medidas de segurança ao manipular subdiretórios.
+   * Verifica se o subdiretório contém tentativas de acesso a diretórios superiores ou fora do recurso.
+   * @param  string $subdirectory Subdiretório a ser verificado.
+   * @throws BusinessException    Se o subdiretório for considerado inseguro.
+   */
+  private function securityMeasures(string $subdirectory) :void {
+    if (trim($subdirectory) === '')
+      return;
+
+    if (strpos($subdirectory, "\0") !== false)
+      throw new BusinessException('Caminho inválido: caracteres nulos não são permitidos.', 400);
+
+    if (strpos($subdirectory, '..') !== false)
+      throw new BusinessException('Caminho inválido: o acesso a diretórios superiores não é permitido.', 400);
+    
+    $this->validateIfPathIsWithinResource($subdirectory);
+  }
+
+  /**
+   * Método para validar se o caminho fornecido está dentro do diretório de recursos.
+   * Previne tentativas de acesso a diretórios fora do recurso, mesmo que o path traversal seja evitado.
+   * @param  string $path      Caminho a ser validado.
+   * @throws BusinessException Se o caminho estiver fora do diretório de recursos.
+   */
+  private function validateIfPathIsWithinResource(string $path) :void {
+    $subdirectory = str_replace('\\', '/', $path);
+    
+    $resourcePath     = $this->getResourcePath();
+    $realFullPath     = realpath($subdirectory);
+    $realResourcePath = realpath($resourcePath);
+    
+    if ($realFullPath !== false) {
+      $realFullPath     = str_replace('\\', '/', $realFullPath);
+      $realResourcePath = str_replace('\\', '/', $realResourcePath);
+      
+      if (strpos($realFullPath, $realResourcePath) !== 0)
+        throw new BusinessException('Caminho inválido: o acesso a diretórios fora do recurso "{caminho_projeto}/storage/app/public" não é permitido.', 400);
+    }
   }
 
   /**

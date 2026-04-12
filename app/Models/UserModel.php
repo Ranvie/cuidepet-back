@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\User\UserDTO;
+use App\Utils\Url;
 use Illuminate\Auth\Authenticatable as TraitAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -64,6 +65,12 @@ class UserModel extends BusinessModel implements Authenticatable{
   ];
 
   /**
+   * Define os campos adicionais que devem ser incluídos na representação do modelo, mesmo que não estejam presentes no banco de dados.
+   * @var array
+   */
+  public $appends = ['image_profile_url'];
+
+  /**
    * Recupera um usuário pelo email
    * @param string $email
    * @param bool   $parse
@@ -109,6 +116,18 @@ class UserModel extends BusinessModel implements Authenticatable{
   public function inactivate($id = null) :bool {
     parent::edit($id, ['active' => 0]);
     return true;
+  }
+
+  /**
+   * Acessor para obter a URL completa do arquivo de imagem principal.
+   * Retorna null se main_image não estiver definido.
+   * @return string|null URL completa do arquivo de imagem principal.
+   */
+  public function getImageProfileUrlAttribute() :?string {
+    if (empty($this->attributes['image_profile']))
+      return null;
+
+    return (new Url())->setResource('media')->getMediaUrlPath($this->attributes['image_profile']);
   }
 
   /**

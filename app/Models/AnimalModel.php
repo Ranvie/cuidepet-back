@@ -3,8 +3,12 @@
 namespace App\Models;
 
 use App\DTO\Animal\AnimalDTO;
+use App\Utils\Url;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Modelo de dados para a entidade "Animal", representando os animais vinculados aos anúncios.
+ */
 class AnimalModel extends BusinessModel {
 
   /**
@@ -58,15 +62,20 @@ class AnimalModel extends BusinessModel {
   ];
 
   /**
-   * Criação de um novo registro no banco de dados, utilizando os dados fornecidos. Retorna o objeto criado.
-   * @param array $data
-   * @param array $relations
-   * @param bool $parse
-   * @return AnimalDTO
+   * Define os atributos que devem ser adicionados ao array de saída do modelo
+   * @var array
    */
-  public function create(array $data, array $relations = [], bool $parse = true) :AnimalDTO {
-    parent::create($data, $relations, $parse);
-    return parent::getById($this->original['announcement_id'], ['breed']);
+  public $appends = ['image_profile_url'];
+
+  /**
+   * Acessor para obter a URL completa do arquivo de mídia.
+   * @return string|null URL completa do arquivo de mídia.
+   */
+  public function getImageProfileUrlAttribute() :?string {
+    if(empty($this->attributes['image_profile']))
+      return null;
+
+    return $this->attributes['image_profile_url'] = (new Url())->setResource('media')->getMediaUrlPath($this->attributes['image_profile']);
   }
 
   /**

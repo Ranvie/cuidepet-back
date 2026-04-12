@@ -5,6 +5,9 @@ namespace App\DTO\User;
 use App\DTO\Notification\NotificationDTO;
 use Illuminate\Support\Collection;
 
+/**
+ * Data Transfer Object (DTO) para representar os dados de um usuário sem informações sensíveis, como email e telefone.
+ */
 class SafeUserDTO{
 
   /**

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\Announcement\AnnouncementDTO;
+use App\Utils\Url;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,6 +60,12 @@ class AnnouncementModel extends BusinessModel {
   ];
 
   /**
+   * Define atributos adicionais que devem ser incluídos na serialização
+   * @var array
+   */
+  protected $appends = ['main_image_url'];
+
+  /**
    * Retorna um anúncio específico de um usuário
    * @param int $userId
    * @param int $announcementId
@@ -78,6 +85,18 @@ class AnnouncementModel extends BusinessModel {
   public function create($data, $relations = [], $parse = true) :AnnouncementModel {
     parent::create($data, []);
     return parent::getById($this->original['id'], $relations, $parse);
+  }
+
+  /**
+   * Acessor para obter a URL completa do arquivo de imagem principal.
+   * Retorna null se main_image não estiver definido.
+   * @return string|null URL completa do arquivo de imagem principal.
+   */
+  public function getMainImageUrlAttribute() :?string {
+    if (empty($this->attributes['main_image']))
+      return null;
+
+    return (new Url())->setResource('media')->getMediaUrlPath($this->attributes['main_image']);
   }
 
   /**

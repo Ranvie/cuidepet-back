@@ -60,10 +60,16 @@ class AnnouncementDTO {
   public string $description;
 
   /**
+   * Caminho da imagem principal do anúncio
+   * @var ?string
+   */
+  public ?string $mainImage;
+
+  /**
    * Imagem principal do anúncio
    * @var string|null
    */
-  public ?string $mainImage;
+  public ?string $mainImageUrl;
 
   /**
    * Email de contato do anúncio

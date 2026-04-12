@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BusinessException;
+use App\Http\Requests\UserDetailRequest;
+use App\Http\Requests\UserPasswordRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
 use Illuminate\Http\JsonResponse;
@@ -37,6 +40,55 @@ class UserController {
     $user = $this->userService->getById($userId);
 
     $response = new BusinessResponse(200, $user);
+    return $response->build();
+  }
+
+  /**
+   * Obtém o perfil do usuário autenticado
+   * @return JsonResponse
+   */
+  public function getProfile() :JsonResponse {
+    $userId = auth()->id();
+    $user   = $this->userService->getById($userId, ['preference', 'newsletter.addresses']);
+
+    $response = new BusinessResponse(200, $user);
+    return $response->build();
+  }
+
+  /**
+   * Atualiza o perfil do usuário autenticado
+   * @param  UserDetailRequest $request
+   * @return JsonResponse
+   */
+  public function updateProfile(UserDetailRequest $request) :JsonResponse {
+    $userId      = auth()->id();
+    $requestData = $request->validated();
+
+    $user = $this->userService->edit($userId, $requestData);
+    //TODO: Falta a questão do address
+
+    $response = new BusinessResponse(200, $user);
+    return $response->build();
+  }
+
+  /**
+   * Atualiza a senha do usuário autenticado
+   * @param  UserPasswordRequest $request
+   * @return JsonResponse
+   * @throws BusinessException
+   */
+  public function updatePassword(UserPasswordRequest $request) :JsonResponse {
+    $user        = auth()->user();
+    $requestData = $request->validated();
+
+    if(!password_verify($requestData['currentPassword'], $user->password))
+      throw new BusinessException("A senha atual está incorreta.", 400);
+
+    $requestData['password'] = $requestData['newPassword'];
+    unset($requestData['currentPassword'], $requestData['newPassword'], $requestData['passwordConfirmation']);
+    $this->userService->edit($user->id, $requestData);
+
+    $response = new BusinessResponse(200, "Senha atualizada com sucesso.");
     return $response->build();
   }
 

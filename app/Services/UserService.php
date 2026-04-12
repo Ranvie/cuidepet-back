@@ -7,6 +7,7 @@ use App\Exceptions\BusinessException;
 use App\Http\Enums\DefaultUserForm;
 use App\Models\UserModel;
 use App\Services\Interfaces\IUserService;
+use App\Utils\File;
 
 class UserService implements IUserService {
 
@@ -16,7 +17,7 @@ class UserService implements IUserService {
    * @param FormService $formService
    */
   public function __construct(
-    private UserModel $userModel,
+    private UserModel   $userModel,
     private FormService $formService
   ) {}
 
@@ -89,11 +90,23 @@ class UserService implements IUserService {
    * @return UserDTO|UserModel
    */
   public function edit(int $id, array $data) :UserDTO|UserModel {
-    if (isset($data['password'])) $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-    $user = $this->userModel->edit($id, $data);
+    $userDto = $this->userModel->getById($id, ['preference'], true);
+    $this->validateIfUserExists($userDto);
 
-    $this->validateIfUserExists($user);
-    return $user;
+    if (isset($data['password']))
+      $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+
+    if(isset($data['imageProfile'])) {
+      $obFile = (new File("user/{$userDto->id}/profile/"));
+      $obFile->remove($userDto->imageProfile);
+      
+      $data['imageProfile'] = $obFile->save($data['imageProfile'], width: 1200, height: 700);
+    }
+
+    $user = $this->userModel->edit($id, $data ?? [], parse: false);
+    $user->preference()->getModel()->edit($userDto->preference->userId, $data['preference'] ?? []);
+    
+    return $this->userModel->getById($id, ['preference', 'roles', 'forms', 'newsletter.addresses'], true);
   }
 
   /**

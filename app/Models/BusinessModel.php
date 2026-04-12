@@ -50,13 +50,14 @@ class BusinessModel extends Model {
    */
   public function parser(Model|Collection $registers, ?string $class = null) :object {
     $parsed = !$registers instanceof Collection
-      ? $this->obParseConvention::parse($registers->original, PARSE_MODE::snakeToCamel, $class ?? $registers->class)
+      ? $this->obParseConvention::parse($registers->attributesToArray(), PARSE_MODE::snakeToCamel, $class ?? $registers->class)
       : $registers->map(function ($obModel) {
-        return $this->obParseConvention::parse($obModel->original, PARSE_MODE::snakeToCamel, $obModel->class); //TODO: Está inserindo objetos via método mágico no DTO
+        return $this->obParseConvention::parse($obModel->attributesToArray(), PARSE_MODE::snakeToCamel, $obModel->class);
       });
 
+    //TODO: Está inserindo as relações mesmo quando não está no DTO;
     if (isset($registers->relations))
-      foreach ($registers->relations as $key => $register) is_null($register) ?: $parsed->$key = $this->parser($register);
+      foreach ($registers->relations as $key => $register) $register === null ?: $parsed->$key = $this->parser($register);
 
     return $parsed;
   }
