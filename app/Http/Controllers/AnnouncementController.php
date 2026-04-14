@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AnnouncementRequest;
+use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\AnnouncementService;
 use Illuminate\Http\JsonResponse;
@@ -19,10 +20,12 @@ class AnnouncementController {
 
   /**
    * Lista os anúncios do usuário autenticado.
-   * @return JsonResponse Resposta JSON com a lista de anúncios.
+   * @param  ListingRequest $request Requisição contendo os parâmetros de paginação.
+   * @return JsonResponse            Resposta JSON com a lista de anúncios.
    */
-  public function list() :JsonResponse {
-    $registers = $this->obAnnouncementService->getListByUser(10, 1, auth()->id());
+  public function list(ListingRequest $request) :JsonResponse {
+    $validated = $request->validated();
+    $registers = $this->obAnnouncementService->getListByUser($validated['limit'], $validated['page'], auth()->id());
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();

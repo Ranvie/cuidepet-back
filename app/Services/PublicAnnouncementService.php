@@ -26,9 +26,10 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @param  string $type Tipo de anúncio.
    * @return array        Lista de anúncios públicos.
    */
-  public function getList(int $limit, int $page, string $type) :array {
+  public function getList(int $limit, int $page, string $type, array $filters = []) :array {
     $this->validateAnnouncementTypeExists($type);
-    return $this->obPublicAnnouncementModel->list($limit, $page, relations: ['user', 'animal'], filters: [new Filter('type', '=', $type)]);
+    $filters = array_merge($filters, [new Filter(column: 'type', operator: '=', value: $type)]);
+    return $this->obPublicAnnouncementModel->list($limit, $page, relations: ['user', 'animal', 'animal.breed', 'animal.breed.specie'], filters: $filters);
   }
 
   /**

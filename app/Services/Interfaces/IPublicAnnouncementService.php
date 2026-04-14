@@ -8,12 +8,13 @@ interface IPublicAnnouncementService {
 
   /**
    * Lista os anúncios públicos.
-   * @param  int $limit   Quantidade de anúncios por página.
-   * @param  int $page    Número da página.
-   * @param  string $type Tipo de anúncio.
-   * @return array        Lista de anúncios públicos.
+   * @param  int    $limit   Quantidade de anúncios por página.
+   * @param  int    $page    Número da página.
+   * @param  string $type    Tipo de anúncio.
+   * @param  array  $filters Filtros adicionais para a listagem de anúncios.
+   * @return array           Lista de anúncios públicos.
    */
-  public function getList(int $limit, int $page, string $type) :array;
+  public function getList(int $limit, int $page, string $type, array $filters = []) :array;
   
   /**
   * Obtém um anúncio público por ID.

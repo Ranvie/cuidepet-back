@@ -14,7 +14,6 @@ return new class extends Migration {
 			$table->id();
 			$table->foreignId('user_id')->nullable()->constrained('tb_user')->onDelete('cascade');
 			$table->string('email')->unique('NEWSLETTER_UK_01');
-			$table->boolean('email_confirmed')->default(false);
 		});
 	}
 

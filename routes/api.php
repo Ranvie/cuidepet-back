@@ -5,8 +5,8 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SpecieController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\FilterDiscoveryController;
 use App\Http\Controllers\FormController;
-use App\Http\Controllers\FormResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PublicAnnouncementController;
 use App\Http\Controllers\ReportController;
@@ -21,8 +21,11 @@ Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
 
 Route::get('/storage/{path}', [StorageController::class, 'get']);
 
+Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']); //TODO: Remover o tipo da URL e passar a enviar por filtro
 Route::get('announcement/{id}',    [PublicAnnouncementController::class, 'get']);
-Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']);
+
+Route::get('/filters', [FilterDiscoveryController::class, 'list']);
+Route::get('/filter',  [FilterDiscoveryController::class, 'get']);
 
 Route::middleware(['auth:sanctum', 'hasRole:reset-password'])
   ->post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -48,7 +51,7 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::get('/species',                               [SpecieController::class, 'list']);
+  Route::get('/species',                               [SpecieController::class, 'list']); //FIX
 
   Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
 

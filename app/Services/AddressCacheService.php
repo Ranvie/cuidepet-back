@@ -50,9 +50,9 @@ class AddressCacheService {
       $this->validateCache($addressResolved, $zipCode);
 
       $expired
-        ? $this->obIntegrationAddressCacheModel->edit($addressDatabase->id, (array)$addressResolved)
-        : $this->obIntegrationAddressCacheModel->create((array)$addressResolved);
-      
+        ? $addressResolved = $this->obIntegrationAddressCacheModel->edit($addressDatabase->id, (array)$addressResolved)
+        : $addressResolved = $this->obIntegrationAddressCacheModel->create((array)$addressResolved);
+
       return $addressResolved;
     }
     
@@ -61,12 +61,12 @@ class AddressCacheService {
 
   /**
    * Valida um cache de endereço.
-   * @param  IntegrationAddressCacheDTO $addressCache Cache de endereço a ser validado.
-   * @param  string                     $zipCode      CEP do endereço para validação.
-   * @return bool                                     Verdadeiro se o cache for válido, falso caso contrário.
-   * @throws BusinessException                        Exceção lançada se o cache for inválido.
+   * @param  IntegrationAddressCacheDTO|null $addressCache Cache de endereço a ser validado.
+   * @param  string                          $zipCode      CEP do endereço para validação.
+   * @return bool                                          Verdadeiro se o cache for válido, falso caso contrário.
+   * @throws BusinessException                             Exceção lançada se o cache for inválido.
    */
-  private function validateCache(IntegrationAddressCacheDTO $addressCache, string $zipCode) :bool {
+  private function validateCache(?IntegrationAddressCacheDTO $addressCache, string $zipCode) :bool {
     if(!$addressCache instanceof IntegrationAddressCacheDTO)
       throw new BusinessException("Não foi possível obter o endereço para o CEP: $zipCode, verifique se o CEP está correto.", 404);
 

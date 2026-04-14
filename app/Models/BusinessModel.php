@@ -36,6 +36,12 @@ class BusinessModel extends Model {
   private ParseConvention $obParseConvention;
 
   /**
+   * Define o número máximo de itens por página para listagem.
+   * @var int
+   */
+  public const int MAX_ITEMS_PER_PAGE = 100;
+
+  /**
    * Método Construtor
    */
   public function __construct() {
@@ -66,13 +72,16 @@ class BusinessModel extends Model {
    * Lista os registros do banco de dados
    * @param  int      $limit
    * @param  int      $page
-   * @param  int      $hardCodedMaxItems
+   * @param  int|null $hardCodedMaxItems
    * @param  string[] $relations
    * @param  Filter[] $filters
    * @return array
    */
-  public function list(int $limit = 10, int $page = 1, int $hardCodedMaxItems = 100, array $relations = [], array $filters = []) :array {
-    if ($limit > $hardCodedMaxItems) $limit = $hardCodedMaxItems;
+  public function list(int $limit = 10, int $page = 1, ?int $hardCodedMaxItems = null, array $relations = [], array $filters = []) :array {
+    $hardCodedMaxItems = $hardCodedMaxItems ?: self::MAX_ITEMS_PER_PAGE;
+
+    if ($limit > $hardCodedMaxItems) 
+      $limit = $hardCodedMaxItems;
 
     $query = self::query();
     $this->addFilters($query, $filters);
@@ -85,11 +94,33 @@ class BusinessModel extends Model {
       $parsedRegisters[] = $this->parser($register);
     }
 
+    return $this->getListResponse(
+      $parsedRegisters,
+      $registers->perPage(),
+      $registers->currentPage(),
+      $registers->lastPage(),
+      $registers->total(),
+      $hardCodedMaxItems
+    );
+  }
+
+  /**
+   * Formata a resposta da listagem de registros
+   * @param  array    $parsedRegisters   Registros já convertidos para o formato de saída
+   * @param  int      $perPage           Número de itens por página
+   * @param  int      $currentPage       Página atual
+   * @param  int      $lastPage          Última página disponível
+   * @param  int      $total             Total de registros encontrados
+   * @param  int|null $hardCodedMaxItems Limite máximo de itens por página (para controle interno, não necessariamente igual ao $perPage)
+   * @return array                       Resposta formatada para a API, contendo os registros e informações de paginação
+   */
+  public static function getListResponse(array $parsedRegisters, int $perPage, int $currentPage, int $lastPage, int $total, ?int $hardCodedMaxItems) :array {
+    $parsed                = [];
     $parsed['registers']   = $parsedRegisters;
-    $parsed['perPage']     = $registers->perPage();
-    $parsed['lastPage']    = $registers->lastPage();
-    $parsed['currentPage'] = $registers->currentPage();
-    $parsed['total']       = $registers->total();
+    $parsed['perPage']     = $perPage;
+    $parsed['lastPage']    = $lastPage;
+    $parsed['currentPage'] = $currentPage;
+    $parsed['total']       = $total;
     $parsed['maxItems']    = $hardCodedMaxItems;
 
     return $parsed;
@@ -138,8 +169,35 @@ class BusinessModel extends Model {
    */
   private function addFilters(Builder $query, array $filters = []) :void {
     foreach ($filters as $filter) {
-      $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+      if (str_contains($filter->column, '.')) {
+        $this->addRelationFilter($query, $filter);
+      } else {
+        $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+      }
     }
+  }
+
+  /**
+   * Adiciona filtro em relacionamento
+   * @param  Builder $query
+   * @param  Filter  $filter
+   * @return void
+   */
+  private function addRelationFilter(Builder $query, Filter $filter) :void {
+    $parts    = explode('.', $filter->column);
+    $column   = array_pop($parts);
+    $relation = implode('.', $parts);
+
+    if (!method_exists($this, $relation))
+      return;
+    
+    $method = strtoupper($filter->boolean) === 'OR' 
+      ? 'orWhereHas'
+      : 'whereHas';
+    
+    $query->$method($relation, function($q) use ($column, $filter) {
+      $q->where($column, $filter->operator, $filter->value);
+    });
   }
 
   /**
