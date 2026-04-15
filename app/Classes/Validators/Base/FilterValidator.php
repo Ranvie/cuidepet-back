@@ -31,6 +31,9 @@ abstract class FilterValidator {
    * @return array                   Filtros construídos a partir da requisição.
    */
   public function build(ListingRequest $request) :array {
+    if(!$this->filterBuilderRules)
+      return [];
+
     $filters = $request->validated();
     $filters = $filters['filters'] ?? [];
 

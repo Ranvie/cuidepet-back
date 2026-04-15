@@ -29,8 +29,8 @@ class PublicAnnouncementController {
    * @return JsonResponse            Resposta JSON contendo a lista de anúncios públicos
    */
   public function list(ListingRequest $request) :JsonResponse {
-    $validated = $request->validated();
-    [$filters] = (new PublicAnnouncementFilterValidator())->build($request);
+    $validated          = $request->validated();
+    [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
 
     $registers = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $filters, $orders);
 

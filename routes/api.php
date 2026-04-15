@@ -21,8 +21,8 @@ Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
 
 Route::get('/storage/{path}', [StorageController::class, 'get']);
 
-Route::get('announcements/{type}', [PublicAnnouncementController::class, 'list']); //TODO: Remover o tipo da URL e passar a enviar por filtro
-Route::get('announcement/{id}',    [PublicAnnouncementController::class, 'get']);
+Route::get('announcements',     [PublicAnnouncementController::class, 'list']);
+Route::get('announcement/{id}', [PublicAnnouncementController::class, 'get']);
 
 Route::get('/filters', [FilterDiscoveryController::class, 'list']);
 Route::get('/filter',  [FilterDiscoveryController::class, 'get']);
@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::get('/species',                               [SpecieController::class, 'list']); //FIX
+  Route::get('/species',                               [SpecieController::class, 'list']);
 
   Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
 
@@ -68,7 +68,6 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::post('/inactivate', [UserController::class, 'inactivate']);
   });
 
-  //TODO: Tem que pensar na questão dos DTOs.. Eles retornam dados sensíveis, como senhas...
   Route::middleware(['validate:BelongsToUser,AnnouncementModel,list|listAnswers|create'])->prefix('my-announcements')->group(function () {
     Route::get('/',                         [AnnouncementController::class, 'list']);
     Route::get('/{announcementId}',         [AnnouncementController::class, 'get']);

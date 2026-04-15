@@ -43,11 +43,20 @@ class FilterDiscoveryController extends Controller {
 
     $validatorClass = $this->routeValidators[$route];
     $validator      = new $validatorClass();
-    $definitions    = $validator->getFieldDefinitions();
+    
+    // Obtém tanto filtros quanto ordenações (se o validator suportar)
+    $filterDefinitions = method_exists($validator, 'getFieldDefinitions') 
+      ? $validator->getFieldDefinitions() 
+      : [];
+    
+    $ordenationDefinitions = method_exists($validator, 'getOrdenationDefinitions')
+      ? $validator->getOrdenationDefinitions()
+      : [];
 
     $response = [
       'route'   => $route,
-      'filters' => $definitions
+      'filters' => $filterDefinitions,
+      'orders'  => $ordenationDefinitions
     ];
 
     return (new BusinessResponse(200, $response))->build();
@@ -65,11 +74,19 @@ class FilterDiscoveryController extends Controller {
 
     foreach ($this->routeValidators as $route => $validatorClass) {
       $validator   = new $validatorClass();
-      $definitions = $validator->getFieldDefinitions();
+      
+      $filterDefinitions = method_exists($validator, 'getFieldDefinitions') 
+        ? $validator->getFieldDefinitions() 
+        : [];
+      
+      $ordenationDefinitions = method_exists($validator, 'getOrdenationDefinitions')
+        ? $validator->getOrdenationDefinitions()
+        : [];
 
       $routes[] = [
-        'route'       => "api/$route",
-        'filterCount' => \count($definitions)
+        'route'           => "api/$route",
+        'filterCount'     => \count($filterDefinitions),
+        'ordenationCount' => \count($ordenationDefinitions)
       ];
     }
 
