@@ -8,18 +8,20 @@ namespace App\Classes;
 class FilterFieldDefinition {
 
   /**
-   * @param string   $field          Nome do campo (ex: 'status', 'animal.name')
-   * @param string   $name           Nome amigável para exibição
-   * @param string   $description    Descrição do que o filtro faz
-   * @param string[] $operators      Operadores permitidos para este campo
-   * @param string   $valueType      Tipo do valor: 'string', 'number', 'boolean', 'date', 'array'
-   * @param mixed    $acceptedValues Valores aceitos (array para enums, string para formato, null para livre)
+   * @param string   $field            Nome do campo (ex: 'status', 'animal.name')
+   * @param string   $name             Nome legível para exibição (ex: 'Status', 'Nome do Animal')
+   * @param string   $description      Descrição do que o filtro faz
+   * @param string[] $operators        Operadores permitidos para este campo
+   * @param string[] $booleanOperators Operadores lógicos permitidos para combinar este filtro com outros (ex: 'AND', 'OR')
+   * @param string   $valueType        Tipo do valor: 'string', 'number', 'boolean', 'date', 'array'
+   * @param mixed    $acceptedValues   Valores aceitos (array para enums, string para formato, null para livre)
    */
   public function __construct(
     public string $field,
     public string $name,
     public string $description,
     public array  $operators,
+    public array  $booleanOperators = ['AND', 'OR'],
     public string $valueType = 'string',
     public mixed  $acceptedValues = null
   ) {}
@@ -31,6 +33,15 @@ class FilterFieldDefinition {
    */
   public function isOperatorAllowed(string $operator): bool {
     return \in_array($operator, $this->operators);
+  }
+
+  /**
+   * Valida se um operador lógico é permitido para este campo.
+   * @param  string $booleanOperator
+   * @return bool
+   */
+  public function isBooleanOperatorAllowed(string $booleanOperator): bool {
+    return \in_array($booleanOperator, $this->booleanOperators);
   }
 
   /**
@@ -82,12 +93,13 @@ class FilterFieldDefinition {
    */
   public function toArray(): array {
     return [
-      'field'          => $this->field,
-      'name'           => $this->name,
-      'description'    => $this->description,
-      'operators'      => $this->operators,
-      'valueType'      => $this->valueType,
-      'acceptedValues' => $this->acceptedValues
+      'field'            => $this->field,
+      'name'             => $this->name,
+      'description'      => $this->description,
+      'operators'        => $this->operators,
+      'booleanOperators' => $this->booleanOperators,
+      'valueType'        => $this->valueType,
+      'acceptedValues'   => $this->acceptedValues
     ];
   }
 }

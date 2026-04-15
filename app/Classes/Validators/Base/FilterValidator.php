@@ -45,6 +45,7 @@ abstract class FilterValidator {
         column:   $filter['field']    ?? '',
         operator: $filter['operator'] ?? '',
         value:    $value,
+        boolean:  $filter['boolean']  ?? 'AND'
       );
 
       $this->filterBuilderRules->addFilter($obFilter);

@@ -21,6 +21,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Status do anúncio',
           description: 'Filtra os anúncios com base em se estão em aberto (1) ou fechados (0).',
           operators: ['=', '!=', 'IN', 'NOT IN'],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'boolean',
           acceptedValues: [0, 1]
         ),
@@ -30,8 +31,19 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Data de criação',
           description: 'Permite filtrar os anúncios por data de criação',
           operators: ['=', '!=', '>', '<', '>=', '<='],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'date',
           acceptedValues: 'YYYY-MM-DD ou YYYY-MM-DDTH:i:sZ'
+        ),
+
+        new FilterFieldDefinition(
+          field: 'type',
+          name: 'Tipo de anúncio',
+          description: 'Permite filtrar os anúncios pelo tipo',
+          operators: ['=', '!=', 'IN', 'NOT IN'],
+          booleanOperators: ['AND', 'OR'],
+          valueType: 'string',
+          acceptedValues: ['donation', 'lost']
         ),
 
         new FilterFieldDefinition(
@@ -39,6 +51,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Gênero do animal',
           description: 'Filtra pelo gênero do animal',
           operators: ['=', '!=', 'IN', 'NOT IN'],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'string',
           acceptedValues: ['male', 'female']
         ),
@@ -48,6 +61,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Animal com deficiência',
           description: 'Filtra se o animal possui alguma deficiência (1) ou não (0)',
           operators: ['=', '!='],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'boolean',
           acceptedValues: [0, 1]
         ),
@@ -57,6 +71,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Animal vacinado',
           description: 'Filtra se o animal está vacinado (1) ou não (0)',
           operators: ['=', '!='],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'boolean',
           acceptedValues: [0, 1]
         ),
@@ -66,6 +81,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Animal desverminado',
           description: 'Filtra se o animal está desverminado (1) ou não (0)',
           operators: ['=', '!='],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'boolean',
           acceptedValues: [0, 1]
         ),
@@ -75,6 +91,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Animal castrado',
           description: 'Filtra se o animal está castrado (1) ou não (0)',
           operators: ['=', '!='],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'boolean',
           acceptedValues: [0, 1]
         ),
@@ -84,6 +101,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Nome da raça',
           description: 'Filtra pelo nome da raça do animal',
           operators: ['=', '!=', 'LIKE', 'IN', 'NOT IN'],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'string',
           acceptedValues: null
         ),
@@ -93,6 +111,7 @@ class PublicAnnouncementFilterValidator extends FilterValidator {
           name: 'Nome da espécie',
           description: 'Filtra pela espécie do animal (ex: Cachorro, Gato)',
           operators: ['=', '!=', 'LIKE', 'IN', 'NOT IN'],
+          booleanOperators: ['AND', 'OR'],
           valueType: 'string',
           acceptedValues: null
         ),

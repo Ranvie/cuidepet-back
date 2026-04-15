@@ -83,6 +83,10 @@ class FilterBuilderRules {
     if (!$definition)
       return false;
 
+    // Valida operador lógico (AND/OR)
+    if (!$definition->isBooleanOperatorAllowed($filter->boolean))
+      return false;
+
     // Valida operador específico do campo
     if (!$definition->isOperatorAllowed($filter->operator))
       return false;

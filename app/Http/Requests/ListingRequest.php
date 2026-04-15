@@ -21,6 +21,10 @@ class ListingRequest extends FormRequest {
       'filters.*.field'    => 'required|string',
       'filters.*.operator' => 'required|string|in:=,>,<,>=,<=,!=,LIKE,IN,NOT IN',
       'filters.*.value'    => 'required',
+      'filters.*.boolean'  => 'nullable|string|in:AND,OR',
+      'orders'             => 'nullable|array',
+      'orders.*.field'     => 'required|string',
+      'orders.*.direction' => 'required|string|in:asc,desc',
     ];
   }
 

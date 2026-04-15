@@ -113,8 +113,11 @@ class AnnouncementService implements IAnnouncementService {
 
     $announcementModel->form()->associate($data['formId']);
 
-    $announcementMediaData = $data['announcementMedia'];
-    foreach ($announcementMediaData as $announcementMedia) {
+    $announcementMediaData = $data['announcementMedia'] ?? [];
+    foreach ($announcementMediaData as $announcementMedia) {      
+      if(!isset($announcementMedia['file']))
+        continue;
+      
       $announcementMedia['announcementId'] = $announcementId;
       $announcementMedia['userId']         = $data['userId'];
       $this->obAnnouncementMediaService->create($announcementMedia);
@@ -259,11 +262,14 @@ class AnnouncementService implements IAnnouncementService {
    * @return bool         Indica se a remoção foi bem-sucedida.
    */
   public function remove(?int $id = null): bool {
-    $obAnnouncement = $this->obAnnouncementModel->getById($id);
-    $userId         = $obAnnouncement->userId;
+    $obAnnouncement = $this->obAnnouncementModel->getById($id, [], false);
+    $userId         = $obAnnouncement->user_id;
+    $addressId      = $obAnnouncement->address_id;
 
     (new File("user/$userId/announcement/{$id}/"))->removeAll();
-    return $this->obAnnouncementModel->remove($id);
+    $this->obAnnouncementModel->remove($id);
+    $this->obAddressService->remove($addressId);
+    return true;
   }
 
   /**

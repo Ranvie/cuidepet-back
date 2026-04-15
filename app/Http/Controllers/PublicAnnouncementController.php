@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Ordenation;
 use App\Classes\Validators\PublicAnnouncementFilterValidator;
 use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
@@ -24,15 +25,14 @@ class PublicAnnouncementController {
 
   /**
    * Lista os anúncios públicos com base no tipo de anúncio
-   * @param  ListingRequest $request  Objeto de requisição contendo os parâmetros de paginação
-   * @param  string $announcementType O tipo de anúncio a ser listado
-   * @return JsonResponse             Resposta JSON contendo a lista de anúncios públicos
+   * @param  ListingRequest $request Objeto de requisição contendo os parâmetros de paginação e filtros
+   * @return JsonResponse            Resposta JSON contendo a lista de anúncios públicos
    */
-  public function list(ListingRequest $request, string $announcementType) :JsonResponse {
+  public function list(ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    $filters   = (new PublicAnnouncementFilterValidator())->build($request);
+    [$filters] = (new PublicAnnouncementFilterValidator())->build($request);
 
-    $registers = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $announcementType, $filters);
+    $registers = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $filters, $orders);
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();

@@ -27,7 +27,7 @@ class AnimalModel extends BusinessModel {
    * Aponta a chave primária no banco de dados
    * @var string
    */
-  public $primaryKey = 'announcement_id';
+  public $primaryKey = 'id';
 
   /**
    * Define a chave primária como auto incremento

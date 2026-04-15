@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\SpecieModel;
 use App\Services\Interfaces\IAnnouncementService;
 
-class SpecieService implements IAnnouncementService {
+class SpecieService {
 
   /**
    * Construtor do serviço de espécies.

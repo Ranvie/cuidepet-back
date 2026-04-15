@@ -69,7 +69,6 @@ class AnnouncementRequest extends FormRequest {
       'animal.imageProfile'      => 'required|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
       'animal.lastSeenDate'      => 'missing_if:type,donation|date',
       'animal.breedId'           => 'required|exists:tb_breed,id',
-      'animal.specieId'          => 'required|exists:tb_specie,id',
     ];
   }
 
@@ -108,7 +107,6 @@ class AnnouncementRequest extends FormRequest {
       'animal.imageProfile'        => 'nullable|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
       'animal.lastSeenDate'        => 'missing_if:type,donation|date',
       'animal.breedId'             => 'nullable|exists:tb_breed,id',
-      'animal.specieId'            => 'nullable|exists:tb_specie,id',
     ];
   }
 

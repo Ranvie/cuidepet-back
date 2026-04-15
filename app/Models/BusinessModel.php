@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Classes\Filter;
+use App\Classes\Ordenation;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
@@ -70,14 +71,15 @@ class BusinessModel extends Model {
 
   /**
    * Lista os registros do banco de dados
-   * @param  int      $limit
-   * @param  int      $page
-   * @param  int|null $hardCodedMaxItems
-   * @param  string[] $relations
-   * @param  Filter[] $filters
+   * @param  int          $limit
+   * @param  int          $page
+   * @param  int|null     $hardCodedMaxItems
+   * @param  string[]     $relations
+   * @param  Filter[]     $filters
+   * @param  Ordenation[] $orders
    * @return array
    */
-  public function list(int $limit = 10, int $page = 1, ?int $hardCodedMaxItems = null, array $relations = [], array $filters = []) :array {
+  public function list(int $limit = 10, int $page = 1, ?int $hardCodedMaxItems = null, array $relations = [], array $filters = [], array $orders = []) :array {
     $hardCodedMaxItems = $hardCodedMaxItems ?: self::MAX_ITEMS_PER_PAGE;
 
     if ($limit > $hardCodedMaxItems) 
@@ -85,6 +87,7 @@ class BusinessModel extends Model {
 
     $query = self::query();
     $this->addFilters($query, $filters);
+    $this->ordenation($query, $orders);
 
     $query->with($relations);
     $registers = $query->paginate($limit, ['*'], 'page', $page);
@@ -199,6 +202,58 @@ class BusinessModel extends Model {
       $q->where($column, $filter->operator, $filter->value);
     });
   }
+
+  /**
+   * Adiciona ordenação a uma query
+   * @param  Builder      $query
+   * @param  Ordenation[] $orders
+   * @return void
+   */
+  private function ordenation(Builder $query, array $orders = []) :void {
+    foreach ($orders as $order) {
+      $column = $order->field     ?? null;
+      $dir    = $order->direction ?? 'asc';
+      
+      if (!$column) 
+        continue;
+      
+      if (str_contains($column, '.')) {
+        $this->addRelationOrdenation($query, $column, $dir);
+      } else {
+        $query->orderBy($column, $dir);
+      }
+    }
+  }
+
+  /**
+   * Adiciona ordenação em relacionamento
+   * @param  Builder $query
+   * @param  string  $column
+   * @param  string  $dir
+   * @return void
+   */
+  private function addRelationOrdenation(Builder $query, string $column, string $dir) :void {
+    $parts          = explode('.', $column);
+    $relationColumn = array_pop($parts);
+    $relationName   = implode('.', $parts);
+
+    if (!method_exists($this, $relationName))
+      return;
+    
+    $relation = $this->$relationName();
+    
+    $query->orderBy(
+      $relation->getRelated()
+        ->select($relationColumn)
+        ->whereColumn(
+          $relation->getQualifiedForeignKeyName(),
+          $relation->getQualifiedOwnerKeyName()
+        )
+        ->limit(1),
+      $dir
+    );
+  }
+
 
   /**
    * @param  array    $data

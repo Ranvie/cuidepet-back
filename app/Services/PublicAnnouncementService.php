@@ -21,15 +21,14 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
 
   /**
    * Lista os anúncios públicos.
-   * @param  int $limit   Quantidade de anúncios por página.
-   * @param  int $page    Número da página.
-   * @param  string $type Tipo de anúncio.
-   * @return array        Lista de anúncios públicos.
+   * @param  int $limit        Quantidade de anúncios por página.
+   * @param  int $page         Número da página.
+   * @param  array $filters    Filtros para a consulta dos anúncios.
+   * @throws BusinessException Caso o tipo de anúncio seja inválido.
+   * @return array             Lista de anúncios públicos.
    */
-  public function getList(int $limit, int $page, string $type, array $filters = []) :array {
-    $this->validateAnnouncementTypeExists($type);
-    $filters = array_merge($filters, [new Filter(column: 'type', operator: '=', value: $type)]);
-    return $this->obPublicAnnouncementModel->list($limit, $page, relations: ['user', 'animal', 'animal.breed', 'animal.breed.specie'], filters: $filters);
+  public function getList(int $limit, int $page, array $filters = [], array $orders = []) :array {
+    return $this->obPublicAnnouncementModel->list($limit, $page, relations: ['user', 'animal', 'animal.breed', 'animal.breed.specie'], filters: $filters, orders: $orders);
   }
 
   /**
@@ -43,17 +42,6 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
 
     $this->validateAnnouncementExists($obAnnouncementDTO);
     return $obAnnouncementDTO;
-  }
-
-  /**
-   * Validação do tipo do anúncio (Perdido ou Doação)
-   * @param string $type
-   * @throws BusinessException
-   * @return void
-   */
-  private function validateAnnouncementTypeExists(string $type) :void {
-    if (!AnnouncementTypes::tryFrom($type))
-      throw new BusinessException('Atualmente, as únicas opções de listagem de anúncios são: perdidos (lost) ou doações (donations).', 404);
   }
 
   /**
