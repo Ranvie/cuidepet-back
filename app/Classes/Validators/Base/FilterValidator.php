@@ -40,15 +40,11 @@ abstract class FilterValidator {
     foreach($filters as $filter) {
       $value = $filter['value'] ?? '';
 
-      if (\in_array($filter['operator'], ['IN', 'NOT IN']) && \is_string($value)) {
-        $value = array_map('trim', explode(',', $value));
-      }
-
       $obFilter = new Filter(
         column:   $filter['field']    ?? '',
         operator: $filter['operator'] ?? '',
         value:    $value,
-        boolean:  $filter['boolean']  ?? 'AND'
+        boolean:  $filter['boolean']  ?? Filter::DEFAULT_BOOLEAN
       );
 
       $this->filterBuilderRules->addFilter($obFilter);

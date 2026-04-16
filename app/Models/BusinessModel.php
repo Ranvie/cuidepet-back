@@ -10,6 +10,7 @@ use App\Utils\ParseConvention;
 use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -171,22 +172,117 @@ class BusinessModel extends Model {
    * @return void
    */
   private function addFilters(Builder $query, array $filters = []) :void {
-    foreach ($filters as $filter) {
-      if (str_contains($filter->column, '.')) {
-        $this->addRelationFilter($query, $filter);
+    if (empty($filters)) 
+      return;
+
+    $groups = $this->getGroupsFromFilters($filters);
+    foreach ($groups as $index => $group) {
+      $isFirstGroup = $index === 0;
+      $groupBoolean = $isFirstGroup ? Filter::DEFAULT_BOOLEAN : strtoupper($group['boolean']);
+      
+      if (\count($group['filters']) === 1) {
+        $this->addSingleFilter($query, $group['filters'][0], $groupBoolean);
       } else {
-        $query->where($filter->column, $filter->operator, $filter->value, $filter->boolean);
+        $this->addGroupFilter($query, $group['filters'], $groupBoolean);
       }
     }
+  }
+
+  /**
+   * Agrupa filtros consecutivos com o mesmo operador lógico para controlar precedência
+   * @param  Filter[] $filters
+   * @return array    Retorna um array de grupos, onde cada grupo contém os filtros e o operador lógico associado ao grupo
+   */
+  private function getGroupsFromFilters(array $filters) :array {
+    $groups         = [];
+    $currentGroup   = [];
+    $currentBoolean = null;
+
+    foreach ($filters as $filter) {
+      $boolean = $filter->boolean ?? Filter::DEFAULT_BOOLEAN;
+      
+      if ($currentBoolean === null) {
+        $currentBoolean = $boolean;
+        $currentGroup[] = $filter;
+        continue;
+      }
+      
+      if (strtoupper($boolean) === strtoupper($currentBoolean)) {
+        $currentGroup[] = $filter;
+        continue;
+      }
+
+      $groups[]       = ['filters' => $currentGroup, 'boolean' => $currentBoolean];
+      $currentGroup   = [$filter];
+      $currentBoolean = $boolean;
+    }
+    
+    // Adiciona o último grupo
+    if (!empty($currentGroup)) {
+      $groups[] = ['filters' => $currentGroup, 'boolean' => $currentBoolean];
+    }
+
+    return $groups;
+  }
+
+  /**
+   * Aplica um filtro simples (sem relação) ou direciona para filtro de relação
+   * @param  Builder $query
+   * @param  Filter  $filter
+   * @param  string  $boolean Operador lógico para aplicar este filtro (usado quando o filtro é parte de um grupo)
+   * @return void
+   */
+  private function addSingleFilter(Builder $query, Filter $filter, string $boolean) :void {
+    if (str_contains($filter->column, '.')) {
+      $this->addRelationFilter($query, $filter, $boolean);
+    } else {
+      $this->applyFilter($query, $filter->column, $filter->operator, $filter->value, $boolean);
+    }
+  }
+
+  /**
+   * Aplica um grupo de filtros dentro de um closure para controlar precedência
+   * @param  Builder $query
+   * @param  Filter[] $filters
+   * @param  string  $boolean Operador lógico para aplicar este grupo de filtros
+   * @return void
+   */
+  private function addGroupFilter(Builder $query, array $filters, string $boolean) :void {
+    $method = strtoupper($boolean) === 'OR' ? 'orWhere' : 'where';
+    $query->$method(function($q) use ($filters) {
+      foreach ($filters as $filter) {
+        $this->addSingleFilter($q, $filter, Filter::DEFAULT_BOOLEAN);
+      }
+    });
+  }
+
+  /**
+   * Aplica um filtro à query com base no operador e operador lógico
+   * @param  Builder $query
+   * @param  string  $column   Nome da coluna
+   * @param  string  $operator Operador de comparação (ex: '=', '>', '<', 'LIKE', 'IN', 'NOT IN', etc.)
+   * @param  mixed   $value    Valor ou array de valores para o filtro
+   * @param  string  $boolean  Operador lógico (ex: 'AND', 'OR')
+   * @return void
+   */
+  private function applyFilter(Builder $query, string $column, string $operator, mixed $value, string $boolean = Filter::DEFAULT_BOOLEAN) :void {
+    $isOr = strtoupper($boolean) === 'OR';
+    
+    match (strtoupper($operator)) {
+      'IN'     => $isOr ? $query->orWhereIn($column, $value)          : $query->whereIn($column, $value),
+      'NOT IN' => $isOr ? $query->orWhereNotIn($column, $value)       : $query->whereNotIn($column, $value),
+      default  => $isOr ? $query->orWhere($column, $operator, $value) : $query->where($column, $operator, $value)
+    };
   }
 
   /**
    * Adiciona filtro em relacionamento
    * @param  Builder $query
    * @param  Filter  $filter
+   * @param  string  $boolean Operador lógico para aplicar este filtro na query principal
    * @return void
    */
-  private function addRelationFilter(Builder $query, Filter $filter) :void {
+  private function addRelationFilter(Builder $query, Filter $filter, string $boolean = Filter::DEFAULT_BOOLEAN) :void {
     $parts    = explode('.', $filter->column);
     $column   = array_pop($parts);
     $relation = implode('.', $parts);
@@ -194,12 +290,12 @@ class BusinessModel extends Model {
     if (!method_exists($this, $relation))
       return;
     
-    $method = strtoupper($filter->boolean) === 'OR' 
+    $method = strtoupper($boolean) === 'OR' 
       ? 'orWhereHas'
       : 'whereHas';
     
     $query->$method($relation, function($q) use ($column, $filter) {
-      $q->where($column, $filter->operator, $filter->value);
+      $this->applyFilter($q, $column, $filter->operator, $filter->value, Filter::DEFAULT_BOOLEAN);
     });
   }
 
@@ -240,18 +336,19 @@ class BusinessModel extends Model {
     if (!method_exists($this, $relationName))
       return;
     
-    $relation = $this->$relationName();
-    
-    $query->orderBy(
-      $relation->getRelated()
-        ->select($relationColumn)
-        ->whereColumn(
-          $relation->getQualifiedForeignKeyName(),
-          $relation->getQualifiedOwnerKeyName()
-        )
-        ->limit(1),
-      $dir
-    );
+    $relation            = $this->$relationName();
+    $getForeignKey       = $relation->getQualifiedForeignKeyName();
+    $getQualifiedKeyName = $relation instanceof BelongsTo 
+      ? $relation->getQualifiedOwnerKeyName()
+      : $relation->getQualifiedParentKeyName();
+
+    $relatedQuery = $relation->getRelated()
+      ->select($relationColumn);
+
+    $relatedQuery->whereColumn($getForeignKey, $getQualifiedKeyName)
+      ->limit(1);
+
+    $query->orderBy($relatedQuery, $dir);
   }
 
 

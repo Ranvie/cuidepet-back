@@ -114,7 +114,7 @@ class PublicAnnouncementFilterValidator extends ListingValidator {
         booleanOperators: ['AND', 'OR'],
         valueType: 'string',
         acceptedValues: null
-      ),
+      )
     ];
 
     $orderRules = [
@@ -124,6 +124,7 @@ class PublicAnnouncementFilterValidator extends ListingValidator {
         description: 'Ordena os anúncios pelo ID do anúncio',
         directions: ['asc', 'desc']
       ),
+
       new OrdenationFieldDefinition(
         field: 'created_at',
         name: 'Data de criação',

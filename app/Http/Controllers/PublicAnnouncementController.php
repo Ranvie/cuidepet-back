@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Classes\Ordenation;
+use App\Classes\Filter;
 use App\Classes\Validators\PublicAnnouncementFilterValidator;
 use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
@@ -29,13 +29,26 @@ class PublicAnnouncementController {
    * @return JsonResponse            Resposta JSON contendo a lista de anúncios públicos
    */
   public function list(ListingRequest $request) :JsonResponse {
-    $validated          = $request->validated();
-    [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
+    $validated         = $request->validated();
+    $preDefinedFilters = $this->getAnnouncementFilters();
 
-    $registers = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $filters, $orders);
+    [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
+    $filters            = array_merge($preDefinedFilters, $filters);
+    $registers          = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $filters, $orders);
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();
+  }
+
+  /**
+   * Obtém regras pré definidas de filtros para anúncios públicos.
+   * @return array
+   */
+  private function getAnnouncementFilters() :array {
+    return [
+      new Filter('active', '=', '1', 'AND'),
+      new Filter('blocked', '=', '0', 'AND'),
+    ];
   }
 
   /**

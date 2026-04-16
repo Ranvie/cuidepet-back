@@ -8,6 +8,12 @@ namespace App\Classes;
 class Filter {
 
   /**
+   * Valor padrão para o operador lógico entre filtros (AND ou OR).
+   * @var string
+   */
+  public const string DEFAULT_BOOLEAN = 'AND';
+
+  /**
    * @param string $column   Coluna a ser filtrada
    * @param string $operator Operador de comparação (ex: '=', '>', '<', 'LIKE', 'IN', 'NOT IN', etc.)
    * @param mixed  $value    Valor a ser comparado (string, int, bool, array)
@@ -17,6 +23,6 @@ class Filter {
     public string $column   = '',
     public string $operator = '=',
     public mixed  $value    = '',
-    public string $boolean  = 'AND'
+    public string $boolean  = self::DEFAULT_BOOLEAN
   ) {}
 }

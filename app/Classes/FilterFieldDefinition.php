@@ -2,6 +2,8 @@
 
 namespace App\Classes;
 
+use Illuminate\Support\Arr;
+
 /**
  * Define as regras e metadados de um campo filtrável.
  */
@@ -66,10 +68,17 @@ class FilterFieldDefinition {
    * @return bool
    */
   public function isAcceptedValue(mixed $value): bool {
-    if ($this->acceptedValues === null || !\is_array($this->acceptedValues))
+    if($this->acceptedValues === null)
       return true;
+  
+    $values = \is_array($value) ? $value : [$value];
+    $values = Arr::flatten($values);
+    foreach($values as $value) {
+      if (!\in_array($value, $this->acceptedValues))
+        return false;
+    }
 
-    return \in_array($value, $this->acceptedValues);
+    return true;
   }
 
   /**

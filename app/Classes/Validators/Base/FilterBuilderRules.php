@@ -95,12 +95,12 @@ class FilterBuilderRules {
     if (!$definition->isValueValid($filter->value))
       return false;
 
+    // Converte string para array em operadores IN/NOT IN
+    if (\in_array($filter->operator, ['IN', 'NOT IN']) && \is_string($filter->value))
+      $filter->value = array_map('trim', explode(',', $filter->value));
+
     // Valida valores aceitos (enums)
     if (!$definition->isAcceptedValue($filter->value))
-      return false;
-
-    // Valida arrays para IN/NOT IN
-    if (\in_array($filter->operator, ['IN', 'NOT IN']) && !\is_array($filter->value))
       return false;
 
     return true;
