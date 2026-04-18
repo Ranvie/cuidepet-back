@@ -120,7 +120,7 @@ class AuthService {
     if ($obUserModel->email_confirmed)
       throw new BusinessException('Email já confirmado', 400);
 
-    $this->userService->edit($obUserModel->id, ['email_verified_at' => now(), 'active' => true]);
+    $this->userService->edit($obUserModel->id, ['email_verified_at' => now(), 'active' => 1]);
 
     $this->deleteTokens($obUserModel);
 

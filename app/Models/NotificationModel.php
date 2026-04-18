@@ -46,7 +46,7 @@ class NotificationModel extends BusinessModel {
    * Define os campos que podem ser preenchidos em massa
    * @var array
    */
-  public $fillable = ['viewed'];
+  public $fillable = ['viewed', 'user_id', 'notification_template_id', 'data'];
 
   /**
    * Relacionamento com a entidade de usuário. Uma notificação pertence a um usuário.

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Filter;
+use App\Classes\Ordenation;
+use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\NotificationService;
 use \Illuminate\Http\JsonResponse;
@@ -21,23 +24,25 @@ class NotificationController {
 
   /** 
    * Método responsável por listar as notificações do usuário autenticado.
-   * @param int $limit Número de notificações por página.
-   * @param int $page  Número da página atual.
+   * @param ListingRequest $request Requisição contendo os parâmetros de paginação.
    * @return JsonResponse
    */
-  public function list(int $limit = 10, int $page = 1) {
-    $notifications = $this->notificationService->getList($limit, $page);
+  public function list(ListingRequest $request) :JsonResponse {
+    $validated     = $request->validated();
+    $filters       = [new Filter('user_id', '=', auth()->id())];
+    $orders        = [new Ordenation('created_at', 'desc')];
+    $notifications = $this->notificationService->getList($validated['limit'], $validated['page'], filters: $filters, orders: $orders);
     
     $response = new BusinessResponse(200, $notifications);
     return $response->build();
   }
 
   /**
-   * Método responsável por obter os detalhes de uma notificação específica.
-   * @param  int $notificationId ID da notificação.
+   * Remove uma notificação do usuário autenticado.
+   * @param  int $notificationId ID da notificação a ser removida.
    * @return JsonResponse
    */
-  public function delete(int $notificationId) {
+  public function delete(int $notificationId) :JsonResponse {
     $this->notificationService->remove($notificationId);
 
     $response = new BusinessResponse(200, "Notificação deletada com sucesso.");
@@ -45,13 +50,12 @@ class NotificationController {
   }
 
   /**
-   * Método responsável por marcar uma notificação como lida.
+   * Marca uma notificação como lida.
    * @param  int $notificationId ID da notificação a ser marcada como lida.
    * @return JsonResponse
    */
-  public function readNotification(int $notificationId) {
-    $userId = auth()->id();
-    $this->notificationService->readNotification($notificationId, $userId);
+  public function readNotification(int $notificationId) :JsonResponse {
+    $this->notificationService->readNotification($notificationId);
 
     $response = new BusinessResponse(200, "Notificação marcada como lida com sucesso.");
     return $response->build();

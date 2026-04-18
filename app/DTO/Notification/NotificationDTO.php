@@ -32,6 +32,12 @@ class NotificationDTO {
   public bool $viewed;
 
   /**
+   * Dados adicionais da notificação
+   * @var array|null
+   */
+  public ?array $data;
+
+  /**
    * Data de criação da notificação
    * @var string
    */

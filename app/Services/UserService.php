@@ -8,6 +8,7 @@ use App\Http\Enums\DefaultUserForm;
 use App\Models\UserModel;
 use App\Services\Interfaces\IUserService;
 use App\Utils\File;
+use Illuminate\Support\Facades\DB;
 
 class UserService implements IUserService {
 
@@ -17,18 +18,22 @@ class UserService implements IUserService {
    * @param FormService $formService
    */
   public function __construct(
-    private UserModel   $userModel,
-    private FormService $formService
+    private UserModel           $userModel,
+    private FormService         $formService,
+    private NotificationService $notificationService
   ) {}
 
   /**
    * Lista os usuários do banco de dados
-   * @param  int $limit Número de registros por página
-   * @param  int $page  Número da página
+   * @param  int   $limit Número de registros por página
+   * @param  int   $page  Número da página
+   * @param  array $relations Relacionamentos a serem carregados
+   * @param  array $filters Filtros a serem aplicados
+   * @param  array $orders Ordenações a serem aplicadas
    * @return array
    */
-  public function getList(int $limit, int $page) :array {
-    return $this->userModel->list($limit, $page);
+  public function getList(int $limit, int $page, array $relations = ['preference', 'roles', 'forms'], array $filters = [], array $orders = []) :array {
+    return $this->userModel->list($limit, $page, relations: $relations, filters: $filters, orders: $orders);
   }
 
   /**
@@ -69,16 +74,26 @@ class UserService implements IUserService {
   public function create(array $data, array $relations = ['preference', 'roles', 'forms'], bool $parse = true) :UserDTO|UserModel {
     $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
-    $user = $this->userModel->create($data, [], false);
-    $user->preference()->create();
-    $user->roles()->sync([2]);
+    try {
+      DB::beginTransaction();
 
-    $userId = $user->getOriginal()['id'];
-    $this->formService->create([
-      'userId'  => $userId,
-      'title'   => DefaultUserForm::TITLE,
-      'payload' => DefaultUserForm::PAYLOAD
-    ]);
+      $user = $this->userModel->create($data, [], false);
+      $user->preference()->create();
+      $user->roles()->sync([2]);
+      $this->notificationService->sendNotification(NotificationType::WELCOME,$user->id);
+
+      $userId = $user->getOriginal()['id'];
+      $this->formService->create([
+        'userId'  => $userId,
+        'title'   => DefaultUserForm::TITLE->value,
+        'payload' => file_get_contents(resource_path('documents/cuidepet-default-user-form.json'))
+      ]);
+      
+      DB::commit();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw new BusinessException('Ocorreu um erro ao criar o usuário. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
+    }
 
     return $this->userModel->getById($userId, $relations, $parse);
   }
@@ -93,18 +108,27 @@ class UserService implements IUserService {
     $userDto = $this->userModel->getById($id, ['preference'], true);
     $this->validateIfUserExists($userDto);
 
-    if (isset($data['password']))
-      $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+    try {
+      DB::beginTransaction();
 
-    if(isset($data['imageProfile'])) {
-      $obFile = (new File("user/{$userDto->id}/profile/"));
-      $obFile->remove($userDto->imageProfile);
-      
-      $data['imageProfile'] = $obFile->save($data['imageProfile'], width: 1200, height: 700);
+      if (isset($data['password']))
+        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+
+      if(isset($data['imageProfile'])) {
+        $obFile = (new File("user/{$userDto->id}/profile/"));
+        $obFile->remove($userDto->imageProfile);
+        
+        $data['imageProfile'] = $obFile->save($data['imageProfile'], width: 1200, height: 700);
+      }
+
+      $user = $this->userModel->edit($id, $data ?? [], parse: false);
+      $user->preference()->getModel()->edit($userDto->preference->userId, $data['preference'] ?? []);
+
+      DB::commit();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw new BusinessException('Ocorreu um erro ao editar o usuário. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
-
-    $user = $this->userModel->edit($id, $data ?? [], parse: false);
-    $user->preference()->getModel()->edit($userDto->preference->userId, $data['preference'] ?? []);
     
     return $this->userModel->getById($id, ['preference', 'roles', 'forms', 'newsletter.addresses'], true);
   }

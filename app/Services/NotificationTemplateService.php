@@ -9,6 +9,19 @@ use App\Services\Interfaces\INotificationTemplateService;
 use \App\Exceptions\BusinessException;
 
 /**
+ * Enumeração dos tipos de notificação disponíveis.
+ */
+enum NotificationType: string {
+  case WELCOME             = "welcome";
+  case ANNOUNCEMENT_ALERT  = "announcement-alert";
+  case NEW_RESPONSE        = "new-response";
+  case ANNOUNCEMENT_UPDATE = "announcement-update";
+  case PET_FOUND           = "pet-found";
+  case PET_ADOPTED         = "pet-adopted";
+  case ANNOUNCEMENT_PAUSED = "announcement-paused";
+}
+
+/**
  * Serviço responsável por gerenciar as operações relacionadas aos templates de notificação.
  */
 class NotificationTemplateService implements INotificationTemplateService {
@@ -36,11 +49,11 @@ class NotificationTemplateService implements INotificationTemplateService {
 
   /**
    * Obtém um template de notificação por tipo.
-   * @param string $type
+   * @param NotificationType $type
    * @return NotificationTemplateDTO
    */
-  public function getNotificationTemplateByType(string $type) :NotificationTemplateDTO {
-    $templateResponse = $this->notificationTemplateModel->getByQuery([new Filter("type", "=", $type)]);
+  public function getNotificationTemplateByType(NotificationType $type) :NotificationTemplateDTO {
+    $templateResponse = $this->notificationTemplateModel->getByQuery([new Filter("type", "=", $type->value)]);
 
     $this->validateIfExists($templateResponse);
     return $templateResponse;

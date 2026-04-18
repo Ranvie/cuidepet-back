@@ -97,6 +97,7 @@ class NewsletterService {
    * @param  array  $zipCodes Lista de códigos postais para os quais a assinatura da newsletter será cancelada
    * @param  string $email    E-mail do usuário para cancelamento da assinatura da newsletter
    * @return void
+   * @throws BusinessException Se a newsletter não for encontrada
    */
   public function unsubscribe(array $zipCodes, string $email) :void {
     $zipCodes     = array_map(fn($zip) => preg_replace('/\D/', '', $zip), $zipCodes);
@@ -117,12 +118,26 @@ class NewsletterService {
     $obNewsletter->addresses()->detach($addressCacheIds);
   }
 
+  //TODO: problema que já pensei: pode acabar notificando o próprio usuário que gerou a notificação
+  /**
+   * Envia a newsletter para os assinantes.
+   * @return void
+   */
   public function sendNewsletter() :void {
     // Lógica para enviar a newsletter para os assinantes
   }
 
-  public function getSubscribers(string $regionZipcode) :array {
-    // Lógica para obter a lista de assinantes da newsletter com base no CEP da região
-    return [];
+  /**
+   * Obtém os assinantes da newsletter com base em um código postal e um raio de distância.
+   * @param  string $regionZipcode Código postal da região para a qual os assinantes serão obtidos
+   * @param  int    $radius        Raio de distância em quilômetros para a obtenção dos assinantes
+   * @return array                 Lista de assinantes da newsletter na região especificada
+   */
+  public function getSubscribers(string $regionZipcode, int $radius = 5) :array {
+    $addressesInArea = $this->addressCacheService->getAddressesInArea($regionZipcode, $radius);
+    $addressIds      = array_map(fn($address) => $address->id, $addressesInArea);
+
+    $newsletters = $this->newsletterModel->getAllByQuery([new Filter('addresses.address_cache_id', 'IN', $addressIds)], [], true);
+    return $newsletters;
   }
 }

@@ -166,6 +166,29 @@ class BusinessModel extends Model {
   }
 
   /**
+   * Lista todos os registros que correspondem a uma query personalizada
+   * @param  array    $filters
+   * @param  string[] $relations
+   * @param  boolean  $parse
+   * @return array
+   */
+  public function getAllByQuery(array $filters, array $relations = [], bool $parse = true) :array {
+    $queryBuilder = self::query();
+    $this->addFilters($queryBuilder, $filters);
+
+    $models = $queryBuilder->with($relations)->get();
+    if ($models->isEmpty()) return [];
+    if (!$parse) return $models->all();
+
+    $parsedModels = [];
+    foreach ($models as $model) {
+      $parsedModels[] = $this->parser($model);
+    }
+    
+    return $parsedModels;
+  }
+
+  /**
    * Adiciona filtros a uma query
    * @param  Builder $query
    * @param  Filter[] $filters
@@ -353,6 +376,7 @@ class BusinessModel extends Model {
 
 
   /**
+   * Cria um novo registro no banco de dados
    * @param  array    $data
    * @param  string[] $relations
    * @param  boolean  $parse
@@ -364,15 +388,11 @@ class BusinessModel extends Model {
       return $this->getById($this->original[$this->primaryKey], $relations, $parse);
     }
 
-    return
-      DB::transaction(function () use ($data, $relations, $parse) {
-        $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
-
-        $this->fill($origin);
-        $this->save();
-
-        return $this->getById($this->original[$this->primaryKey], $relations, $parse);
-      });
+    $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
+    $this->fill($origin);
+    $this->save();
+    
+    return $this->getById($this->original[$this->primaryKey], $relations, $parse);
   }
 
   /**
@@ -393,7 +413,7 @@ class BusinessModel extends Model {
 
     $register->fill($obj);
     $register->save();
-
+    
     return $this->getById($id, [], $parse);
   }
 

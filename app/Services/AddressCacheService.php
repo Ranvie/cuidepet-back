@@ -89,4 +89,20 @@ class AddressCacheService {
     return $currentTime > $cacheTime;
   }
 
+  /**
+   * Obtém os endereços dentro de um raio especificado.
+   * @param  string $zipCode   Código postal para o qual os endereços devem ser obtidos.
+   * @param  int    $radius    Raio em quilômetros para a busca de endereços ao redor do código postal fornecido.
+   * @return array             Lista de endereços associados ao código postal fornecido.
+   * @throws BusinessException Exceção lançada se o código postal for inválido ou se não for possível encontrar o endereço correspondente.
+   */
+  public function getAddressesInArea(string $zipCode, int $radius) :array {
+    $addressCache = $this->getByZipCode($zipCode);
+
+    if(!$addressCache instanceof IntegrationAddressCacheDTO)
+      throw new BusinessException('Código postal inválido. Não foi possível encontrar o endereço para o CEP informado.', 404);
+
+    return $this->obIntegrationAddressCacheModel->getAddressesInArea($addressCache->latitude, $addressCache->longitude, $radius);
+  }
+
 }

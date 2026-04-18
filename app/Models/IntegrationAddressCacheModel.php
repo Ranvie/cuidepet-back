@@ -117,6 +117,21 @@ class IntegrationAddressCacheModel extends BusinessModel {
   }
 
   /**
+   * Obtém os usuários que estão na área de um código postal específico.
+   * @param  string $latitude  Latitude do código postal para o qual os usuários próximos devem ser encontrados.
+   * @param  string $longitude Longitude do código postal para o qual os usuários próximos devem ser encontrados.
+   * @param  int    $radius    Raio em quilômetros para considerar os usuários próximos ao código postal.
+   * @return array             Coleção de endereços encontrados na área especificada.
+   */
+  public function getAddressesInArea(string $latitude, string $longitude, int $radius = 5) {
+    return DB::table('tb_integration_address_cache')
+            ->selectRaw('*, ST_Distance_Sphere(point, POINT(?, ?)) AS distance_m', [$longitude, $latitude])
+            ->whereRaw('ST_Distance_Sphere(point, POINT(?, ?)) <= ?', [$longitude, $latitude, $radius * 1000])
+            ->get()
+            ->toArray();
+  }
+
+  /**
    * Recupera as newsletters relacionadas a este cache de endereço. Um cache de endereço pode estar relacionado a muitas newsletters.
    * @return BelongsToMany
    */

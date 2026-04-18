@@ -11,6 +11,7 @@ use App\Models\AnnouncementModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
 use App\Utils\File;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Serviço de gerenciamento de anúncios.
@@ -91,36 +92,46 @@ class AnnouncementService implements IAnnouncementService {
     $this->validateIfUserExists($data['userId']);
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
-    $addressData       = $data['address'];
-    $address           = $this->obAddressService->create($addressData);
-    $data['addressId'] = $address->id;
+    try {
+      DB::beginTransaction();
 
-    $mainImage = $data['mainImage'] ?? null;
-    unset($data['mainImage']);
-    
-    $announcementModel = $this->obAnnouncementModel->create($data, [], false);
-    $announcementId    = $announcementModel->getOriginal()['id'];
+      $addressData       = $data['address'];
+      $address           = $this->obAddressService->create($addressData);
+      $data['addressId'] = $address->id;
 
-    if(isset($mainImage)) {
-      $mainImagePath = (new File("user/{$data['userId']}/announcement/{$announcementId}/media/"))->save($mainImage, width: 1200, height: 700);
-      $announcementModel->update(['main_image' => $mainImagePath]);
-    }
-
-    $animalData                   = $data['animal'];
-    $animalData['announcementId'] = $announcementId;
-    $animalData['userId']         = $data['userId'];
-    $this->obAnimalService->create($animalData);
-
-    $announcementModel->form()->associate($data['formId']);
-
-    $announcementMediaData = $data['announcementMedia'] ?? [];
-    foreach ($announcementMediaData as $announcementMedia) {      
-      if(!isset($announcementMedia['file']))
-        continue;
+      $mainImage = $data['mainImage'] ?? null;
+      unset($data['mainImage']);
       
-      $announcementMedia['announcementId'] = $announcementId;
-      $announcementMedia['userId']         = $data['userId'];
-      $this->obAnnouncementMediaService->create($announcementMedia);
+      $announcementModel = $this->obAnnouncementModel->create($data, [], false);
+      $announcementId    = $announcementModel->getOriginal()['id'];
+
+      if(isset($mainImage)) {
+        $mainImagePath = (new File("user/{$data['userId']}/announcement/{$announcementId}/media/"))->save($mainImage, width: 1200, height: 700);
+        $announcementModel->update(['main_image' => $mainImagePath]);
+      }
+
+      $animalData                   = $data['animal'];
+      $animalData['announcementId'] = $announcementId;
+      $animalData['userId']         = $data['userId'];
+      $this->obAnimalService->create($animalData);
+
+      $announcementModel->form()->associate($data['formId']);
+
+      $announcementMediaData = $data['announcementMedia'] ?? [];
+      foreach ($announcementMediaData as $announcementMedia) {      
+        if(!isset($announcementMedia['file']))
+          continue;
+        
+        $announcementMedia['announcementId'] = $announcementId;
+        $announcementMedia['userId']         = $data['userId'];
+        $this->obAnnouncementMediaService->create($announcementMedia);
+      }
+
+      DB::commit();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      dd($e);
+      throw new BusinessException('Ocorreu um erro ao criar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
 
     return $this->getById($announcementId, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
@@ -162,48 +173,57 @@ class AnnouncementService implements IAnnouncementService {
     if(isset($data['formId']))  
       $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
-    if(isset($data['mainImage'])) {
-      $obFile            = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
-      $obAnnouncementDTO = $this->getById($id, ['announcementMedia']);
-      $obFile->remove($obAnnouncementDTO->mainImage);
-      
-      $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
-    }
+    try {
+      DB::beginTransaction();
 
-    $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
-
-    if(isset($data['animal'])) {
-      $data['animal']['userId']         = $data['userId'];
-      $data['animal']['announcementId'] = $id;
-      $this->obAnimalService->edit($id, $data['animal']);
-    }
-
-    if(isset($data['formId'])) 
-      $announcementModel->form()->associate($data['formId']);
-
-    if(isset($data['address']))
-      $this->obAddressService->edit($announcementModel->address->id, $data['address']);
-
-    if (isset($data['announcementMedia'])) {
-      $announcementMediaData = $data['announcementMedia'];
-      $announcementMediaIds  = $this->obAnnouncementMediaService->getAllMediaIds($id);
-      $errors = [];
-      foreach ($announcementMediaData as $announcementMedia) {
-        if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
-          $errors[] = "O anúncio não pode conter mais do que 4 mídias.";
-          break;
-        }
-
-        if($announcementMedia['action'] !== 'ADD' && !$this->validateIfMediaBelongsToAnnouncement($announcementMedia['id'] ?? null, $announcementMediaIds, $errors))
-          continue;
-
-        $announcementMedia['announcementId'] = $id;
-        $announcementMedia['userId']         = $data['userId'];
-        $this->changeMediaData($announcementMedia);
+      if(isset($data['mainImage'])) {
+        $obFile            = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
+        $obAnnouncementDTO = $this->getById($id, ['announcementMedia']);
+        $obFile->remove($obAnnouncementDTO->mainImage);
+        
+        $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
       }
 
-      if(\count($errors) > 0)
-        BusinessResponse::addErrors($errors);
+      $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
+
+      if(isset($data['animal'])) {
+        $data['animal']['userId']         = $data['userId'];
+        $data['animal']['announcementId'] = $id;
+        $this->obAnimalService->edit($id, $data['animal']);
+      }
+
+      if(isset($data['formId'])) 
+        $announcementModel->form()->associate($data['formId']);
+
+      if(isset($data['address']))
+        $this->obAddressService->edit($announcementModel->address->id, $data['address']);
+
+      if (isset($data['announcementMedia'])) {
+        $announcementMediaData = $data['announcementMedia'];
+        $announcementMediaIds  = $this->obAnnouncementMediaService->getAllMediaIds($id);
+        $errors = [];
+        foreach ($announcementMediaData as $announcementMedia) {
+          if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
+            $errors[] = "O anúncio não pode conter mais do que 4 mídias.";
+            break;
+          }
+
+          if($announcementMedia['action'] !== 'ADD' && !$this->validateIfMediaBelongsToAnnouncement($announcementMedia['id'] ?? null, $announcementMediaIds, $errors))
+            continue;
+
+          $announcementMedia['announcementId'] = $id;
+          $announcementMedia['userId']         = $data['userId'];
+          $this->changeMediaData($announcementMedia);
+        }
+
+        if(\count($errors) > 0)
+          BusinessResponse::addErrors($errors);
+      }
+
+      DB::commit();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw new BusinessException('Ocorreu um erro ao editar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
 
     return $this->getById($id, ['animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'address', 'address.cacheAddress']);
