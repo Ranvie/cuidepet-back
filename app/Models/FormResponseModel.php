@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use App\DTO\FormResponse\FormResponseDTO;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class FormResponseModel extends Model
-{
+class FormResponseModel extends BusinessModel {
   /**
    * Define a classe de saída dos objetos. (Formato: Classe::class)
    * @var string

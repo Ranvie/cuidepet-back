@@ -14,9 +14,9 @@ class BusinessResponse implements \JsonSerializable {
 
   /**
    * Conteúdo da resposta
-   * @var array|object|string
+   * @var array|object|string|bool
    */
-  public array|object|string $content;
+  public array|object|string|bool $content;
 
   /**
    * Erros da resposta (opcional)
@@ -32,10 +32,10 @@ class BusinessResponse implements \JsonSerializable {
 
   /**
    * Construtor da resposta de negócio
-   * @param int                 $code    Código HTTP da resposta
-   * @param array|object|string $content Conteúdo da resposta
+   * @param int                      $code    Código HTTP da resposta
+   * @param array|object|string|bool $content Conteúdo da resposta
    */
-  public function __construct(int $code, object|array|string $content) {
+  public function __construct(int $code, object|array|string|bool $content) {
     $this->code        = $code;
     $this->content     = $content;
     $this->errors      = self::$addedErrors ?? [];

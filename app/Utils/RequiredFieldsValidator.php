@@ -3,9 +3,9 @@
 namespace App\Utils;
 
 /**
- * Classe utilitária para validação de campos obrigatórios em respostas de APIs, suportando dot notation para campos aninhados.
+ * Classe utilitária para validação de campos obrigatórios em arrays.
  */
-class ResponseValidator {
+class RequiredFieldsValidator {
   
   /**
    * Valida se os campos obrigatórios estão presentes na response, suportando dot notation para campos aninhados.

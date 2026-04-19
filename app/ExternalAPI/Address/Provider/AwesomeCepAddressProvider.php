@@ -6,7 +6,7 @@ use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use App\ExternalAPI\Address\Abstract\AbstractAddressProvider;
 use App\ExternalAPI\Address\DTO\Response\AwesomeCepDTO;
 use App\Utils\Objectfy;
-use App\Utils\ResponseValidator;
+use App\Utils\RequiredFieldsValidator;
 
 class AwesomeCepAddressProvider extends AbstractAddressProvider {
 
@@ -77,7 +77,7 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
       return false;
     }
 
-    if(ResponseValidator::validate($addressData, ['cep','state','city','lat','lng'])){
+    if(RequiredFieldsValidator::validate($addressData, ['cep','state','city','lat','lng'])){
       $errors = [];
       return true;
     }

@@ -6,7 +6,7 @@ use App\DTO\IntegrationAddressCache\IntegrationAddressCacheDTO;
 use \App\ExternalAPI\Address\DTO\Response\BrasilApiDTO;
 use App\ExternalAPI\Address\Abstract\AbstractAddressProvider;
 use App\Utils\Objectfy;
-use App\Utils\ResponseValidator;
+use App\Utils\RequiredFieldsValidator;
 
 class BrasilApiCepProvider extends AbstractAddressProvider {
 
@@ -75,7 +75,7 @@ class BrasilApiCepProvider extends AbstractAddressProvider {
       return false;
     }
 
-    if (ResponseValidator::validate($addressData, ['cep','state','city','location.coordinates.longitude','location.coordinates.latitude'])) {
+    if (RequiredFieldsValidator::validate($addressData, ['cep','state','city','location.coordinates.longitude','location.coordinates.latitude'])) {
       $errors = [];
       return true;
     }

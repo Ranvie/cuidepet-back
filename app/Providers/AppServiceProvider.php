@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider {
       'userId'         => '[0-9]{1,18}',
       'announcementId' => '[0-9]{1,18}',
       'notificationId' => '[0-9]{1,18}',
+      'responseId'     => '[0-9]{1,18}',
       'formId'         => '[0-9]{1,18}',
       'type'           => 'lost|donation',
       'zipCode'        => '[0-9]{5}-?[0-9]{3}',

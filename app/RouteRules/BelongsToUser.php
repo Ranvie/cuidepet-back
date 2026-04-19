@@ -21,20 +21,22 @@ class BelongsToUser extends AbstractValidator {
   public function validate(): void {
     $user       = $this->quickContext['user'];
     $foreignKey = 'user_id';
+    $fieldId    = $this->quickContext['params']['fieldId'] ?? null;
 
     if(!$user) {
       throw new BusinessException('Usuário não autenticado.', 401);
     }
 
-    $model = $this->quickContext['params'][1] ?? null;
+    $model = $this->quickContext['params']['model'] ?? null;
     
     try{
       $obModel   = app('App\\Models\\' . $model);
-      $idParam   = $this->quickContext['parameters']['id']      ?? null;
-      $idParam ??= array_pop($this->quickContext['parameters']) ?? null;
+      $paramId   = $this->quickContext['parameters'][$fieldId]  ?? null;
+      $paramId ??= $this->quickContext['parameters']['id']      ?? null;
+      $paramId ??= array_pop($this->quickContext['parameters']) ?? null;
 
       $obModel->where($foreignKey, $user->id)
-              ->where($obModel->getKeyName(), $idParam ?? 0)
+              ->where($obModel->getKeyName(), $paramId ?? 0)
               ->firstOrFail();
     }
     catch(ModelNotFoundException $e){

@@ -18,10 +18,9 @@ interface IUserResponseService {
   /**
    * Busca formulário respondido por um usuário.
    * @param  int $responseId ID do formulário.
-   * @param  int $userId     ID do usuário.
-   * @return FormResponseDTO Coleção de formulários do usuário.
+   * @return FormResponseDTO Retorna formulário de resposta do usuário.
    */
-  public function getUserResponseById(int $responseId, int $userId) :FormResponseDTO;
+  public function getUserResponseById(int $responseId) :FormResponseDTO;
 
   /**
    * Exclui formulários de resposta do usuário.

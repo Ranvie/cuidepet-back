@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListingRequest;
 use App\Http\Requests\UserFormRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\FormService;
@@ -19,10 +20,12 @@ class FormController {
 
   /**
    * Lista paginada de formulários de um usuário específico.
-   * @return JsonResponse Resposta JSON do serviço.
+   * @param  ListingRequest $request Objeto de requisição contendo os parâmetros de paginação (limit e page)
+   * @return JsonResponse            Resposta JSON do serviço.
    */
-  public function list() :JsonResponse {
-    $registers = $this->obFormService->listFormsByUser(10, 1, auth()->id());
+  public function list(ListingRequest $request) :JsonResponse {
+    $validated = $request->validated();
+    $registers = $this->obFormService->listFormsByUser($validated['limit'], $validated['page'], auth()->id());
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();
@@ -59,6 +62,7 @@ class FormController {
   public function getByAnnouncement(int $announcementId) :JsonResponse {
     $register = $this->obFormService->getFormByAnnouncement($announcementId);
 
+    unset($register->user);
     $response = new BusinessResponse(200, $register);
     return $response->build();
   }

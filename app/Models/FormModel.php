@@ -87,13 +87,14 @@ class FormModel extends BusinessModel {
    * @return FormDTO|null
    */
   public function getFormByAnnouncement(int $announcementId) :?FormDTO {
-    $obFormModel = $this->query()
-      ->whereHas('announcements', function ($query) use ($announcementId) {
-        $query->where('id', $announcementId);
-      })
-      ->first();
+    $form = $this->getByQuery([
+      new Filter('announcements.id', '=', $announcementId),
+      new Filter('announcements.active', '=', true),
+      new Filter('announcements.blocked', '=', false),
+      new Filter('announcements.status', '=', false),
+    ], ['user'], true);
 
-    return $obFormModel ? $this->parser($obFormModel) : null;
+    return $form;
   }
 
   /**

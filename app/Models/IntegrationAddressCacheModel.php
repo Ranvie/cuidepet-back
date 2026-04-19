@@ -139,7 +139,7 @@ class IntegrationAddressCacheModel extends BusinessModel {
     return $this->belongsToMany(
       NewsletterModel::class,
       NewsletterIntegrationAddressCacheModel::class,
-      'integration_address_cache_id',
+      'address_cache_id',
       'newsletter_id'
     );
   }

@@ -23,9 +23,11 @@ class Validate {
    * @return Response         Retorna a resposta HTTP após a validação, ou uma resposta de erro caso a validação falhe.
    */
   public function handle(Request $request, Closure $next, mixed ...$params) :Response {
+    $params = $this->parseMiddlewareParams($params);
+
     $action         = $request->route()->getActionMethod() ?? '';
-    $validatorClass = $params[0] ?? '';
-    $ignoreMethods  = explode('|', $params[2] ?? '');
+    $validatorClass = $params['policy'] ?? '';
+    $ignoreMethods  = explode('|', $params['ignored'] ?? '');
 
     if(\in_array($action, $ignoreMethods))
       return $next($request);
@@ -46,6 +48,21 @@ class Validate {
     }
 
     return $next($request);
+  }
+
+  /**
+   * Responsável por estruturar os parâmetros do middleware
+   * @param  array $params Parâmetros brutos passados para o middleware, no formato ['key=value']
+   * @return array         Parâmetros estruturados em um array associativo, no formato ['key' => 'value']
+   */
+  private function parseMiddlewareParams(array $params) :array {
+    $parsed = [];
+    foreach ($params as $param) {
+      [$key, $value] = array_pad(explode('=', $param, 2), 2, null);
+      $parsed[$key] = $value;
+    }
+
+    return $parsed;
   }
 
 }

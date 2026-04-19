@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
+use App\Exceptions\BusinessException;
+use App\FormValidator\FormStructureValidator;
 use App\Models\FormModel;
 use App\Services\Interfaces\IFormService;
 
@@ -57,15 +59,15 @@ class FormService implements IFormService {
 
   /**
    * Busca formulário associado a um anúncio por ID.
-   * @param int $announcementId ID do anúncio.
+   * @param  int $announcementId ID do anúncio.
    * @return FormDTO Coleção de formulários do usuário.
    */
   public function getFormByAnnouncement(int $announcementId) :FormDTO {
-    $formResponse = $this->formModel->getFormByAnnouncement($announcementId);
+    $formDTO = $this->formModel->getFormByAnnouncement($announcementId);
     
-    $this->validateForm($formResponse);
+    $this->validateForm($formDTO);
 
-    return $formResponse;
+    return $formDTO;
   }
 
   /**
@@ -74,6 +76,9 @@ class FormService implements IFormService {
    * @return FormDTO DTO do formulário cadastrado.
    */
   public function create(array $data) :FormDTO {
+    $requestPayload  = json_decode($data['payload'] ?? [], true) ?? [];
+    $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+
     return $this->formModel->create($data);
   }
 
@@ -84,10 +89,13 @@ class FormService implements IFormService {
    * @return FormDTO       DTO do formulário atualizado.
    */
   public function edit(int $formId, array $data) :FormDTO {
+    $requestPayload  = json_decode($data['payload'] ?? [], true) ?? [];
+    $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+
     $obFormDTO = $this->formModel->edit($formId, $data);
 
     if(!$obFormDTO instanceof FormDTO)
-      throw new \Exception("Ocorreu um erro ao atualizar o formulário.");
+      throw new BusinessException("Ocorreu um erro ao atualizar o formulário.", 500);
 
     return $obFormDTO;
   }
@@ -108,6 +116,6 @@ class FormService implements IFormService {
    */
   private function validateForm(?FormDTO $formDTO) :void {
     if (!$formDTO instanceof FormDTO)
-      throw new \Exception("O formulário solicitado não foi encontrado.");
+      throw new BusinessException("O formulário solicitado não foi encontrado.", 404);
   }
 }

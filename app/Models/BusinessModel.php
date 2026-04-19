@@ -306,11 +306,11 @@ class BusinessModel extends Model {
    * @return void
    */
   private function addRelationFilter(Builder $query, Filter $filter, string $boolean = Filter::DEFAULT_BOOLEAN) :void {
-    $parts    = explode('.', $filter->column);
-    $column   = array_pop($parts);
-    $relation = implode('.', $parts);
-
-    if (!method_exists($this, $relation))
+    $parts           = explode('.', $filter->column);
+    $column          = array_pop($parts);
+    $relation        = implode('.', $parts);
+    
+    if(!$this->isRelationValid($parts))
       return;
     
     $method = strtoupper($boolean) === 'OR' 
@@ -320,6 +320,23 @@ class BusinessModel extends Model {
     $query->$method($relation, function($q) use ($column, $filter) {
       $this->applyFilter($q, $column, $filter->operator, $filter->value, Filter::DEFAULT_BOOLEAN);
     });
+  }
+
+  /**
+   * Verifica se uma cadeia de relações é válida para este modelo
+   * @param  string[] $relations Array de nomes de métodos de relação (ex: ['user', 'preference'])
+   * @return bool
+   */
+  private function isRelationValid(array $relations) {
+    $model = $this;
+    foreach ($relations as $method) {
+      if (!method_exists($model, $method))
+        return false;
+
+      $model = $model->$method()->getRelated();
+    }
+
+    return true;
   }
 
   /**
