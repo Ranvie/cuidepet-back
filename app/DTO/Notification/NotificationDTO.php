@@ -5,6 +5,9 @@ namespace App\DTO\Notification;
 use App\DTO\NotificationTemplate\NotificationTemplateDTO;
 use App\DTO\User\UserDTO;
 
+/**
+ * Data Transfer Object (DTO) para representar os dados de uma notificação.
+ */
 class NotificationDTO {
 
   /**
@@ -33,9 +36,9 @@ class NotificationDTO {
 
   /**
    * Dados adicionais da notificação
-   * @var array|null
+   * @var NotificationDataDTO|string|null
    */
-  public ?array $data;
+  public NotificationDataDTO|string|null $data;
 
   /**
    * Data de criação da notificação

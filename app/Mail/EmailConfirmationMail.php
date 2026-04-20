@@ -8,6 +8,9 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Classe de email para confirmação de email
+ */
 class EmailConfirmationMail extends Mailable {
 
   /**
