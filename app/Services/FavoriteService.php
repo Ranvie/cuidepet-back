@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\Models\FavoriteModel;
 use App\Services\Interfaces\IFavoriteService;
 
@@ -9,62 +10,49 @@ class FavoriteService implements IFavoriteService {
 
   /**
    * Método Construtor
-   * @param FavoriteModel $favoriteModel
+   * @param FavoriteModel             $obFavoriteModel
+   * @param PublicAnnouncementService $obPublicAnnouncementService
    */
   public function __construct(
-    private FavoriteModel $favoriteModel
+    private FavoriteModel             $obFavoriteModel,
+    private PublicAnnouncementService $obPublicAnnouncementService
   ) {}
-
+  
   /**
-   * Lista os registros com paginação.
-   * @param  int $limit Número de registros por página.
-   * @param  int $page  Número da página.
-   * @return array      Lista de registros paginada.
+   * Responsável por listar todos os anúncios favoritos do usuário
+   * @param int    $limit   Limite máximo de registros
+   * @param int    $page    Página atual da lista
+   * @param array  $filters Lista de filtros aplicados à listagem
+   * @param array  $orders  Lista de ordenação aplicados à listagem
+   * @return array          Lista de anúncios favoritados
    */
-  public function getList(int $limit, int $page) :array {
-    // TODO: Implement getList() method.
-
-    return [];
-  }
-
-  /**
-   * Obtém um registro por ID.
-   * @param  int   $id        ID do registro.
-   * @param  array $relations Relacionamentos a serem carregados.
-   * @return object           Objeto com os detalhes do registro.
-   */
-  public function getById(int $id, array $relations = []) :object {
-    // TODO: Implement getById() method.
-
-    return $this->favoriteModel;
+  public function listFavorites(int $limit, int $page, array $filters = [], array $orders = []) :array {
+    return $this->obPublicAnnouncementService->getList($limit, $page, filters: $filters, orders: $orders);
   }
 
   /**
-   * Cria um novo registro.
-   * @param  array  $data Dados do registro a ser criado.
-   * @return object       Objeto com os detalhes do registro criado.
+   * Responsável por possibilitar um usuário favoritar um anúncio
+   * @param int $userId         ID do usuário que deseja favoritar um anúncio
+   * @param int $announcementId ID do anúncio que deve ser favoritado
+   * @return bool               Valor booleano indicando se o anúncio foi favoritado
    */
-  public function create(array $data) :object {
-    // TODO: Implement create() method.
+  public function addFavorite(int $userId, int $announcementId) :bool {
+    $this->obFavoriteModel->create(['user_id' => $userId, 'announcement_id' => $announcementId], parse: false);
 
-    return $this->favoriteModel;
+    return true;
   }
 
   /**
-   * Edita um registro existente.
-   * @param  int    $id   ID do registro a ser editado.
-   * @param  array  $data Dados atualizados do registro.
-   * @return object       Objeto com os detalhes do registro atualizado.
+   * Responsável por remover um favorito do usuário
+   * @param  int $userId         ID do usuário que deseja desfavoritar um anúncio
+   * @param  int $announcementId ID do anúncio que deve ser desfavoritado
+   * @return bool                Valor booleano indicando se o anúncio foi desfavoritado
    */
-  public function edit(int $id, array $data) :object {
-    // TODO: Implement edit() method.
-    
-    return $this->favoriteModel;
+  public function removeFavorite(int $userId, int $announcementId) :bool {
+    return $this->obFavoriteModel->getByQuery([
+      new Filter('user_id', '=', $userId),
+      new Filter('announcement_id', '=', $announcementId)
+    ], parse: false)?->delete() ?? false;
   }
-
-  public function remove(?int $id = null) :bool {
-    // TODO: Implement remove() method.
-
-    return false;
-  }
+  
 }

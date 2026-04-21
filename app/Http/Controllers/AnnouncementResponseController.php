@@ -61,8 +61,8 @@ class AnnouncementResponseController {
    * @return JsonResponse                        Resposta JSON do serviço.
    */
   public function create(int $announcementId, FormResponseRequest $request) :JsonResponse {
-    $responseData = array_merge($request->validated(), ['userId' => auth()->id()]);
-    $register     = $this->obAnnouncementResponseService->create($announcementId, $responseData);
+    $responseData = array_merge($request->validated(), ['user_id' => auth()->id(), 'announcement_id' => $announcementId]);
+    $register     = $this->obAnnouncementResponseService->create($responseData);
 
     return new BusinessResponse(200, $register)->build();
   }

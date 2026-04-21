@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Classes\Filter;
 use App\DTO\Announcement\AnnouncementDTO;
 use App\DTO\Form\FormDTO;
+use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
 use App\Http\Response\BusinessResponse;
+use App\MessageDispatcher\Notifications\AnnouncementAlertNotification;
 use App\Models\AnnouncementModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
 use App\Utils\File;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -34,7 +37,8 @@ class AnnouncementService implements IAnnouncementService {
     private AnnouncementMediaService $obAnnouncementMediaService,
     private FormService              $obFormService,
     private AddressService           $obAddressService,
-    private AnimalService            $obAnimalService
+    private AnimalService            $obAnimalService,
+    private NewsletterService        $obNewsletterService
   ) {}
 
   /**
@@ -89,7 +93,7 @@ class AnnouncementService implements IAnnouncementService {
    * @return AnnouncementDTO Objeto de transferência de dados do anúncio criado.
    */
   public function create(array $data) :AnnouncementDTO {
-    $this->validateIfUserExists($data['userId']);
+    $user = $this->validateIfUserExists($data['userId']);
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
     try {
@@ -127,10 +131,12 @@ class AnnouncementService implements IAnnouncementService {
         $this->obAnnouncementMediaService->create($announcementMedia);
       }
 
+      $users = $this->getUsersToNotify($addressData['zipCode'], $user->email);
+      (new AnnouncementAlertNotification($users, $announcementId, $data['type']))->send();
+
       DB::commit();
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       DB::rollBack();
-      dd($e);
       throw new BusinessException('Ocorreu um erro ao criar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
 
@@ -139,12 +145,28 @@ class AnnouncementService implements IAnnouncementService {
 
   /**
    * Valida se um usuário existe.
-   * @param  int  $userId      ID do usuário a ser verificado.
-   * @return void
+   * @param  int  $userId ID do usuário a ser verificado.
+   * @return UserDTO      Objeto de transferência de dados do usuário ou modelo de usuário.
    * @throws BusinessException Se o usuário não for encontrado.
    */
-  private function validateIfUserExists(int $userId) :void {
-    $this->obUserService->getById($userId);
+  private function validateIfUserExists(int $userId) :UserDTO {
+    return $this->obUserService->getById($userId);
+  }
+
+  /**
+   * Obtém os emails dos usuários a serem notificados com base no código postal e no raio de um anúncio.
+   * @param  string $zipCode   Código postal do anúncio.
+   * @param  string $userEmail E-mail do usuário que criou o anúncio, para evitar enviar notificações para ele mesmo.
+   * @return array             Lista de usuários a serem notificados.
+   */
+  private function getUsersToNotify(string $zipCode, string $userEmail) :array {
+    $newsletters = $this->obNewsletterService->getSubscribers($zipCode);
+
+    $newsletters = array_filter($newsletters, function($newsletter) use ($userEmail) {
+      return (!isset($newsletter->user) || $newsletter->user->email !== $userEmail);
+    });
+    
+    return array_values($newsletters);
   }
 
   /**

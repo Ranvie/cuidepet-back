@@ -31,6 +31,15 @@ class FavoriteModel extends BusinessModel {
   public $timestamps = false;
 
   /**
+   * Define os campos que podem ser preenchidos em massa
+   * @var array
+   */
+  public $fillable = [
+    'user_id',
+    'announcement_id'
+  ];
+
+  /**
    * Relacionamento com a entidade de anúncio. Um favorito pertence a um anúncio.
    * @return BelongsTo
    */

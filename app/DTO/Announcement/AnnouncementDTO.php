@@ -9,6 +9,10 @@ use App\DTO\Animal\AnimalDTO;
 use App\DTO\AnnouncementMedia\AnnouncementMediaDTO;
 use Illuminate\Support\Collection;
 
+/**
+ * Data Transfer Object (DTO) para representar um anúncio.
+ * Contém informações detalhadas sobre um anúncio, incluindo dados do usuário, endereço, animal e mídias associadas.
+ */
 class AnnouncementDTO {
 
   /**
@@ -100,6 +104,18 @@ class AnnouncementDTO {
    * @var string
    */
   public string $status;
+
+  /**
+   * Contagem de favoritos do anúncio
+   * @var int
+   */
+  public int $favoritesCount;
+
+  /**
+   * Contagem de favoritos do anúncio
+   * @var bool
+   */
+  public bool $isFavorited;
 
   /**
    * Data de criação do anúncio

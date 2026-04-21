@@ -21,7 +21,8 @@ class FilterDiscoveryController extends Controller {
    * @var array<string, string>
    */
   protected array $routeValidators = [
-    'announcements' => \App\Classes\Validators\PublicAnnouncementFilterValidator::class
+    'announcements' => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
+    'favorites'     => \App\Classes\Validators\PublicAnnouncementFilterValidator::class
   ];
 
   /**

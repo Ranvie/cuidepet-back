@@ -86,13 +86,13 @@ class FormModel extends BusinessModel {
    * @param int $announcementId ID do anúncio associado ao formulário
    * @return FormDTO|null
    */
-  public function getFormByAnnouncement(int $announcementId) :?FormDTO {
+  public function getFormByAnnouncement(int $announcementId, bool $parse = true) :?FormDTO {
     $form = $this->getByQuery([
       new Filter('announcements.id', '=', $announcementId),
       new Filter('announcements.active', '=', true),
       new Filter('announcements.blocked', '=', false),
       new Filter('announcements.status', '=', false),
-    ], ['user'], true);
+    ], ['user'], $parse);
 
     return $form;
   }

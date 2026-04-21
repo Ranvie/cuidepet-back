@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
 use App\Http\Enums\DefaultUserForm;
+use App\Http\Enums\NotificationTypes;
+use App\MessageDispatcher\Builders\NotificationBuilder;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
 use App\Models\UserModel;
 use App\Services\Interfaces\IUserService;
 use App\Utils\File;
@@ -20,7 +24,7 @@ class UserService implements IUserService {
   public function __construct(
     private UserModel           $userModel,
     private FormService         $formService,
-    private NotificationService $notificationService
+    private AddressCacheService $obAddressService,
   ) {}
 
   /**
@@ -80,7 +84,8 @@ class UserService implements IUserService {
       $user = $this->userModel->create($data, [], false);
       $user->preference()->create();
       $user->roles()->sync([2]);
-      $this->notificationService->sendNotification(NotificationType::WELCOME,$user->id);
+
+      (new MessageDispatcher(new NotificationBuilder([$user->id], NotificationTypes::WELCOME)))->dispatch();
 
       $userId = $user->getOriginal()['id'];
       $this->formService->create([
@@ -149,6 +154,21 @@ class UserService implements IUserService {
    */
   public function inactivate(?int $id = null) :bool {
     return $this->userModel->inactivate($id);
+  }
+
+  /**
+   * Obtém os usuários que estão em uma determinada área geográfica com base em códigos postais e raio
+   * @param  string $regionZipcode Lista de códigos postais que definem o centro da área geográfica
+   * @param  float  $radius        Raio em quilômetros para definir a área geográfica ao redor dos códigos postais
+   * @return array                 Lista de usuários que estão dentro da área geográfica definida
+   */
+  public function getUsersInArea(string $regionZipcode, float $radius = 5) :array {
+    $addresses  = $this->obAddressService->getAddressesInArea($regionZipcode, $radius);
+    $addressIds = array_map(fn($a) => $a->id, $addresses);
+
+    return $this->userModel->getAllByQuery([
+      new Filter('addresses.address_cache_id', 'IN', $addressIds)
+    ]);
   }
 
   /**

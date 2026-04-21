@@ -34,7 +34,7 @@ class PublicAnnouncementController {
 
     [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
     $filters            = array_merge($preDefinedFilters, $filters);
-    $registers          = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], $filters, $orders);
+    $registers          = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], auth()->id(), $filters, $orders);
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();
@@ -42,7 +42,7 @@ class PublicAnnouncementController {
 
   /**
    * Obtém regras pré definidas de filtros para anúncios públicos.
-   * @return array
+   * @return Filter[] Array de objetos Filter contendo as regras pré definidas para listagem de anúncios públicos
    */
   private function getAnnouncementFilters() :array {
     return [
@@ -57,7 +57,7 @@ class PublicAnnouncementController {
    * @return JsonResponse        Resposta JSON contendo os detalhes do anúncio público
    */
   public function get(int $announcementId) :JsonResponse {
-    $obAnnouncementDTO = $this->obPublicAnnouncementService->getById($announcementId);
+    $obAnnouncementDTO = $this->obPublicAnnouncementService->getById($announcementId, auth()->id());
 
     $response = new BusinessResponse(200, $obAnnouncementDTO);
     return $response->build();

@@ -74,6 +74,18 @@ class PublicAnnouncementDTO {
   public string $status;
 
   /**
+   * Contagem de favoritos do anúncio
+   * @var int
+   */
+  public int $favoritesCount;
+
+  /**
+   * Contagem de favoritos do anúncio
+   * @var bool
+   */
+  public bool $isFavorited;
+
+  /**
    * Data de criação do anúncio
    * @var string
    */

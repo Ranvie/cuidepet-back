@@ -61,13 +61,13 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
 // ENDPOINTS DE USUÁRIO AUTENTINCADO
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
-  Route::get('/species',                               [SpecieController::class, 'list']);
+  Route::get('/species',       [SpecieController::class, 'list']);
 
-  Route::post('/accept-terms',                         [AuthController::class, 'acceptTerms']);
+  Route::post('/accept-terms', [AuthController::class, 'acceptTerms']);
 
-  Route::post('/logout',                               [AuthController::class, 'logout']);
+  Route::post('/logout',       [AuthController::class, 'logout']);
 
-  Route::post('/report/announcement/{announcementId}', [ReportController::class, 'create']);
+  Route::post('/report',       [ReportController::class, 'create']);
 
   // ENDPOINTS "PÚBLICOS" DE BUSCA E RESPOSTA DE FORMULÁRIO
   Route::prefix('announcement/{announcementId}/form')->group(function () {
@@ -132,9 +132,9 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
   });
 
   // GERENCIAMENTO DE FAVORITOS
-  Route::middleware(['validate:policy=BelongsToUser,model=FavoriteModel,ignored=list|create'])->prefix('/favorite')->group(function () {
-    Route::get('/',                [FavoriteController::class, 'list']);
-    Route::post('/',               [FavoriteController::class, 'create']);
-    Route::delete('/{favoriteId}', [FavoriteController::class, 'delete']);
+  Route::prefix('/favorite')->group(function () {
+    Route::get('/',                                 [FavoriteController::class, 'list']);
+    Route::post('/announcement/{announcementId}',   [FavoriteController::class, 'create']);
+    Route::delete('/announcement/{announcementId}', [FavoriteController::class, 'delete']);
   });
 });
