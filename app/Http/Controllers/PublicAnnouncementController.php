@@ -33,7 +33,7 @@ class PublicAnnouncementController {
     $preDefinedFilters = $this->getAnnouncementFilters();
 
     [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
-    $filters            = array_merge($preDefinedFilters, $filters);
+    $filters            = array_merge($filters, $preDefinedFilters);
     $registers          = $this->obPublicAnnouncementService->getList($validated['limit'], $validated['page'], auth()->id(), $filters, $orders);
 
     $response = new BusinessResponse(200, $registers);

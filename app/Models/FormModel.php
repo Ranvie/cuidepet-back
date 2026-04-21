@@ -53,7 +53,8 @@ class FormModel extends BusinessModel {
     'user_id',
     'title',
     'payload',
-    'active'
+    'active',
+    'blocked'
   ];
 
   /**
@@ -66,7 +67,6 @@ class FormModel extends BusinessModel {
     return $this->getById($formId, [], false, [new Filter('user_id', '=', $userId)]);
   }
 
-  //TODO: ver de implementar um DTO
   /**
    * Lista todos os formulários de um usuário sem paginação
    * @param  int $userId ID do usuário
@@ -84,9 +84,9 @@ class FormModel extends BusinessModel {
   /**
    * Busca um formulário a partir de um anúncio
    * @param int $announcementId ID do anúncio associado ao formulário
-   * @return FormDTO|null
+   * @return FormDTO|FormModel|null
    */
-  public function getFormByAnnouncement(int $announcementId, bool $parse = true) :?FormDTO {
+  public function getFormByAnnouncement(int $announcementId, bool $parse = true) :FormDTO|FormModel|null {
     $form = $this->getByQuery([
       new Filter('announcements.id', '=', $announcementId),
       new Filter('announcements.active', '=', true),
@@ -141,6 +141,14 @@ class FormModel extends BusinessModel {
    */
   public function user() :BelongsTo {
     return $this->belongsTo(UserModel::class, 'user_id', 'id');
+  }
+
+  /**
+   * Recupera as denúncias relacionadas ao formulário. Um formulário pode ter várias denúncias relacionadas a ele.
+   * @return HasMany
+   */
+  public function reports() :HasMany {
+    return $this->hasMany(ReportModel::class, 'form_id', 'id');
   }
 
 }

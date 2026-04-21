@@ -2,27 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRequest;
+use App\Http\Requests\ReportRequest;
+use App\Http\Response\BusinessResponse;
+use App\Services\ReportService;
+use Illuminate\Http\JsonResponse;
 
 class ReportController {
-  //
-  public function list() {
-    // TODO: Implement list() method.
+
+  /**
+   * Método Construtor
+   * @param ReportService $obReportService Serviço para processamento de denúncias
+   */
+  public function __construct(
+    private ReportService $obReportService
+  ){}
+
+  /**
+   * Responsável por cadastrar a denúncia de um anúncio
+   * @param  ReportRequest $request Request contendo conteúdo para cadastro da denúncia
+   * @return JsonResponse           Resposta JSON da operação
+   */
+  public function create(ReportRequest $request) :JsonResponse {
+    $data = array_merge($request->validated(), ['userId' => auth()->id()]);
+    $this->obReportService->create($data);
+
+    return new BusinessResponse(200, 'Denúncia realizada com sucesso!')->build();
   }
 
-  public function get(int $userId) {
-    // TODO: Implement get() method.
-  }
-
-  public function create(UserRequest $request) {
-    // TODO: Implement create() method.
-  }
-
-  public function update(int $userId, UserRequest $request) {
-    // TODO: Implement update() method.
-  }
-
-  public function delete(int $userId) {
-    // TODO: Implement delete() method.
-  }
 }

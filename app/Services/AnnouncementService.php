@@ -243,7 +243,7 @@ class AnnouncementService implements IAnnouncementService {
       }
 
       DB::commit();
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       DB::rollBack();
       throw new BusinessException('Ocorreu um erro ao editar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }

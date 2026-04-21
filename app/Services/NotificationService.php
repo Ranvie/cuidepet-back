@@ -42,10 +42,11 @@ class NotificationService implements INotificationService {
    * @return array
    */
   private function processTemplates(array $notifications) :array {
-    foreach ($notifications as $notification) {
-      $params = $notification->data['action']['params'] ?? [];
-      foreach($params as $param) {
-        $notification->notificationTemplate->content = str_replace("{$param}", $params[$param], $notification->notificationTemplate->content);
+    foreach ($notifications['registers'] as $notification) {
+      $params = json_decode($notification->data, true);
+      foreach($params['action']['parameters'] ?? [] as $param => $value) {
+        $notification->notificationTemplate->title   = str_replace("{{$param}}", $value, $notification->notificationTemplate->title);
+        $notification->notificationTemplate->message = str_replace("{{$param}}", $value, $notification->notificationTemplate->message);
       }
     }
     return $notifications;

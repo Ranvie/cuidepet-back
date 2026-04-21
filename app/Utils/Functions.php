@@ -69,4 +69,13 @@ class Functions {
 
     return $diff;
   }
+
+  /**
+   * Gera um hash aleatório de uma determinada extensão.
+   * @param  int    $length Extensão do hash a ser gerado.
+   * @return string         Hash aleatório gerado, com extensão de 2 vezes o valor de $length (devido ao uso de bin2hex).
+   */
+  public static function getRandomHash(int $length = 32) :string {
+    return bin2hex(random_bytes($length));
+  }
 }

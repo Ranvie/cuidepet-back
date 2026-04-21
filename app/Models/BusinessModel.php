@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Classes\Filter;
 use App\Classes\Ordenation;
+use App\Exceptions\BusinessException;
 use App\Utils\PARSE_MODE;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\ParseConvention;
@@ -11,7 +12,6 @@ use App\Utils\Objectfy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Modelo de negócio base para os modelos do sistema.
@@ -57,13 +57,15 @@ class BusinessModel extends Model {
    * @return object
    */
   public function parser(Model|Collection $registers, ?string $class = null) :object {
+    if(empty($registers->class) && $registers->count() > 0 && empty($registers[0]->class))
+      throw new BusinessException('O DTO da model ' . \get_class($registers) . ' não está definido.');
+
     $parsed = !$registers instanceof Collection
       ? $this->obParseConvention::parse($registers->attributesToArray(), PARSE_MODE::snakeToCamel, $class ?? $registers->class)
       : $registers->map(function ($obModel) {
         return $this->obParseConvention::parse($obModel->attributesToArray(), PARSE_MODE::snakeToCamel, $obModel->class);
       });
 
-    //TODO: Está inserindo as relações mesmo quando não está no DTO;
     if (isset($registers->relations))
       foreach ($registers->relations as $key => $register) $register === null ?: $parsed->$key = $this->parser($register);
 
@@ -274,7 +276,7 @@ class BusinessModel extends Model {
     $method = strtoupper($boolean) === 'OR' ? 'orWhere' : 'where';
     $query->$method(function($q) use ($filters) {
       foreach ($filters as $filter) {
-        $this->addSingleFilter($q, $filter, Filter::DEFAULT_BOOLEAN);
+        $this->addSingleFilter($q, $filter, $filter->boolean ?? Filter::DEFAULT_BOOLEAN);
       }
     });
   }
@@ -306,9 +308,9 @@ class BusinessModel extends Model {
    * @return void
    */
   private function addRelationFilter(Builder $query, Filter $filter, string $boolean = Filter::DEFAULT_BOOLEAN) :void {
-    $parts           = explode('.', $filter->column);
-    $column          = array_pop($parts);
-    $relation        = implode('.', $parts);
+    $parts    = explode('.', $filter->column);
+    $column   = array_pop($parts);
+    $relation = implode('.', $parts);
     
     if(!$this->isRelationValid($parts))
       return;
@@ -400,16 +402,19 @@ class BusinessModel extends Model {
    * @return object
    */
   public function create(array $data, array $relations = [], bool $parse = true) :object {
+    $model = $this->newModel();
+
     if (empty($data)) {
-      $this->save();
-      return $this->getById($this->original[$this->primaryKey], $relations, $parse);
+      $model->save();
+      return $this->getById($model->original[$model->primaryKey], $relations, $parse);
     }
 
     $origin = ParseConvention::parse($data, PARSE_MODE::camelToSnake);
-    $this->fill($origin);
-    $this->save();
+    $model->fill($origin);
+    $model->save();
     
-    return $this->getById($this->original[$this->primaryKey], $relations, $parse);
+    $this->original = $model->getOriginal();
+    return $this->getById($model->original[$model->primaryKey], $relations, $parse);
   }
 
   /**

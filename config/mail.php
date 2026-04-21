@@ -122,6 +122,6 @@ return [
     |
     */
 
-    'delay' => env('MAIL_DELAY', 30),
+    'delay' => env('MAIL_DELAY_SECONDS', 30),
 
 ];

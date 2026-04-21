@@ -24,9 +24,9 @@ interface IFavoriteService {
 
   /**
    * Responsável por remover um favorito do usuário
-   * @param int $userId         ID do usuário que deseja desfavoritar um anúncio
-   * @param int $announcementId ID do anúncio que deve ser desfavoritado
-   * @return bool               Valor booleano indicando se o anúncio foi desfavoritado
+   * @param  int $userId         ID do usuário que deseja desfavoritar um anúncio
+   * @param  int $announcementId ID do anúncio que deve ser desfavoritado
+   * @return bool                Valor booleano indicando se o anúncio foi desfavoritado
    */
   public function removeFavorite(int $userId, int $announcementId) :bool;
 

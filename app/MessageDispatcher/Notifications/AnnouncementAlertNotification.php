@@ -61,23 +61,23 @@ class AnnouncementAlertNotification {
   private function resolvePushRecipients() :array {
     $userIds = [];
 
-    foreach ($this->users as $newsletter) {
-      if (isset($newsletter->user->preference) && $newsletter->user->preference->receiveRegionAlarms ?? false)
-        $userIds[] = $newsletter->user->id;
+    foreach ($this->users as $addressNewsletter) {
+      if (isset($addressNewsletter->newsletter->user->preference) && $addressNewsletter->newsletter->user->preference->receiveRegionAlarms ?? false)
+        $userIds[] = $addressNewsletter->newsletter->user->id;
     }
 
     return $userIds;
   }
 
   /**
-   * Mapeia o tipo do anúncio para um formato mais amigável para o email
+   * Mapeia o tipo do anúncio para um formato mais amigável para a notificação interna
    * @return string Tipo do anúncio formatado para email
    */
   private function getAnnouncementTypeForPush() :string {
     return match ($this->announcementType) {
-      'doacao'  => 'em doação',
-      'perdido' => 'perdido',
-      default   => 'anúncio',
+      'donation' => 'em doação',
+      'lost'     => 'perdido',
+      default    => '',
     };
   }
 
@@ -88,13 +88,13 @@ class AnnouncementAlertNotification {
   private function resolveEmailRecipients() :array {
     $recipients = [];
 
-    foreach ($this->users as $newsletter) {
-      if (!isset($newsletter->user) || (isset($newsletter->user->preference) && $newsletter->user->preference->receiveAlarmsOnEmail ?? false)) {
+    foreach ($this->users as $addressNewsletter) {
+      if (!isset($addressNewsletter->newsletter->user) || (isset($addressNewsletter->newsletter->user->preference) && $addressNewsletter->newsletter->user->preference->receiveAlarmsOnEmail ?? false)) {
         $recipients[] = [
-          'email' => $newsletter->email,
+          'email' => $addressNewsletter->newsletter->email,
           'vars'  => [
-            'username'       => $newsletter->user->username ?? 'chegou novidade na área!',
-            'unsubscribeUrl' => config('app.frontend_url') . '/unsubscribe/' . $newsletter->id,
+            'username'       => $addressNewsletter->newsletter->user->username ?? 'chegou novidade na área!',
+            'unsubscribeUrl' => config('app.frontend_url') . '/unsubscribe/' . $addressNewsletter->hash,
           ],
         ];
       }
@@ -103,11 +103,15 @@ class AnnouncementAlertNotification {
     return $recipients;
   }
 
+  /**
+   * Mapeia o tipo do anúncio para um formato mais amigável para o email
+   * @return string Tipo do anúncio formatado para email
+   */
   private function getAnnouncementTypeForEmail() :string {
     return match ($this->announcementType) {
-      'doacao'  => 'em doação',
-      'perdido' => 'perdido',
-      default   => '',
+      'donation' => 'em doação',
+      'lost'     => 'perdido',
+      default    => '',
     };
   }
 }

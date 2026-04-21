@@ -33,7 +33,7 @@ class FavoriteController {
     $preDefinedFilters = $this->getAnnouncementFilters();
 
     [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
-    $filters            = array_merge($preDefinedFilters, $filters);
+    $filters            = array_merge($filters, $preDefinedFilters);
     $registers          = $this->obFavoriteService->listFavorites($validated['limit'], $validated['page'], $filters, $orders);
 
     return new BusinessResponse(200, $registers)->build();

@@ -5,6 +5,10 @@ namespace App\Utils;
 use ReflectionClass;
 use Exception;
 
+/**
+ * Classe utilitária para converter arrays em objetos de classes específicas, com suporte a propriedades aninhadas.
+ * A conversão é baseada nos tipos declarados no PHPDoc das propriedades da classe destino.
+ */
 class Objectfy {
 
   /**
