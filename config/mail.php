@@ -113,4 +113,15 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Delay Between Emails
+    |--------------------------------------------------------------------------
+    |
+    | Define the time in seconds to wait between sending each email when using the EmailSender.
+    |
+    */
+
+    'delay' => env('MAIL_DELAY', 30),
+
 ];

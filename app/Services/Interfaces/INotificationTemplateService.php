@@ -3,7 +3,7 @@
 namespace App\Services\Interfaces;
 
 use App\DTO\NotificationTemplate\NotificationTemplateDTO;
-use App\Services\NotificationType;
+use App\Http\Enums\NotificationTypes;
 
 /**
  * Interface de serviço para gerenciar templates de notificação.
@@ -27,9 +27,9 @@ interface INotificationTemplateService {
 
   /**
    * Obtém um template de notificação por tipo.
-   * @param  NotificationType $type
+   * @param  NotificationTypes $type
    * @return NotificationTemplateDTO
    */
-  public function getNotificationTemplateByType(NotificationType $type) :NotificationTemplateDTO;
+  public function getNotificationTemplateByType(NotificationTypes $type) :NotificationTemplateDTO;
 
 }

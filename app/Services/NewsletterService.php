@@ -118,26 +118,20 @@ class NewsletterService {
     $obNewsletter->addresses()->detach($addressCacheIds);
   }
 
-  //TODO: problema que já pensei: pode acabar notificando o próprio usuário que gerou a notificação
-  /**
-   * Envia a newsletter para os assinantes.
-   * @return void
-   */
-  public function sendNewsletter() :void {
-    // Lógica para enviar a newsletter para os assinantes
-  }
-
   /**
    * Obtém os assinantes da newsletter com base em um código postal e um raio de distância.
-   * @param  string $regionZipcode Código postal da região para a qual os assinantes serão obtidos
-   * @param  int    $radius        Raio de distância em quilômetros para a obtenção dos assinantes
-   * @return array                 Lista de assinantes da newsletter na região especificada
+   * @param  string $regionZipcode       Código postal da região para a qual os assinantes serão obtidos
+   * @param  int    $radius              Raio de distância em quilômetros para a obtenção dos assinantes
+   * @return array                       Lista de assinantes da newsletter na região especificada
    */
   public function getSubscribers(string $regionZipcode, int $radius = 5) :array {
     $addressesInArea = $this->addressCacheService->getAddressesInArea($regionZipcode, $radius);
     $addressIds      = array_map(fn($address) => $address->id, $addressesInArea);
 
-    $newsletters = $this->newsletterModel->getAllByQuery([new Filter('addresses.address_cache_id', 'IN', $addressIds)], [], true);
+    $filters   = [];
+    $filters[] = new Filter('addresses.address_cache_id', 'IN', $addressIds);
+
+    $newsletters = $this->newsletterModel->getAllByQuery($filters, ['user.preference'], true);
     return $newsletters;
   }
 }

@@ -12,14 +12,14 @@ class EmailMessage implements Message, EmailableMessage {
 
   /**
    * Método Construtor
-   * @param array  $emails      Lista de emails dos destinatários do email
+   * @param array  $recipients  Lista de destinatários do email. Cada item pode ser uma string (email) ou um array com 'email' e 'vars' (dados individuais do destinatário)
    * @param string $subject     Assunto do email
    * @param string $template    Template de email a ser utilizado para o email
-   * @param array  $data        Dados a serem inseridos no template do email
+   * @param array  $data        Dados compartilhados a serem inseridos no template do email (mesmos para todos os destinatários)
    * @param array  $attachments Lista de arquivos a serem anexados no email
    */
   public function __construct(
-    private array  $emails,
+    private array  $recipients,
     private string $subject,
     private string $template,
     private array  $data = [],
@@ -27,11 +27,16 @@ class EmailMessage implements Message, EmailableMessage {
   ) {}
 
   /**
-   * Retorna a lista de destinatários do email, que são os emails fornecidos na construção da mensagem
-   * @return array Lista de emails dos destinatários do email
+   * Retorna a lista de destinatários do email no formato estruturado ['email' => string, 'vars' => array]
+   * @return array Lista de destinatários estruturados
    */
   public function getRecipients(): array {
-    return $this->emails;
+    return array_map(function ($recipient) {
+      if (is_string($recipient))
+        return ['email' => $recipient, 'vars' => []];
+
+      return $recipient;
+    }, $this->recipients);
   }
 
   /**

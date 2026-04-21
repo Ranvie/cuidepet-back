@@ -14,14 +14,14 @@ class EmailBuilder implements Builder {
   
   /**
    * Método Construtor
-   * @param array      $emails       Lista de emails dos destinatários da newsletter
-   * @param string     $subject      Assunto da newsletter
-   * @param string     $template     Template de email a ser utilizado para a newsletter
-   * @param array      $templateData Dados a serem inseridos no template da newsletter
-   * @param array|null $attachments  Lista de arquivos a serem anexados na newsletter
+   * @param array      $recipients   Lista de destinatários do email. Cada item pode ser uma string (email) ou um array com 'email' e 'vars' (dados individuais do destinatário)
+   * @param string     $subject      Assunto do email
+   * @param string     $template     Template de email a ser utilizado
+   * @param array      $templateData Dados compartilhados a serem inseridos no template (mesmos para todos os destinatários)
+   * @param array|null $attachments  Lista de arquivos a serem anexados
    */
   public function __construct(
-    private array  $emails,
+    private array  $recipients,
     private string $subject,
     private string $template,
     private array  $templateData = [],
@@ -33,15 +33,15 @@ class EmailBuilder implements Builder {
    * @return EMailMessage Retorna a mensagem construída, que deve implementar a interface Message e conter
    */
   public function build(): EMailMessage {
-    if(empty($this->emails))
-      throw new BusinessException('Nenhum email destinatário fornecido para a newsletter.', 422);
+    if(empty($this->recipients))
+      throw new BusinessException('Nenhum destinatário fornecido para o email.', 422);
 
     $templateExists = view()->exists($this->template);
     if (!$templateExists)
       throw new BusinessException("O template '{$this->template}' não existe.", 422);
 
     return new EMailMessage(
-      $this->emails,
+      $this->recipients,
       $this->subject,
       $this->template,
       $this->templateData,

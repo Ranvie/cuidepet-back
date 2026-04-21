@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\DTO\Notification\NotificationDataDTO;
 use App\DTO\Notification\NotificationDTO;
+use App\Http\Enums\NotificationTypes;
 use App\Models\NotificationModel;
 use App\Services\Interfaces\INotificationService;
 use \App\Exceptions\BusinessException;
@@ -67,9 +69,9 @@ class NotificationService implements INotificationService {
    * @return object       Objeto com os detalhes do registro criado.
    */
   public function create(array $data) :object {
-    $type = $data['type'] instanceof NotificationType 
+    $type = $data['type'] instanceof NotificationTypes 
       ? $data['type'] 
-      : NotificationType::tryFrom($data['type']);
+      : NotificationTypes::tryFrom($data['type']);
     
     $notificationTemplate = $this->notificationTemplateService->getNotificationTemplateByType($type);
     $this->notificationTemplateService->validateIfExists($notificationTemplate);
@@ -129,62 +131,20 @@ class NotificationService implements INotificationService {
 
   /**
    * Envia uma notificação para um usuário específico.
-   * @param  NotificationType $type   Tipo da notificação a ser enviada.
-   * @param  int              $userId ID do usuário destinatário da notificação.
-   * @param  array|null       $data    Dados adicionais a serem incluídos na notificação (opcional).
+   * @param  int                 $userId ID do usuário destinatário da notificação.
+   * @param  NotificationDataDTO $data   Dados adicionais a serem incluídos na notificação (opcional).
    * @return void
    */
-  public function sendNotification(NotificationType $type, int $userId, ?array $data = null) :void {
-    $notificationTemplate = $this->notificationTemplateService->getNotificationTemplateByType($type);
+  public function sendNotification(int $userId, NotificationDataDTO $data) :void {
+    $notificationTemplate = $this->notificationTemplateService->getNotificationTemplateByType($data->type);
     $this->notificationTemplateService->validateIfExists($notificationTemplate);
 
+    $arrayData = get_object_vars($data);
+
     $this->create([
-      'type'    => $type->value,
+      'type'    => $data->type->value,
       'user_id' => $userId,
-      'data'    => $this->getNotificationDataByType($type, $data)
+      'data'    => json_encode($arrayData, JSON_UNESCAPED_UNICODE)
     ]);
-  }
-
-  /**
-   * Gera os dados adicionais para a notificação com base no tipo e nos dados fornecidos.
-   * @param  NotificationType $type Tipo da notificação.
-   * @param  array|null       $data Dados adicionais para a notificação.
-   * @return array                  Dados da notificação.
-   */
-  private function getNotificationDataByType(NotificationType $type, ?array $data = null) :array {
-    return match ($type) {
-      NotificationType::WELCOME             => $this->getNotificationData(NotificationType::WELCOME,             'announcement.create',    [], []),
-      NotificationType::ANNOUNCEMENT_ALERT  => $this->getNotificationData(NotificationType::ANNOUNCEMENT_ALERT,  'announcement.view',   $data, ['announcementId', 'type']),
-      NotificationType::NEW_RESPONSE        => $this->getNotificationData(NotificationType::NEW_RESPONSE,        'announcement.view',   $data, ['announcementId', 'petName']),
-      NotificationType::ANNOUNCEMENT_UPDATE => $this->getNotificationData(NotificationType::ANNOUNCEMENT_UPDATE, 'announcement.view',   $data, ['announcementId']),
-      NotificationType::PET_FOUND           => $this->getNotificationData(NotificationType::PET_FOUND,           'announcement.view',   $data, ['announcementId', 'petName']),
-      NotificationType::PET_ADOPTED         => $this->getNotificationData(NotificationType::PET_ADOPTED,         'announcement.view',   $data, ['announcementId', 'petName']),
-      NotificationType::ANNOUNCEMENT_PAUSED => $this->getNotificationData(NotificationType::ANNOUNCEMENT_PAUSED, 'none',                $data, [])
-    };
-  }
-
-  /**
-   * Gera os dados adicionais para a notificação com base no tipo e nos dados fornecidos.
-   * @param  NotificationType $type           Tipo da notificação.
-   * @param  string           $action         Ação da notificação.
-   * @param  array|null       $params         Parâmetros da notificação.
-   * @param  array|null       $requiredParams Parâmetros obrigatórios da notificação.
-   * @return array                            Dados da notificação.
-   */
-  private function getNotificationData(NotificationType $type, string $action, ?array $params, ?array $requiredParams) :array {
-    $missingParams = array_diff($requiredParams ?? [], array_keys($params ?? []));
-    if (!empty($missingParams))
-      throw new BusinessException("Parâmetros obrigatórios ausentes para o tipo de notificação '{$type->value}': " . implode(', ', $missingParams));
-
-    // Filtra os parâmetros para incluir apenas os obrigatórios
-    $params = array_intersect_key($params ?? [], array_flip($requiredParams ?? []));
-
-    return [
-      'type'   => $type,
-      'action' => [
-        'type'   => $action,
-        'params' => $params
-      ]
-    ];
   }
 }

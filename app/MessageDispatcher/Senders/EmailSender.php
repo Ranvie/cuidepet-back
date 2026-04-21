@@ -23,15 +23,19 @@ class EmailSender implements Sender {
     if (!$message instanceof EmailableMessage)
       throw new BusinessException('A mensagem não é compatível com o canal de email.', 422);
 
-    $mailInfo = new EmailTemplate(
-      $message->getSubject(),
-      $message->getTemplate(),
-      $message->getData(),
-      $message->getAttachments()
-    );
+    $delaySeconds = 0;
+    foreach ($message->getRecipients() as $recipient) {
+      $mergedData = array_merge($message->getData(), $recipient['vars']);
 
-    foreach ($message->getRecipients() as $email) {
-      Mail::to($email)->queue($mailInfo);
+      $mailInfo = new EmailTemplate(
+        $message->getSubject(),
+        $message->getTemplate(),
+        $mergedData,
+        $message->getAttachments()
+      );
+
+      Mail::to($recipient['email'])->later(now()->addSeconds($delaySeconds), $mailInfo);
+      $delaySeconds += config('mail.delay', 30);
     }
   }
 }
