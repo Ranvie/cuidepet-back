@@ -5,10 +5,14 @@ namespace App\Services;
 use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
 use App\DTO\FormResponse\FormResponseDTO;
-use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
 use App\FormValidator\FormResponseValidator;
+use App\Http\Enums\NotificationTypes;
+use App\MessageDispatcher\Builders\NotificationBuilder;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
+use App\Models\AnimalModel;
 use App\Models\FormResponseModel;
+use App\Models\UserResponseHistoryModel;
 use App\Services\Interfaces\IAnnouncementResponseService;
 
 /**
@@ -19,12 +23,16 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
 
   /**
    * Método Construtor
-   * @param FormResponseModel $obFormResponseModel
-   * @param FormService       $obFormService
+   * @param FormResponseModel        $obFormResponseModel
+   * @param UserResponseHistoryModel $obUserResponseHistoryModel
+   * @param AnimalModel              $obAnimalModel
+   * @param FormService              $obFormService
    */
   public function __construct(
-    private FormResponseModel $obFormResponseModel,
-    private FormService       $obFormService
+    private FormResponseModel        $obFormResponseModel,
+    private UserResponseHistoryModel $obUserResponseHistoryModel,
+    private AnimalModel              $obAnimalModel,
+    private FormService              $obFormService
   ) {}
 
   /**
@@ -70,16 +78,21 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
 
   /**
    * Cadastra formulários de resposta a um anúncio.
-   * @param  array $data           Dados do formulário a ser cadastrado.
-   * @return FormResponseDTO       DTO do formulário cadastrado.
+   * @param  array $data     Dados do formulário a ser cadastrado.
+   * @return FormResponseDTO DTO do formulário cadastrado.
    */
   public function create(array $data) :FormResponseDTO {
-    $obFormDTO = $this->obFormService->getFormByAnnouncement($data['announcement_id']);
+    $obFormDTO            = $this->obFormService->getFormByAnnouncement($data['announcement_id']);
+    $obAnimalDTO          = $this->obAnimalModel->getByQuery([new Filter('announcement_id', '=', $data['announcement_id'])]); 
+    $obResponseHistoryDTO = $this->obUserResponseHistoryModel->getByQuery([
+      new Filter('announcement_id', '=', $data['announcement_id']), 
+      new Filter('user_id', '=', $data['user_id'])
+    ]);
 
     if(!$obFormDTO instanceof FormDTO)
       throw new BusinessException("Formulário original do anúncio {$data['announcement_id']} não encontrado.", 404);
 
-    if($obFormDTO->user instanceof UserDTO)
+    if($obFormDTO->user->id === $data['user_id'])
       throw new BusinessException("Você não pode responder ao próprio anúncio.", 403);
 
     new FormResponseValidator(
@@ -88,6 +101,8 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
     )->resolve();
 
     $this->obFormResponseModel->upsert([$data], ['user_id', 'announcement_id'], ['payload']);
+
+    new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'petName' => $obAnimalDTO->name]))->dispatch();
 
     return $this->obFormResponseModel->getByQuery([
       new Filter('user_id', '=', $data['user_id']),

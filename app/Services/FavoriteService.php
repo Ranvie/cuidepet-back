@@ -3,9 +3,14 @@
 namespace App\Services;
 
 use App\Classes\Filter;
+use App\Exceptions\BusinessException;
 use App\Models\FavoriteModel;
 use App\Services\Interfaces\IFavoriteService;
 
+/**
+ * Serviço de gerenciamento de favoritos.
+ * Fornece métodos para listar, adicionar e remover favoritos de anúncios por parte dos usuários.
+ */
 class FavoriteService implements IFavoriteService {
 
   /**
@@ -37,7 +42,18 @@ class FavoriteService implements IFavoriteService {
    * @return bool               Valor booleano indicando se o anúncio foi favoritado
    */
   public function addFavorite(int $userId, int $announcementId) :bool {
-    $this->obFavoriteModel->create(['user_id' => $userId, 'announcement_id' => $announcementId], parse: false);
+    $obAnnouncementDTO = $this->obPublicAnnouncementService->getById($announcementId, relations: []);
+
+    $favorited = $this->obFavoriteModel->getByQuery([
+      new Filter('user_id', '=', $userId),
+      new Filter('announcement_id', '=', $announcementId),
+    ], parse: false);
+
+    if($obAnnouncementDTO->userId === $userId)
+      throw new BusinessException('Não é possível favoritar seu próprio anúncio.', 400);
+
+    if(!$favorited instanceof FavoriteModel)
+      $this->obFavoriteModel->create(['user_id' => $userId, 'announcement_id' => $announcementId], parse: false);
 
     return true;
   }

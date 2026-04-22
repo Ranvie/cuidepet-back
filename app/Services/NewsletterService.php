@@ -5,7 +5,11 @@ namespace App\Services;
 use App\Classes\Filter;
 use App\Exceptions\BusinessException;
 use App\Http\Response\BusinessResponse;
+use App\MessageDispatcher\Builders\EmailBuilder;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
 use App\Models\NewsletterModel;
+use App\Models\NewsletterIntegrationAddressCacheModel;
+use App\Utils\Functions;
 
 /**
  * Serviço responsável por gerenciar as operações relacionadas à newsletter, incluindo
@@ -15,12 +19,16 @@ class NewsletterService {
 
   /**
    * Método Construtor
-   * @param NewsletterModel     $newsletterModel,
-   * @param AddressCacheService $addressCacheService
+   * @param NewsletterModel                        $newsletterModel,
+   * @param AddressCacheService                    $addressCacheService,
+   * @param NewsletterIntegrationAddressCacheModel $newsletterIntegrationAddressCacheModel,
+   * @param TokenService                           $tokenService
    */
   public function __construct(
-    private NewsletterModel     $newsletterModel,
-    private AddressCacheService $addressCacheService
+    private NewsletterModel                        $newsletterModel,
+    private AddressCacheService                    $addressCacheService,
+    private NewsletterIntegrationAddressCacheModel $newsletterIntegrationAddressCacheModel,
+    private TokenService                           $tokenService
   ) {}
 
   /**
@@ -50,7 +58,7 @@ class NewsletterService {
     
     $caches = $this->getAddressCaches($zipCodes);
     foreach($caches ?? [] as $cache){
-      $obNewsletter->addresses()->attach($cache->id);
+      $obNewsletter->addresses()->attach($cache->id, ['hash' => $this->getNewsletterHash()]);
     }
   }
 
@@ -112,7 +120,7 @@ class NewsletterService {
 
     $addressCacheIds = $obNewsletter->addresses
       ->whereIn('zipcode', $zipCodes)
-      ->pluck('tb_integration_address_cache.id')
+      ->pluck('id')
       ->toArray();
 
     $obNewsletter->addresses()->detach($addressCacheIds);
@@ -120,18 +128,71 @@ class NewsletterService {
 
   /**
    * Obtém os assinantes da newsletter com base em um código postal e um raio de distância.
-   * @param  string $regionZipcode       Código postal da região para a qual os assinantes serão obtidos
-   * @param  int    $radius              Raio de distância em quilômetros para a obtenção dos assinantes
-   * @return array                       Lista de assinantes da newsletter na região especificada
+   * OBS: As preferências não são levadas em conta.
+   * @param  string $regionZipcode Código postal da região para a qual os assinantes serão obtidos
+   * @param  int    $radius        Raio de distância em quilômetros para a obtenção dos assinantes
+   * @return array                 Lista de assinantes da newsletter na região especificada
    */
   public function getSubscribers(string $regionZipcode, int $radius = 5) :array {
     $addressesInArea = $this->addressCacheService->getAddressesInArea($regionZipcode, $radius);
     $addressIds      = array_map(fn($address) => $address->id, $addressesInArea);
 
     $filters   = [];
-    $filters[] = new Filter('addresses.address_cache_id', 'IN', $addressIds);
+    $filters[] = new Filter('address_cache_id', 'IN', $addressIds);
 
-    $newsletters = $this->newsletterModel->getAllByQuery($filters, ['user.preference'], true);
+    $newsletters = $this->newsletterIntegrationAddressCacheModel->getAllByQuery($filters, ['newsletter.user.preference'], true);
     return $newsletters;
+  }
+
+  /**
+   * Envia um e-mail de confirmação de assinatura da newsletter para o usuário.
+   * @param  string $email   E-mail do usuário para o qual o e-mail de confirmação será enviado
+   * @param  string $zipCode Código postal associado à assinatura da newsletter para o qual o e-mail de confirmação será enviado
+   * @return void
+   */
+  public function sendNewsletterMailConfirmation(string $email, string $zipCode) :void {
+    $token           = $this->tokenService->createToken('newsletter-subscription', ['email' => $email, 'zipCode' => $zipCode], 60);
+    $subscriptionUrl = url(config('app.frontend_url') . "/newsletter/confirm?token=$token");
+
+    new MessageDispatcher(
+      new EmailBuilder([$email],'Confirmação de Assinatura da Newsletter','mail.newsletterConfirmation',['subscriptionUrl' => $subscriptionUrl])
+    )->dispatch();
+  }
+
+  /**
+   * Confirma a assinatura de um usuário na newsletter com base em um token de confirmação.
+   * @param  string $token Token de confirmação da assinatura da newsletter
+   * @return void
+   * @throws BusinessException Se o token for inválido ou expirado, ou se ocorrer algum erro durante a confirmação da assinatura
+   */
+  public function confirmNewsletterSubscription(string $token) :void {
+    $obToken = $this->tokenService->verifyToken('newsletter-subscription', $token);
+
+    $payload = json_decode($obToken->payload, true);
+    if(!$payload || !isset($payload['email']) || !isset($payload['zipCode']))
+      throw new BusinessException('Token de confirmação inválido.', 400);
+
+    $this->subscribe([$payload['zipCode']], $payload['email']);
+  }
+
+  /**
+   * Cancela a assinatura de um usuário na newsletter com base em um token de cancelamento.
+   * @param  string $token Token de cancelamento da assinatura da newsletter
+   * @return void
+   */
+  public function unsubscribeByToken(string $token) :void {
+    $obNewsletterIntegrationModel = $this->newsletterIntegrationAddressCacheModel->getByQuery([new Filter('hash', '=', $token)], [], false);
+    $obNewsletterIntegrationModel->delete();
+  }
+
+  /**
+   * Gera um hash único para a newsletter.
+   * @return string Hash único gerado para a newsletter
+   */
+  private function getNewsletterHash() :string {
+    do {
+      $hash = Functions::getRandomHash(32);
+    } while($this->newsletterIntegrationAddressCacheModel->getByQuery([new Filter('hash', '=', $hash)], [], false) instanceof NewsletterIntegrationAddressCacheModel);
+    return $hash;
   }
 }

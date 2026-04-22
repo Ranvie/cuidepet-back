@@ -78,6 +78,8 @@ class AnnouncementRequest extends FormRequest {
    */
   private function putRules() :array {
     return [
+      'status'                     => 'nullable|boolean',
+      'active'                     => 'nullable|boolean',
       'type'                       => 'nullable|in:lost,donation',
       'description'                => 'nullable|string|max:1000',
       'mainImage'                  => 'nullable|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
@@ -116,7 +118,8 @@ class AnnouncementRequest extends FormRequest {
   public function messages() :array {
     return [
       'type'                     => 'Os tipos permitidos são lost ou donation',
-      'status'                   => 'Os status permitidos para o status são open e closed',
+      'status'                   => 'Os valores permitidos para o status são 0 e 1',
+      'active'                   => 'Os valores permitidos para o active são 0 e 1',
       'animal.gender'            => 'Os tipos permitidos são male e female',
       'animal.size'              => 'Os tamanhos permitidos são small, medium ou large',
       'animal.age'               => 'As descrições de idade permitidas são puppy, adult e senior',

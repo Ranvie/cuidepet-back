@@ -84,8 +84,7 @@ class AddressCacheService {
 
     $cacheTime   = strtotime($addressCache->expiresAt);
     $currentTime = time();
-
-    // Considera o cache expirado se tiver mais de 24 horas (86400 segundos)
+    
     return $currentTime > $cacheTime;
   }
 

@@ -7,9 +7,13 @@ use App\DTO\Announcement\AnnouncementDTO;
 use App\DTO\Form\FormDTO;
 use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
+use App\Http\Enums\NotificationTypes;
 use App\Http\Response\BusinessResponse;
+use App\MessageDispatcher\Builders\NotificationBuilder;
 use App\MessageDispatcher\Notifications\AnnouncementAlertNotification;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
 use App\Models\AnnouncementModel;
+use App\Models\FavoriteModel;
 use App\Services\AddressService;
 use App\Services\Interfaces\IAnnouncementService;
 use App\Utils\File;
@@ -30,6 +34,7 @@ class AnnouncementService implements IAnnouncementService {
    * @param FormService              $obFormService              Serviço de formulários.
    * @param AddressService           $obAddressService           Serviço de endereços.
    * @param AnimalService            $obAnimalService            Serviço de animais.
+   * @param FavoriteModel            $obFavoriteModel            Modelo de favoritos.
    */
   public function __construct(
     private AnnouncementModel        $obAnnouncementModel,
@@ -38,7 +43,8 @@ class AnnouncementService implements IAnnouncementService {
     private FormService              $obFormService,
     private AddressService           $obAddressService,
     private AnimalService            $obAnimalService,
-    private NewsletterService        $obNewsletterService
+    private NewsletterService        $obNewsletterService,
+    private FavoriteModel            $obFavoriteModel,
   ) {}
 
   /**
@@ -197,10 +203,14 @@ class AnnouncementService implements IAnnouncementService {
 
     try {
       DB::beginTransaction();
+      
+      $obAnnouncementDTO = $this->getById($id, ['announcementMedia', 'animal']);
+
+      if($obAnnouncementDTO->blocked)
+        throw new BusinessException("Não é permitido atualizar um anúncio pausado", 400);
 
       if(isset($data['mainImage'])) {
         $obFile            = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
-        $obAnnouncementDTO = $this->getById($id, ['announcementMedia']);
         $obFile->remove($obAnnouncementDTO->mainImage);
         
         $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
@@ -241,6 +251,30 @@ class AnnouncementService implements IAnnouncementService {
         if(\count($errors) > 0)
           BusinessResponse::addErrors($errors);
       }
+
+      $notificationType = NotificationTypes::ANNOUNCEMENT_UPDATE;
+
+      if(isset($data['status']) && $data['status'] == true && $obAnnouncementDTO->status == false){
+        $notificationType = $announcementModel->type === 'lost'
+          ? NotificationTypes::PET_FOUND
+          : NotificationTypes::PET_ADOPTED;
+      }
+      
+      if(isset($data['blocked']) && $data['blocked'] == true && $obAnnouncementDTO->blocked == false){
+        $notificationType = NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED;
+
+        new MessageDispatcher(new NotificationBuilder([$announcementModel->user_id], NotificationTypes::ANNOUNCEMENT_PAUSED, ['petName' => $obAnnouncementDTO->animal->name]))->dispatch();
+      }
+
+      $favoritedUserIds = $this->getFavoritedUsersToNotify($id);
+
+      $obNotificationBuilder = match($notificationType){
+        NotificationTypes::ANNOUNCEMENT_UPDATE                       => new NotificationBuilder($favoritedUserIds, $notificationType, ['announcementId' => $id]),
+        NotificationTypes::PET_FOUND, NotificationTypes::PET_ADOPTED => new NotificationBuilder($favoritedUserIds, $notificationType, ['announcementId' => $id, 'petName' => $obAnnouncementDTO->animal->name]),
+        NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED             => new NotificationBuilder($favoritedUserIds, $notificationType, ['petName' => $obAnnouncementDTO->animal->name])
+      };
+
+      new MessageDispatcher($obNotificationBuilder)->dispatch();
 
       DB::commit();
     } catch (Exception $e) {
@@ -323,5 +357,20 @@ class AnnouncementService implements IAnnouncementService {
   private function validateAnnouncementExists(?AnnouncementDTO $obAnnouncement) :void {
     if (!$obAnnouncement instanceof AnnouncementDTO)
       throw new BusinessException('O anúncio não foi encontrado', 404);
+  }
+
+  /**
+   * Obtém os IDs dos usuários que favoritaram um anúncio específico para notificação.
+   * @param  int $announcementId ID do anúncio para o qual os usuários favoritaram.
+   * @return array               Lista de IDs dos usuários que favoritaram o anúncio.
+   */
+  private function getFavoritedUsersToNotify(int $announcementId) {
+    $users = $this->obFavoriteModel->getAllByQuery([new Filter('announcement_id', '=', $announcementId)], ['user']);
+
+    $userIds = array_map(function($favorite) {
+      return $favorite->user->id;
+    }, $users);
+
+    return $userIds;
   }
 }

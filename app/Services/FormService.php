@@ -6,6 +6,9 @@ use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
 use App\Exceptions\BusinessException;
 use App\FormValidator\FormStructureValidator;
+use App\Http\Enums\NotificationTypes;
+use App\MessageDispatcher\Builders\NotificationBuilder;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
 use App\Models\FormModel;
 use App\Services\Interfaces\IFormService;
 
@@ -84,18 +87,32 @@ class FormService implements IFormService {
 
   /**
    * Atualiza formulários de anúncios.
-   * @param  int   $formId ID do formulário a ser atualizado.
-   * @param  array $data   Dados do formulário a ser atualizado.
-   * @return FormDTO       DTO do formulário atualizado.
+   * @param  int   $formId     ID do formulário a ser atualizado.
+   * @param  array $data       Dados do formulário a ser atualizado.
+   * @return FormDTO           DTO do formulário atualizado.
+   * @throws BusinessException Se o formulário solicitado não for encontrado ou se ocorrer um erro ao atualizar o formulário.
    */
   public function edit(int $formId, array $data) :FormDTO {
-    $requestPayload  = json_decode($data['payload'] ?? [], true) ?? [];
-    $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+    $obFormDTO = $this->formModel->getById($formId);
+
+    if(!$obFormDTO instanceof FormDTO)
+      throw new BusinessException("Formulário solicitado não foi encontrado.", 404);
+
+    if($obFormDTO->blocked)
+      throw new BusinessException('Não é possível alterar um formulário pausado.', 403);
+
+    if(isset($data['payload'])){
+      $requestPayload  = json_decode($data['payload'] ?? "{}", true) ?? [];
+      $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+    }
 
     $obFormDTO = $this->formModel->edit($formId, $data);
 
     if(!$obFormDTO instanceof FormDTO)
       throw new BusinessException("Ocorreu um erro ao atualizar o formulário.", 500);
+
+    if($obFormDTO->blocked)
+      new MessageDispatcher(new NotificationBuilder([$obFormDTO->userId], NotificationTypes::FORM_PAUSED, ['title' => $obFormDTO->title]))->dispatch();
 
     return $obFormDTO;
   }

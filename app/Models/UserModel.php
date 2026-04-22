@@ -6,19 +6,20 @@ use App\DTO\User\UserDTO;
 use App\Utils\Url;
 use Illuminate\Auth\Authenticatable as TraitAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Modelo de usuário, representando a entidade "tb_user" no banco de dados.
+ */
 class UserModel extends BusinessModel implements Authenticatable{
 
   /**
    * Traits
    */
-  use TraitAuthenticatable, HasApiTokens, HasFactory, Notifiable;
+  use TraitAuthenticatable, HasApiTokens;
 
   /**
    * Define a classe de saída dos objetos. (Formato: Classe::class)
@@ -94,28 +95,6 @@ class UserModel extends BusinessModel implements Authenticatable{
   public function create(array $data, array $relations = [], bool $parse = true) :UserDTO|UserModel {
     parent::create($data, []);
     return parent::getById($this->original['id'], $relations, $parse);
-  }
-
-  //TODO:
-  //Validar se não faz sentido deletar outros dados também
-  //Inativar os formulários
-  //Inativar os anúncios + animal + mídias + endereços dos anúncios (cuidado para não deletar os da newsletter)
-  //Inativar as respostas
-  //Inativar o histórico de respostas
-  //Inativar as notificações
-  //Inativar as preferências
-  //Inativar as denúncias
-  //Inativar os termos de uso aceitos
-  //Inativar os favoritos
-  
-  /**
-   * Inativa um usuário e seus dados relacionados, definindo o campo "active" como false. Retorna true se a operação for bem-sucedida.
-   * @param  int|null $id
-   * @return bool
-   */
-  public function inactivate($id = null) :bool {
-    parent::edit($id, ['active' => 0]);
-    return true;
   }
 
   /**

@@ -4,6 +4,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AnnouncementResponseController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\SpecieController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FilterDiscoveryController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserResponseController;
 
+// GRUPO DE AUTENTICAÇÃO
 Route::post('/login',             [AuthController::class, 'login']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
@@ -40,7 +42,7 @@ Route::middleware(['auth:sanctum', 'hasRole:reset-password'])
 Route::middleware(['auth:sanctum', 'hasRole:confirm-email'])
   ->post('/email-confirmation', [AuthController::class, 'confirmUserEmail']);
 
-// RESGATA ENDEREÇO POR ZIPCODE
+// RESGATA ENDEREÇO POR CEP
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('address')->group(function () {
   Route::get('/{zipCode}', [AddressController::class, 'get']);
 });
@@ -58,7 +60,14 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
   Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
 
-// ENDPOINTS DE USUÁRIO AUTENTINCADO
+// ENDPOINTS DE NEWSLETTER
+Route::group(['prefix' => 'newsletter'], function () {
+  Route::post('/subscribe',  [NewsletterController::class, 'subscribe']);
+  Route::get('/confirm',     [NewsletterController::class, 'confirmSubscription']);
+  Route::get('/unsubscribe', [NewsletterController::class, 'unsubscribe']);
+});
+
+// ENDPOINTS DE USUÁRIO AUTENTICADO
 Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
 
   Route::get('/species',       [SpecieController::class, 'list']);

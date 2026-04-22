@@ -14,7 +14,7 @@ return new class extends Migration {
 			$table->id();
 			$table->foreignId('newsletter_id')->constrained('tb_newsletter')->onDelete('cascade');
 			$table->foreignId('address_cache_id')->constrained('tb_integration_address_cache')->onDelete('cascade');
-			$table->string('hash', 64)->unique('TB_NEWSLETTER_INTEGRATION_ADDRESS_CACHE_UK_01');
+			$table->string('hash', 64)->unique('NEWSLETTER_INTEGRATION_ADDRESS_CACHE_UK_01');
 		});
 	}
 

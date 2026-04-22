@@ -45,24 +45,27 @@ class ReportService implements IReportService {
       throw new BusinessException("Mensagem não foi encontrada ou com o tipo inválido", 404);
 
     $obReportedEntity = match($data['type']){
-      'announcement' => $this->obAnnouncementModel->getById($announcementId, parse: false),
-      'form'         => $this->obFormModel->getFormByAnnouncement($announcementId, parse: false),
+      'announcement' => ['model' => $this->obAnnouncementModel->getById($announcementId, parse: false),       'service' => AnnouncementService::class],
+      'form'         => ['model' => $this->obFormModel->getFormByAnnouncement($announcementId, parse: false), 'service' => FormService::class],
       default        => null
     };
+  
+    if(!$obReportedEntity || !$obReportedEntity['model'])
+      throw new BusinessException("Entidade a ser reportada não foi encontrada", 404);
 
-    if(!$obReportedEntity instanceof AnnouncementModel && !$obReportedEntity instanceof FormModel)
-      throw new BusinessException("Entidade solicitada não foi encontrada", 404);
+    if($obReportedEntity['model']->user_id === auth()->id())
+      throw new BusinessException("Não é possível reportar seu próprio anúncio ou formulário", 403);
 
     $this->obReportModel->insertOrIgnore([
       'user_id'           => $data['userId'],
       'report_message_id' => $data['reportMessageId'],
-      'announcement_id'   => $data['type'] === 'announcement' ? $announcementId       : null,
-      'form_id'           => $data['type'] === 'form'         ? $obReportedEntity->id : null,
+      'announcement_id'   => $data['type'] === 'announcement' ? $obReportedEntity['model']->id : null,
+      'form_id'           => $data['type'] === 'form'         ? $obReportedEntity['model']->id : null,
       'description'       => $data['description']
     ]);
 
-    if($obReportedEntity->reports->count() >= self::MAX_REPORT_COUNT)
-      $obReportedEntity->edit($obReportedEntity->id, ['blocked' => true]);
+    if($obReportedEntity['model']->reports->count() >= self::MAX_REPORT_COUNT)
+      app($obReportedEntity['service'])->edit($obReportedEntity['model']->id, ['blocked' => true, 'userId' => $data['userId']]);
 
     return true;
   }

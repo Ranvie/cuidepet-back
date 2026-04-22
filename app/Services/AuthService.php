@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\DTO\User\SafeUserDTO;
 use App\DTO\User\UserDTO;
 use App\DTO\UseTerms\UseTermsDTO;
-use App\Events\EmailConfirmationEvent;
-use App\Events\RecoverPasswordEvent;
 use App\Exceptions\BusinessException;
+use App\MessageDispatcher\Builders\EmailBuilder;
+use App\MessageDispatcher\Orchestrator\MessageDispatcher;
+use App\Models\NewsletterModel;
 use App\Models\UserModel;
 use App\Utils\PARSE_MODE;
 use App\Utils\ParseConvention;
@@ -21,12 +23,15 @@ class AuthService {
   /**
    * Construtor do serviço de autenticação.
    * @param UserService     $userService     Serviço de usuários.
+   * @param UseTermsService $useTermService  Serviço de termos de uso.
    * @param ParseConvention $parseConvention Utilitário para conversão de convenções de nomenclatura.
+   * @param NewsletterModel $newsletterModel Modelo de newsletter para verificar assinaturas relacionadas ao usuário.
    */
   public function __construct(
     private UserService     $userService,
     private UseTermsService $useTermService,
-    private ParseConvention $parseConvention
+    private ParseConvention $parseConvention,
+    private NewsletterModel $newsletterModel
   ) {}
 
   /**
@@ -85,10 +90,20 @@ class AuthService {
    * @return UserDTO     Dados do usuário registrado.
    */
   public function register(array $data) :UserDTO {
-    $obUserModel = $this->userService->create($data, parse: false);
+    try {
+      DB::beginTransaction();
 
-    $this->acceptTerms($obUserModel->id);
-    $this->sendEmailConfirmation($obUserModel);
+      $obUserModel = $this->userService->create($data, parse: false);
+
+      $this->acceptTerms($obUserModel->id);
+      $this->verifyNewsletter($obUserModel);
+      $this->sendEmailConfirmation($obUserModel);
+      
+      DB::commit();
+    } catch (BusinessException $e) {
+      DB::rollBack();
+      throw $e;
+    }
 
     return ParseConvention::parse($obUserModel->getOriginal(), PARSE_MODE::snakeToCamel, UserDTO::class);
   }
@@ -107,7 +122,13 @@ class AuthService {
     
     $frontUrl        = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
     $confirmationUrl = $frontUrl . "/confirm-email?token=" . urlencode($token);
-    EmailConfirmationEvent::dispatch($obUserModel, $confirmationUrl);
+
+    new MessageDispatcher(new EmailBuilder(
+      [$obUserModel->email], 
+      'CuidePet - Confirmação de e-mail', 
+      'mail.emailConfirmation', 
+      ['username' => $obUserModel->username, 'confirmationUrl' => $confirmationUrl]
+    ))->dispatch();
   }
    
   /**
@@ -146,7 +167,13 @@ class AuthService {
 
     $frontUrl         = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
     $resetPasswordUrl = "$frontUrl/reset-password?token=" . urlencode($token);
-    RecoverPasswordEvent::dispatch($userDto, $resetPasswordUrl);
+
+    new MessageDispatcher(new EmailBuilder(
+      [$userDto->email],
+      'CuidePet - Recuperação de Senha', 
+      'mail.recoverPassword', 
+      ['username' => $userDto->username, 'resetUrl' => $resetPasswordUrl]
+    ))->dispatch();
   }
 
   /**
@@ -211,7 +238,9 @@ class AuthService {
 
   /**
    * Aceita os termos de uso pelo usuário.
+   * @param  int $userId       ID do usuário que está aceitando os termos de uso.
    * @return bool
+   * @throws BusinessException Se ocorrer um erro ao aceitar os termos de uso.
    */
   public function acceptTerms(int $userId) :bool {
     return $this->useTermService->acceptTerms($userId);
@@ -236,5 +265,17 @@ class AuthService {
    */
   private function deleteTokens(UserModel $user) :void {
     $user->tokens()->delete();
+  }
+
+  /**
+   * Vincula uma newsletter ao usuário caso ele possua.
+   * @param  UserModel $user Modelo do usuário para o qual a verificação deve ser realizada.
+   * @return void
+   */
+  private function verifyNewsletter(UserModel $user) :void {
+    $obNewsletter = $this->newsletterModel->getByQuery([new Filter('email', '=', $user->email)], [], false);
+
+    if($obNewsletter instanceof NewsletterModel)
+      $obNewsletter->edit($obNewsletter->id, ['user_id' => $user->id]);
   }
 }

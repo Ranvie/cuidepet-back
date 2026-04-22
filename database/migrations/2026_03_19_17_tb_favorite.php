@@ -14,6 +14,7 @@ return new class extends Migration {
       $table->id();
       $table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
       $table->foreignId('announcement_id')->constrained('tb_announcement')->onDelete('cascade');
+      $table->unique(['user_id', 'announcement_id'], 'FAVORITE_UK_01');
     });
   }
 

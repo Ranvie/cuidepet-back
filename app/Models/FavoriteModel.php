@@ -2,9 +2,16 @@
 
 namespace App\Models;
 
+use App\DTO\Favorites\FavoriteDTO;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FavoriteModel extends BusinessModel {
+
+  /**
+   * DTO de favoritos
+   * @var string
+   */
+  public $class = FavoriteDTO::class;
 
   /**
    * Aponta a entidade do banco de dados

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\BusinessException;
 use App\Http\Requests\ListingRequest;
 use App\Http\Requests\UserDetailRequest;
+use App\Http\Requests\UserInactivateRequest;
 use App\Http\Requests\UserPasswordRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Response\BusinessResponse;
@@ -182,9 +183,11 @@ class UserController {
    * Inativa o usuário autenticado
    * @return JsonResponse
    */
-  public function inactivate() :JsonResponse {
-    $userId = auth()->id();
-    $this->userService->inactivate($userId);
+  public function inactivate(UserInactivateRequest $request) :JsonResponse {
+    $validated = $request->validated();
+    $userId    = auth()->id();
+
+    $this->userService->inactivate($validated['password'], $userId);
 
     $response = new BusinessResponse(200, "O usuário {$userId} foi inativado com sucesso.");
     return $response->build();

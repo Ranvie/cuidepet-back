@@ -13,6 +13,12 @@ class FormDTO {
   public int $id;
 
   /**
+   * Identificador do usuário
+   * @var int
+   */
+  public int $userId;
+
+  /**
    * Objeto do usuário dono do formulário
    * @var UserDTO
    */
@@ -35,6 +41,12 @@ class FormDTO {
    * @var bool
    */
   public bool $active;
+
+  /**
+   * Determina se o formulário está pausado por denúncias
+   * @var bool
+   */
+  public bool $blocked;
 
   /**
    * Data de criação do formulário

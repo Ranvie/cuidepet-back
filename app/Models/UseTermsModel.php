@@ -51,6 +51,7 @@ class UseTermsModel extends BusinessModel {
   public function getLatestUseTerms(bool $parse = true) :?object {
     $useTerms = $this->query()
       ->orderBy('created_at', 'desc')
+      ->where('active', true)
       ->first();
 
     if($useTerms instanceof UseTermsModel && $parse)

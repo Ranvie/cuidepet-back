@@ -149,11 +149,49 @@ class UserService implements IUserService {
 
   /**
    * Inativa um usuário
-   * @param  int|null $id ID do usuário a ser inativado, ou null para inativar o usuário atual
+   * @param  string   $password Senha do usuário para confirmar a inativação
+   * @param  int|null $id       ID do usuário a ser inativado
    * @return bool
    */
-  public function inactivate(?int $id = null) :bool {
-    return $this->userModel->inactivate($id);
+  public function inactivate(string $password, ?int $id = null) :bool {
+    $user = $this->userModel->getById($id, ['newsletter'], false);
+    $this->validateIfUserExists($user);
+
+    if (!password_verify($password, $user->password))
+      throw new BusinessException("A senha atual está incorreta.", 400);
+
+    try {
+      DB::beginTransaction();
+
+      // Inativar usuário, formulários e anúncios
+      $this->userModel->edit($user->id, ['active' => false], parse: false);
+      $user->forms()->update(['active' => false]);
+      $user->announcements()->update(['active' => false]);
+
+      // Revogar tokens de acesso (segurança)
+      $user->tokens()->delete();
+
+      // Remover permissões
+      $user->roles()->detach();
+
+      // Remover dados operacionais pessoais
+      $user->notifications()->delete();
+      $user->preference()->delete();
+      $user->favorites()->detach();
+
+      // Remover newsletter e endereços associados
+      if ($user->newsletter) {
+        $user->newsletter->addresses()->detach();
+        $user->newsletter()->delete();
+      }
+
+      DB::commit();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw new BusinessException('Ocorreu um erro ao inativar o usuário. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
+    }
+
+    return true;
   }
 
   /**
