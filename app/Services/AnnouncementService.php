@@ -7,11 +7,9 @@ use App\DTO\Announcement\AnnouncementDTO;
 use App\DTO\Form\FormDTO;
 use App\DTO\User\UserDTO;
 use App\Exceptions\BusinessException;
-use App\Http\Enums\NotificationTypes;
 use App\Http\Response\BusinessResponse;
-use App\MessageDispatcher\Builders\NotificationBuilder;
 use App\MessageDispatcher\Notifications\AnnouncementAlertNotification;
-use App\MessageDispatcher\Orchestrator\MessageDispatcher;
+use App\MessageDispatcher\Notifications\AnnouncementEditedNotification;
 use App\Models\AnnouncementModel;
 use App\Models\FavoriteModel;
 use App\Services\AddressService;
@@ -25,6 +23,12 @@ use Illuminate\Support\Facades\DB;
  * Fornece métodos para criar, editar, listar e remover anúncios, além de validações relacionadas a anúncios.
  */
 class AnnouncementService implements IAnnouncementService {
+
+  /**
+   * Limite máximo de mídias associadas a um anúncio.
+   * @var int
+   */
+  private const int ANNOUNCEMENT_MEDIA_LIMIT = 4;
 
   /**
    * Construtor do serviço de anúncios.
@@ -102,6 +106,8 @@ class AnnouncementService implements IAnnouncementService {
     $user = $this->validateIfUserExists($data['userId']);
     $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
+    $announcementId = null;
+
     try {
       DB::beginTransaction();
 
@@ -143,6 +149,8 @@ class AnnouncementService implements IAnnouncementService {
       DB::commit();
     } catch (Exception $e) {
       DB::rollBack();
+      (new File("user/{$data['userId']}/announcement/{$announcementId}"))->removeAll();
+
       throw new BusinessException('Ocorreu um erro ao criar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
 
@@ -210,9 +218,9 @@ class AnnouncementService implements IAnnouncementService {
         throw new BusinessException("Não é permitido atualizar um anúncio pausado", 400);
 
       if(isset($data['mainImage'])) {
-        $obFile            = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
+        $obFile = (new File("user/{$data['userId']}/announcement/{$id}/media/"));
         $obFile->remove($obAnnouncementDTO->mainImage);
-        
+
         $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
       }
 
@@ -236,7 +244,7 @@ class AnnouncementService implements IAnnouncementService {
         $errors = [];
         foreach ($announcementMediaData as $announcementMedia) {
           if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
-            $errors[] = "O anúncio não pode conter mais do que 4 mídias.";
+            $errors[] = "O anúncio não pode conter mais do que " . self::ANNOUNCEMENT_MEDIA_LIMIT . " mídias.";
             break;
           }
 
@@ -252,29 +260,8 @@ class AnnouncementService implements IAnnouncementService {
           BusinessResponse::addErrors($errors);
       }
 
-      $notificationType = NotificationTypes::ANNOUNCEMENT_UPDATE;
-
-      if(isset($data['status']) && $data['status'] == true && $obAnnouncementDTO->status == false){
-        $notificationType = $announcementModel->type === 'lost'
-          ? NotificationTypes::PET_FOUND
-          : NotificationTypes::PET_ADOPTED;
-      }
-      
-      if(isset($data['blocked']) && $data['blocked'] == true && $obAnnouncementDTO->blocked == false){
-        $notificationType = NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED;
-
-        new MessageDispatcher(new NotificationBuilder([$announcementModel->user_id], NotificationTypes::ANNOUNCEMENT_PAUSED, ['petName' => $obAnnouncementDTO->animal->name]))->dispatch();
-      }
-
       $favoritedUserIds = $this->getFavoritedUsersToNotify($id);
-
-      $obNotificationBuilder = match($notificationType){
-        NotificationTypes::ANNOUNCEMENT_UPDATE                       => new NotificationBuilder($favoritedUserIds, $notificationType, ['announcementId' => $id]),
-        NotificationTypes::PET_FOUND, NotificationTypes::PET_ADOPTED => new NotificationBuilder($favoritedUserIds, $notificationType, ['announcementId' => $id, 'petName' => $obAnnouncementDTO->animal->name]),
-        NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED             => new NotificationBuilder($favoritedUserIds, $notificationType, ['petName' => $obAnnouncementDTO->animal->name])
-      };
-
-      new MessageDispatcher($obNotificationBuilder)->dispatch();
+      new AnnouncementEditedNotification($favoritedUserIds, $announcementModel, $data);
 
       DB::commit();
     } catch (Exception $e) {
@@ -309,7 +296,7 @@ class AnnouncementService implements IAnnouncementService {
    * @return bool                   Indica se o limite de mídias foi atingido ou não.
    */
   private function validateMediaLimit(int $currentMediaCount) :bool {
-    if($currentMediaCount > 4)
+    if($currentMediaCount > self::ANNOUNCEMENT_MEDIA_LIMIT)
       return false;
 
     return true;

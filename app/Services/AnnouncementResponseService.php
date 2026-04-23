@@ -6,6 +6,7 @@ use App\Classes\Filter;
 use App\DTO\Form\FormDTO;
 use App\DTO\FormResponse\FormResponseDTO;
 use App\Exceptions\BusinessException;
+use Carbon\Carbon;
 use App\FormValidator\FormResponseValidator;
 use App\Http\Enums\NotificationTypes;
 use App\MessageDispatcher\Builders\NotificationBuilder;
@@ -87,7 +88,10 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
     $obResponseHistoryDTO = $this->obUserResponseHistoryModel->getByQuery([
       new Filter('announcement_id', '=', $data['announcement_id']), 
       new Filter('user_id', '=', $data['user_id'])
-    ]);
+    ]); 
+
+    if(!is_null($obResponseHistoryDTO?->expiresAt) && Carbon::parse($obResponseHistoryDTO?->expiresAt)->isFuture())
+      throw new BusinessException("Você já respondeu este anúncio, tente enviar uma nova resposta mais tarde.");
 
     if(!$obFormDTO instanceof FormDTO)
       throw new BusinessException("Formulário original do anúncio {$data['announcement_id']} não encontrado.", 404);
@@ -100,7 +104,14 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
       $this->convertJsonStringToArray($obFormDTO->payload)
     )->resolve();
 
+    $historyData = [
+      'user_id'         => $data['user_id'],
+      'announcement_id' => $data['announcement_id'],
+      'expires_at'      => Carbon::now()->addDay()
+    ];
+
     $this->obFormResponseModel->upsert([$data], ['user_id', 'announcement_id'], ['payload']);
+    $this->obUserResponseHistoryModel->upsert([$historyData], ['user_id', 'announcement_id'], ['expires_at']);
 
     new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'petName' => $obAnimalDTO->name]))->dispatch();
 

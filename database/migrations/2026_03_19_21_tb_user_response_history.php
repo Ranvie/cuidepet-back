@@ -14,7 +14,7 @@ return new class extends Migration {
 			$table->id();
 			$table->foreignId('user_id')->constrained('tb_user')->onDelete('cascade');
 			$table->foreignId('announcement_id')->constrained('tb_announcement')->onDelete('cascade');
-			$table->timestamp('expired_at')->useCurrent();
+			$table->timestamp('expires_at')->useCurrent();
 			$table->timestamp('created_at')->useCurrent();
 			$table->unique(['user_id', 'announcement_id'], 'USER_RESPONSE_HISTORY_UK_01');
 		});

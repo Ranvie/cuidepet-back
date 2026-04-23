@@ -185,6 +185,9 @@ class UserService implements IUserService {
         $user->newsletter()->delete();
       }
 
+      // Anonimizar dados pessoais identificáveis
+      $this->anonymize($user);
+
       DB::commit();
     } catch (\Exception $e) {
       DB::rollBack();
@@ -192,6 +195,27 @@ class UserService implements IUserService {
     }
 
     return true;
+  }
+
+  /**
+   * Anonimiza os dados pessoais identificáveis de um usuário
+   * @param  UserModel $user Usuário a ser anonimizado
+   * @return void
+   */
+  private function anonymize(UserModel $user) :void {
+    if ($user->image_profile)
+      (new File("user/{$user->id}/profile/"))->remove($user->image_profile);
+
+    $data = [
+      'username'          => 'Usuário excluído',
+      'email'             => "usuario-excluido-{$user->id}",
+      'password'          => '*',
+      'phone'             => null,
+      'image_profile'     => null,
+      'email_verified_at' => null,
+    ];
+
+    $this->userModel->edit($user->id, $data, false, false);
   }
 
   /**
