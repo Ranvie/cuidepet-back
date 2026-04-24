@@ -28,7 +28,7 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @return array             Lista de anúncios públicos.
    */
   public function getList(int $limit, int $page, ?int $userId = null, array $filters = [], array $orders = []) :array {
-    $listRelations = ['user', 'animal', 'animal.breed', 'animal.breed.specie', 'favorites'];
+    $listRelations = ['user', 'animal', 'animal.breed', 'animal.breed.specie', 'favorites', 'address.cacheAddress'];
     $publicAnnouncementList = $this->obPublicAnnouncementModel->list($limit, $page, relations: $listRelations, filters: $filters, orders: $orders);
 
     array_map(function($obAnnouncementDTO) use($userId){
