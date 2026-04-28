@@ -26,7 +26,7 @@ class SafeUserDTO{
    * Imagem de perfil do usuário
    * @var string|null
    */
-  public ?string $imageProfile;
+  public ?string $imageProfileUrl;
 
   /**
    * Notificações do usuário

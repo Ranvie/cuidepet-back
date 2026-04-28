@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin
   Route::put('/{id}',           [UserController::class, 'update']);
   Route::delete('/{id}',        [UserController::class, 'delete']);
 
-  Route::get('/report/',        [ReportController::class, 'list']);
+  Route::get('/report',        [ReportController::class, 'list']);
   Route::get('/report/{id}',    [ReportController::class, 'get']);
   Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::post('/inactivate', [UserController::class, 'inactivate']);
   });
 
-  // GERENCIAMENTO DE ANÚNCIO
+  // GERENCIAMENTO DE MEUS ANÚNCIOS
   Route::middleware(['validate:policy=BelongsToUser,model=AnnouncementModel,ignored=list|listAnswers|create'])->prefix('my-announcements')->group(function () {
     Route::get('/',  [AnnouncementController::class, 'list']);
     Route::post('/', [AnnouncementController::class, 'create']);
@@ -101,14 +101,13 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
     Route::prefix('/{announncementId}')->group(function () {
         
       Route::get('/',         [AnnouncementController::class, 'get']);
-      Route::get('/response', [AnnouncementController::class, 'listAnswers']);
       Route::put('/',         [AnnouncementController::class, 'update']);
       Route::delete('/',      [AnnouncementController::class, 'delete']);
 
     });
   });
   
-  // GERENCIAMENTO DE RESPOSTAS DO ANÚNCIOS
+  // GERENCIAMENTO DE RESPOSTAS DOS ANÚNCIOS
   Route::middleware(['validate:policy=BelongsToUser,model=AnnouncementModel,fieldId=announcementId'])->prefix('my-announcements/{announcementId}/form-responses')
     ->group(function () {
         Route::get('/',                [AnnouncementResponseController::class, 'list']);

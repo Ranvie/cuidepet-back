@@ -242,8 +242,10 @@ class AnnouncementService implements IAnnouncementService {
         $announcementMediaData = $data['announcementMedia'];
         $announcementMediaIds  = $this->obAnnouncementMediaService->getAllMediaIds($id);
         $errors = [];
+
+        $mediaBalance = 0;
         foreach ($announcementMediaData as $announcementMedia) {
-          if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds))){
+          if($announcementMedia['action'] === 'ADD' && !$this->validateMediaLimit(\count($announcementMediaIds) + $mediaBalance)) {
             $errors[] = "O anúncio não pode conter mais do que " . self::ANNOUNCEMENT_MEDIA_LIMIT . " mídias.";
             break;
           }
@@ -253,7 +255,7 @@ class AnnouncementService implements IAnnouncementService {
 
           $announcementMedia['announcementId'] = $id;
           $announcementMedia['userId']         = $data['userId'];
-          $this->changeMediaData($announcementMedia);
+          $this->changeMediaData($announcementMedia, $mediaBalance);
         }
 
         if(\count($errors) > 0)
@@ -296,7 +298,7 @@ class AnnouncementService implements IAnnouncementService {
    * @return bool                   Indica se o limite de mídias foi atingido ou não.
    */
   private function validateMediaLimit(int $currentMediaCount) :bool {
-    if($currentMediaCount > self::ANNOUNCEMENT_MEDIA_LIMIT)
+    if($currentMediaCount >= self::ANNOUNCEMENT_MEDIA_LIMIT)
       return false;
 
     return true;
@@ -305,18 +307,26 @@ class AnnouncementService implements IAnnouncementService {
   /**
    * Altera os dados de uma mídia de anúncio com base na ação especificada.
    * @param  array $announcementMedia Dados da mídia do anúncio, incluindo a ação a ser realizada.
+   * @param  int   $mediaBalance      Quantidade de mídias adicionadas ou removidas, usada para controle do limite de mídias.
    * @return void
    */
-  private function changeMediaData(array $announcementMedia) :void {
+  private function changeMediaData(array $announcementMedia, int &$mediaBalance) :void {
     $mediaId = $announcementMedia['id'] ?? null;
     $option  = $announcementMedia['action'];
 
-    match ($option) {
-      'UPD'   => $this->obAnnouncementMediaService->edit($mediaId, $announcementMedia),
-      'DEL'   => $this->obAnnouncementMediaService->remove($mediaId),
-      'ADD'   => $this->obAnnouncementMediaService->create($announcementMedia),
-      default => null,
-    };
+    switch ($option) {
+      case 'UPD':
+        $this->obAnnouncementMediaService->edit($mediaId, $announcementMedia);
+        break;
+      case 'DEL':
+        $this->obAnnouncementMediaService->remove($mediaId);
+        $mediaBalance--;
+        break;
+      case 'ADD':
+        $this->obAnnouncementMediaService->create($announcementMedia);
+        $mediaBalance++;
+        break;
+    }
   }
 
   /**

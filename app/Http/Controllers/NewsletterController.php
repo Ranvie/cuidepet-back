@@ -32,7 +32,7 @@ class NewsletterController {
     $validated = $request->validated();
     $this->newsletterService->sendNewsletterMailConfirmation($validated['email'], $validated['zipcode']);
 
-    return new BusinessResponse(200, 'Inscrição realizada com sucesso.')->build();
+    return new BusinessResponse(200, 'Enviamos um e-mail para você, verifique para confirmar a inscrição.')->build();
   }
 
   /**
