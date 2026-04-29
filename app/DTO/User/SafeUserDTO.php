@@ -33,4 +33,10 @@ class SafeUserDTO{
    * @var Collection<NotificationDTO>
    */
   public Collection $notifications;
+
+  /**
+   * Data de expiração do token de acesso do usuário
+   * @var string|null
+   */
+  public ?string $tokenExpiresAt;
 }

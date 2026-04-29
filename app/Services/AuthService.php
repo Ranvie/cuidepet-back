@@ -57,6 +57,7 @@ class AuthService {
     
     $response->user                  = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
     $response->user->imageProfileUrl = $user->image_profile ? (new Url())->setResource('media')->getMediaUrlPath($user->image_profile) : null;
+    $response->user->tokenExpiresAt  = $expiresAt->toDateTimeString();
 
     return $response;
   }
@@ -234,7 +235,7 @@ class AuthService {
 
   /**
    * Exibe os termos de uso para o usuário.
-   * @return void
+   * @return bool Indica se o usuário aceitou os termos de uso mais recentes.
    */
   public function validateUseTermsAcceptance(int $userId) :bool {
     return $this->useTermService->validateUseTermsAcceptance($userId);
