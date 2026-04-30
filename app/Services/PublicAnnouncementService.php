@@ -28,7 +28,7 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @return array             Lista de anúncios públicos.
    */
   public function getList(int $limit, int $page, ?int $userId = null, array $filters = [], array $orders = []) :array {
-    $listRelations = ['user', 'animal', 'animal.breed', 'animal.breed.specie', 'favorites', 'address.cacheAddress'];
+    $listRelations          = ['user', 'animal', 'animal.breed', 'animal.breed.specie', 'favorites', 'address.cacheAddress'];
     $publicAnnouncementList = $this->obPublicAnnouncementModel->list($limit, $page, relations: $listRelations, filters: $filters, orders: $orders);
 
     array_map(function($obAnnouncementDTO) use($userId){
@@ -45,11 +45,11 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @param  array $relations     Relações a serem carregadas junto com o anúncio.
    * @return AnnouncementDTO|null Anúncio público ou null se não encontrado.
    */
-  public function getById(int $id, ?int $userId = null, array $relations = ['user', 'animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'favorites']): ?AnnouncementDTO {
+  public function getById(int $id, ?int $userId = null, array $relations = ['user', 'animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'favorites', 'address.cacheAddress']): ?AnnouncementDTO {
     $obAnnouncementDTO = $this->obPublicAnnouncementModel->getById($id, $relations, true);
-    $this->applyFavorites($obAnnouncementDTO, $userId);
-
     $this->validateAnnouncementExists($obAnnouncementDTO);
+
+    $this->applyFavorites($obAnnouncementDTO, $userId);
     return $obAnnouncementDTO;
   }
 
