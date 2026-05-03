@@ -26,9 +26,11 @@ Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
 // ENDPOINT PARA BUSCAR MÍDIAS
 Route::get('/storage/{path}', [StorageController::class, 'get']);
 
-// ANÚNCIOS PÚBLICOS
-Route::get('announcements',     [PublicAnnouncementController::class, 'list']);
-Route::get('announcement/{id}', [PublicAnnouncementController::class, 'get']);
+// ANÚNCIOS PÚBLICOS (com autenticação opcional)
+Route::middleware('optionalAuth')->group(function () {
+  Route::get('announcements',     [PublicAnnouncementController::class, 'list']);
+  Route::get('announcement/{id}', [PublicAnnouncementController::class, 'get']);
+});
 
 // ENDPOINT QUE RETORNA FILTROS DE LISTAGENS ESPECÍFICAS 
 Route::get('/filters', [FilterDiscoveryController::class, 'list']);
@@ -76,7 +78,10 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
 
   Route::post('/logout',       [AuthController::class, 'logout']);
 
-  Route::post('/report',       [ReportController::class, 'create']);
+  Route::prefix('/report')->group(function () {
+    Route::get('/{type}', [ReportController::class, 'listReportTemplates'])->whereIn('type', ['form', 'announcement']);
+    Route::post('', [ReportController::class, 'create']);
+  });
 
   // ENDPOINTS "PÚBLICOS" DE BUSCA E RESPOSTA DE FORMULÁRIO
   Route::prefix('announcement/{announcementId}/form')->group(function () {

@@ -25,14 +25,15 @@ class FavoriteService implements IFavoriteService {
   
   /**
    * Responsável por listar todos os anúncios favoritos do usuário
-   * @param int    $limit   Limite máximo de registros
-   * @param int    $page    Página atual da lista
-   * @param array  $filters Lista de filtros aplicados à listagem
-   * @param array  $orders  Lista de ordenação aplicados à listagem
-   * @return array          Lista de anúncios favoritados
+   * @param int      $limit   Limite máximo de registros
+   * @param int      $page    Página atual da lista
+   * @param int|null $userId  ID do usuário cujos favoritos serão listados
+   * @param array    $filters Lista de filtros aplicados à listagem
+   * @param array    $orders  Lista de ordenação aplicados à listagem
+   * @return array            Lista de anúncios favoritados
    */
-  public function listFavorites(int $limit, int $page, array $filters = [], array $orders = []) :array {
-    return $this->obPublicAnnouncementService->getList($limit, $page, filters: $filters, orders: $orders);
+  public function listFavorites(int $limit, int $page, ?int $userId, array $filters = [], array $orders = []) :array {
+    return $this->obPublicAnnouncementService->getList($limit, $page, $userId, $filters, $orders);
   }
 
   /**
@@ -42,7 +43,7 @@ class FavoriteService implements IFavoriteService {
    * @return bool               Valor booleano indicando se o anúncio foi favoritado
    */
   public function addFavorite(int $userId, int $announcementId) :bool {
-    $obAnnouncementDTO = $this->obPublicAnnouncementService->getById($announcementId, relations: []);
+    $obAnnouncementDTO = $this->obPublicAnnouncementService->getById($announcementId);
 
     $favorited = $this->obFavoriteModel->getByQuery([
       new Filter('user_id', '=', $userId),

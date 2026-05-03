@@ -4,6 +4,7 @@ use App\Exceptions\BusinessExceptionHandler;
 use App\Http\Middleware\CheckUser;
 use \App\Http\Middleware\RejectIfUserHasRole;
 use \App\Http\Middleware\AllowIfUserHasRole;
+use App\Http\Middleware\OptionalAuth;
 use App\Http\Middleware\Validate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
       'notHasRole'    => RejectIfUserHasRole::class,
       'hasRole'       => AllowIfUserHasRole::class,
       'validate'      => Validate::class,
+      'optionalAuth'  => OptionalAuth::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {

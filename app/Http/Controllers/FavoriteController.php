@@ -17,7 +17,7 @@ class FavoriteController {
 
   /**
    * Método Construtor
-   * @param FavoriteService Serviço de favoritos para processamento
+   * @param FavoriteService $obFavoriteService Serviço de favoritos para processamento
    */
   public function __construct(
     private FavoriteService $obFavoriteService
@@ -34,7 +34,8 @@ class FavoriteController {
 
     [$filters, $orders] = (new PublicAnnouncementFilterValidator())->build($request);
     $filters            = array_merge($filters, $preDefinedFilters);
-    $registers          = $this->obFavoriteService->listFavorites($validated['limit'], $validated['page'], $filters, $orders);
+    $userId             = auth()->id() ?? null;
+    $registers          = $this->obFavoriteService->listFavorites($validated['limit'], $validated['page'], $userId, $filters, $orders);
 
     return new BusinessResponse(200, $registers)->build();
   }

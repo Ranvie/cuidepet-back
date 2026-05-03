@@ -18,6 +18,17 @@ class ReportController {
   ){}
 
   /**
+   * Responsável por listar os templates de denúncia
+   * @param  string       $reportType Parâmetro que determina o tipo da denúncia cujo template deve ser consultado
+   * @return JsonResponse             Resposta JSON da operação
+   */
+  public function listReportTemplates(string $reportType) :JsonResponse {
+    $data = $this->obReportService->listReportTemplates($reportType);
+
+    return new BusinessResponse(200, $data)->build();
+  }
+
+  /**
    * Responsável por cadastrar a denúncia de um anúncio
    * @param  ReportRequest $request Request contendo conteúdo para cadastro da denúncia
    * @return JsonResponse           Resposta JSON da operação

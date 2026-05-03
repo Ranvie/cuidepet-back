@@ -6,13 +6,14 @@ interface IFavoriteService {
 
   /**
    * Responsável por listar todos os anúncios favoritos do usuário
-   * @param  int    $limit   Limite máximo de registros
-   * @param  int    $page    Página atual da lista
-   * @param  array  $filters Lista de filtros aplicados à listagem
-   * @param  array  $orders  Lista de ordenação aplicados à listagem
-   * @return array           Lista de anúncios favoritados
+   * @param  int      $limit   Limite máximo de registros
+   * @param  int      $page    Página atual da lista
+   * @param  int|null $userId  ID do usuário cujos favoritos serão listados
+   * @param  array    $filters Lista de filtros aplicados à listagem
+   * @param  array    $orders  Lista de ordenação aplicados à listagem
+   * @return array             Lista de anúncios favoritados
    */
-  public function listFavorites(int $limit, int $page, array $filters = [], array $orders = []) :array;
+  public function listFavorites(int $limit, int $page, ?int $userId, array $filters = [], array $orders = []) :array;
 
   /**
    * Responsável por possibilitar um usuário favoritar um anúncio

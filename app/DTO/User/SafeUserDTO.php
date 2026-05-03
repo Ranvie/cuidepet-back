@@ -23,6 +23,18 @@ class SafeUserDTO{
   public string $username;
 
   /**
+   * Email do usuário
+   * @var string|null
+   */
+  public ?string $email;
+
+  /**
+   * Telefone do usuário
+   * @var string|null
+   */
+  public ?string $phone;
+
+  /**
    * Imagem de perfil do usuário
    * @var string|null
    */

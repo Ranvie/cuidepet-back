@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\DTO\ReportMessage\ReportMessageDTO;
 use App\Exceptions\BusinessException;
 use App\Models\AnnouncementModel;
@@ -31,6 +32,22 @@ class ReportService implements IReportService {
     private AnnouncementModel  $obAnnouncementModel,
     private FormModel          $obFormModel
   ) {}
+
+  /**
+   * Lista templates de denúncias
+   * @param  string $reportType Determina o tipo de denúncia cujo templates devem ser consultados
+   * @return array              Retorna uma lista de templates de denúncia
+   */
+  public function listReportTemplates(string $reportType) :array {
+    $reportMessageList = $this->reportMessageModel->getAllByQuery([
+      new Filter('type', '=', $reportType)
+    ], parse: false);
+
+    return array_combine(
+      array_column($reportMessageList, 'id'),
+      array_column($reportMessageList, 'motive')
+    );
+  }
 
   /**
    * Cria um novo registro.

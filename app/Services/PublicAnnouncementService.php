@@ -62,8 +62,8 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
   public function applyFavorites(AnnouncementDTO $obPublicAnnouncementDTO, ?int $userId) :void {
     $obPublicAnnouncementDTO->favoritesCount = $obPublicAnnouncementDTO->favorites->count() ?? 0;
     
-    $obPublicAnnouncementDTO->isFavorited = $userId === null
-      ? $obPublicAnnouncementDTO->favorites->where('userId', $userId)->count() > 0
+    $obPublicAnnouncementDTO->isFavorited = !is_null($userId)
+      ? $obPublicAnnouncementDTO->favorites->where('id', $userId)->count() > 0
       : false;
       
     unset($obPublicAnnouncementDTO->favorites);

@@ -54,7 +54,7 @@ class AuthService {
     $expiresAt                    = now()->addMinutes($expirationTime);
     $response->token              = $user->createToken($user->username . '-AuthToken', $abilities, $expiresAt->toDateTime())->plainTextToken;
     $response->useTermsAcceptance = $this->validateUseTermsAcceptance($user->id);
-    
+
     $response->user                  = ParseConvention::parse($user->getOriginal(), PARSE_MODE::snakeToCamel, SafeUserDTO::class);
     $response->user->imageProfileUrl = $user->image_profile ? (new Url())->setResource('media')->getMediaUrlPath($user->image_profile) : null;
     $response->user->tokenExpiresAt  = $expiresAt->toDateTimeString();
