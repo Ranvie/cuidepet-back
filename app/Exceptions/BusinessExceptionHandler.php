@@ -14,6 +14,10 @@ use \Illuminate\Auth\AuthenticationException;
 use \Illuminate\Auth\Access\AuthorizationException;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Manipulador de exceções de negócio.
+ * Esta classe é responsável por capturar e processar exceções relacionadas a erros de negócio, mapeando-as para códigos de status HTTP apropriados e fornecendo mensagens de erro padronizadas.
+ */
 class BusinessExceptionHandler {
 
   /**
@@ -46,12 +50,17 @@ class BusinessExceptionHandler {
   
     $responseData          = new stdClass();
     $responseData->message = $debug ? $this->exception->getMessage() : $this->defaultErrorMessages($this->status);
+
+    $flags = [];
+    if ($this->exception instanceof AuthenticationException) {
+      $flags = ['tokenValid' => false];
+    }
     
     if($this->exception instanceof ValidationException) {
       $responseData->errors = $this->exception->errors();
     }
     
-    $response = new BusinessResponse($this->status, $responseData);
+    $response = new BusinessResponse($this->status, $responseData, $flags);
     return $response->build();
   }
 

@@ -45,19 +45,19 @@ Route::middleware(['auth:sanctum', 'hasRole:confirm-email'])
   ->post('/email-confirmation', [AuthController::class, 'confirmUserEmail']);
 
 // RESGATA ENDEREÇO POR CEP
-Route::middleware(['auth:sanctum', 'checkUser'])->prefix('address')->group(function () {
+Route::middleware(['auth:sanctum', 'notHasRole:reset-password,confirm-email'])->prefix('address')->group(function () {
   Route::get('/{zipCode}', [AddressController::class, 'get']);
 });
 
 // ENDPOINTS ADMINISTRATIVOS
-Route::middleware(['auth:sanctum', 'hasRole:admin', 'checkUser'])->prefix('admin/user')->group(function () {
-  Route::get('/',               [UserController::class, 'list']);
-  Route::get('/{id}',           [UserController::class, 'get']);
-  Route::post('/',              [UserController::class, 'create']);
-  Route::put('/{id}',           [UserController::class, 'update']);
-  Route::delete('/{id}',        [UserController::class, 'delete']);
+Route::middleware(['auth:sanctum', 'hasRole:admin', 'notHasRole:reset-password,confirm-email'])->prefix('admin/user')->group(function () {
+  Route::get('/',        [UserController::class, 'list']);
+  Route::get('/{id}',    [UserController::class, 'get']);
+  Route::post('/',       [UserController::class, 'create']);
+  Route::put('/{id}',    [UserController::class, 'update']);
+  Route::delete('/{id}', [UserController::class, 'delete']);
 
-  Route::get('/report',        [ReportController::class, 'list']);
+  Route::get('/report',         [ReportController::class, 'list']);
   Route::get('/report/{id}',    [ReportController::class, 'get']);
   Route::delete('/report/{id}', [ReportController::class, 'delete']);
 });
@@ -69,14 +69,15 @@ Route::group(['prefix' => 'newsletter'], function () {
   Route::get('/unsubscribe', [NewsletterController::class, 'unsubscribe']);
 });
 
-// ENDPOINTS DE USUÁRIO AUTENTICADO
-Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function () {
-
-  Route::get('/species',       [SpecieController::class, 'list']);
-
+Route::middleware(['auth:sanctum', 'notHasRole:reset-password,confirm-email'])->prefix('user')->group(function () {
   Route::post('/accept-terms', [AuthController::class, 'acceptTerms']);
-
   Route::post('/logout',       [AuthController::class, 'logout']);
+});
+
+// ENDPOINTS DE USUÁRIO AUTENTICADO
+Route::middleware(['auth:sanctum', 'notHasRole:reset-password,confirm-email', 'acceptTerms'])->prefix('user')->group(function () {
+
+  Route::get('/species', [SpecieController::class, 'list']);
 
   Route::prefix('/report')->group(function () {
     Route::get('/{type}', [ReportController::class, 'listReportTemplates'])->whereIn('type', ['form', 'announcement']);
@@ -105,9 +106,9 @@ Route::middleware(['auth:sanctum', 'checkUser'])->prefix('user')->group(function
 
     Route::prefix('/{announncementId}')->group(function () {
         
-      Route::get('/',         [AnnouncementController::class, 'get']);
-      Route::put('/',         [AnnouncementController::class, 'update']);
-      Route::delete('/',      [AnnouncementController::class, 'delete']);
+      Route::get('/',    [AnnouncementController::class, 'get']);
+      Route::put('/',    [AnnouncementController::class, 'update']);
+      Route::delete('/', [AnnouncementController::class, 'delete']);
 
     });
   });

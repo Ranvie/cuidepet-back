@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Validators\MyAnnouncementsFilterValidator;
 use App\Http\Requests\AnnouncementRequest;
 use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
@@ -24,8 +25,9 @@ class AnnouncementController {
    * @return JsonResponse            Resposta JSON com a lista de anúncios.
    */
   public function list(ListingRequest $request) :JsonResponse {
-    $validated = $request->validated();
-    $registers = $this->obAnnouncementService->getListByUser($validated['limit'], $validated['page'], auth()->id());
+    $validated          = $request->validated();
+    [$filters, $orders] = new MyAnnouncementsFilterValidator()->build($request);
+    $registers          = $this->obAnnouncementService->getListByUser($validated['limit'], $validated['page'], auth()->id(), filters: $filters, orders: $orders);
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();

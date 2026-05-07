@@ -63,13 +63,17 @@ class AnnouncementService implements IAnnouncementService {
 
   /**
    * Lista os anúncios de um usuário específico com paginação.
-   * @param  int $limit  Número de anúncios por página.
-   * @param  int $page   Número da página.
-   * @param  int $userId ID do usuário.
-   * @return array       Lista de anúncios do usuário paginada.
+   * @param  int   $limit     Número de anúncios por página.
+   * @param  int   $page      Número da página.
+   * @param  int   $userId    ID do usuário.
+   * @param  array $relations Relações a serem carregadas com os anúncios.
+   * @param  array $filters   Filtros a serem aplicados na consulta.
+   * @param  array $orders    Ordenações a serem aplicadas na consulta.
+   * @return array            Lista de anúncios do usuário paginada.
    */
-  public function getListByUser(int $limit, int $page, int $userId) :array {
-    return $this->obAnnouncementModel->list($limit, $page, relations: ['animal'], filters: [new Filter('user_id', '=', $userId)]);
+  public function getListByUser(int $limit, int $page, int $userId, array $relations = ['animal'], array $filters = [], array $orders = []) :array {
+    $filters[] = new Filter('user_id', '=', $userId);
+    return $this->obAnnouncementModel->list($limit, $page, relations: $relations, filters: $filters, orders: $orders);
   }
 
   /**
@@ -263,7 +267,7 @@ class AnnouncementService implements IAnnouncementService {
       }
 
       $favoritedUserIds = $this->getFavoritedUsersToNotify($id);
-      new AnnouncementEditedNotification($favoritedUserIds, $announcementModel, $data);
+      new AnnouncementEditedNotification($favoritedUserIds, $announcementModel, $data)->send();
 
       DB::commit();
     } catch (Exception $e) {

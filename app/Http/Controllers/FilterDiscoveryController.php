@@ -9,7 +9,6 @@ use App\Models\BusinessModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Bus;
 
 /**
  * Controller para descoberta de filtros disponíveis por rota.
@@ -21,8 +20,9 @@ class FilterDiscoveryController extends Controller {
    * @var array<string, string>
    */
   protected array $routeValidators = [
-    'announcements' => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
-    'favorites'     => \App\Classes\Validators\PublicAnnouncementFilterValidator::class
+    'announcements'         => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
+    'favorites'             => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
+    'user/my-announcements' => \App\Classes\Validators\MyAnnouncementsFilterValidator::class,
   ];
 
   /**

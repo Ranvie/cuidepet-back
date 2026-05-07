@@ -101,9 +101,9 @@ class AnnouncementDTO {
 
   /**
    * Status do anúncio
-   * @var string
+   * @var bool
    */
-  public string $status;
+  public bool $status;
 
   /**
    * Contagem de favoritos do anúncio

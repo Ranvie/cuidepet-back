@@ -1,7 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessExceptionHandler;
-use App\Http\Middleware\CheckUser;
+use App\Http\Middleware\AcceptTerms;
 use \App\Http\Middleware\RejectIfUserHasRole;
 use \App\Http\Middleware\AllowIfUserHasRole;
 use App\Http\Middleware\OptionalAuth;
@@ -18,11 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
   )
   ->withMiddleware(function (Middleware $middleware) {
     $middleware->alias([
-      'checkUser'     => CheckUser::class,
-      'notHasRole'    => RejectIfUserHasRole::class,
-      'hasRole'       => AllowIfUserHasRole::class,
-      'validate'      => Validate::class,
-      'optionalAuth'  => OptionalAuth::class,
+      'acceptTerms'  => AcceptTerms::class,
+      'notHasRole'   => RejectIfUserHasRole::class,
+      'hasRole'      => AllowIfUserHasRole::class,
+      'validate'     => Validate::class,
+      'optionalAuth' => OptionalAuth::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {

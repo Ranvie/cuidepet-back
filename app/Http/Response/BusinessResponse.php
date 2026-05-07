@@ -19,6 +19,12 @@ class BusinessResponse implements \JsonSerializable {
   public array|object|string|bool $content;
 
   /**
+   * Flags personalizadas de erro da resposta (opcional)
+   * @var array
+   */
+  public array $flags = [];
+
+  /**
    * Erros da resposta (opcional)
    * @var array
    */
@@ -35,9 +41,10 @@ class BusinessResponse implements \JsonSerializable {
    * @param int                      $code    Código HTTP da resposta
    * @param array|object|string|bool $content Conteúdo da resposta
    */
-  public function __construct(int $code, object|array|string|bool $content) {
+  public function __construct(int $code, object|array|string|bool $content, array $flags = []) {
     $this->code        = $code;
     $this->content     = $content;
+    $this->flags       = $flags;
     $this->errors      = self::$addedErrors ?? [];
     self::$addedErrors = null;
   }
@@ -68,6 +75,10 @@ class BusinessResponse implements \JsonSerializable {
       'code'    => $this->code,
       'content' => $this->content,
     ];
+
+    if(\count($this->flags) > 0) {
+      $data['flags'] = $this->flags;
+    }
 
     if (!empty($this->errors)) {
       $data['errors'] = $this->errors;
