@@ -153,7 +153,9 @@ class AnnouncementService implements IAnnouncementService {
       DB::commit();
     } catch (Exception $e) {
       DB::rollBack();
-      (new File("user/{$data['userId']}/announcement/{$announcementId}"))->removeAll();
+      if ($announcementId !== null) {
+        (new File("user/{$data['userId']}/announcement/{$announcementId}"))->removeAll();
+      }
 
       throw new BusinessException('Ocorreu um erro ao criar o anúncio. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
@@ -228,12 +230,12 @@ class AnnouncementService implements IAnnouncementService {
         $data['mainImage'] = $obFile->save($data['mainImage'], width: 1200, height: 700);
       }
 
-      $announcementModel = $this->obAnnouncementModel->edit($id, $data, true, false);
+      $announcementModel = $this->obAnnouncementModel->edit($id, $data, false, false);
 
       if(isset($data['animal'])) {
         $data['animal']['userId']         = $data['userId'];
         $data['animal']['announcementId'] = $id;
-        $this->obAnimalService->edit($id, $data['animal']);
+        $this->obAnimalService->edit($obAnnouncementDTO->animal->id, $data['animal']);
       }
 
       if(isset($data['formId'])) 

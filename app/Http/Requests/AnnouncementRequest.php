@@ -11,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
  * Define as regras de validação para criação e edição de anúncios, incluindo informações do animal, endereço e contato.
  */
 class AnnouncementRequest extends FormRequest {
+
+  use \App\Traits\FormDataRequest;
   
   /**
    * Define se o usuário tem permissão na requisição
@@ -43,7 +45,7 @@ class AnnouncementRequest extends FormRequest {
   private function postRules() :array {
     return [
       'type'                     => 'required|in:lost,donation',
-      'description'              => 'nullable|string|max:1000',
+      'description'              => 'required|string|max:1000',
       'mainImage'                => 'nullable|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
       'address'                  => 'required|array',
       'address.zipCode'          => ['required', 'string', new ZipcodeRule()],
@@ -93,7 +95,7 @@ class AnnouncementRequest extends FormRequest {
       'contactEmail'               => 'nullable|string|email|max:255',
       'announcementMedia'          => 'nullable|array',
       'announcementMedia.*.id'     => 'required_unless:announcementMedia.*.action,ADD|int',
-      'announcementMedia.*.file'   => 'required|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
+      'announcementMedia.*.file'   => 'required_unless:announcementMedia.*.action,DEL|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
       'announcementMedia.*.action' => 'required|in:UPD,ADD,DEL',
       'formId'                     => 'nullable|exists:tb_form,id',
       'animal'                     => 'nullable|array',

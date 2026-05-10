@@ -55,7 +55,7 @@ class File {
    * @return string                     Caminho completo do arquivo salvo, incluindo o nome do arquivo.
    * @throws BusinessException          Se a extensão do arquivo não for permitida ou se a operação falhar.
    */
-  public function save(UploadedFile $file, array $allowedMimes = ['png', 'jpg', 'jpeg', 'webp'], int $height = 100, int $width = 100) :string {
+  public function save(UploadedFile $file, array $allowedMimes = ['png', 'jpg', 'jpeg', 'webp', 'jfif'], int $height = 100, int $width = 100) :string {
     $path      = $this->getFullPath() . $file->hashName();
     $extension = $file->getClientOriginalExtension();
 

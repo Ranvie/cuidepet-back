@@ -69,7 +69,7 @@ class AddressService implements IService {
       throw new BusinessException('Endereço inválido. Não foi possível encontrar o endereço para o CEP informado.');
 
     $data['integrationAddressCacheId'] = $addressCache->id;
-    return $this->obAddressModel->edit($id, $data);
+    return $this->obAddressModel->edit($id, $data, false);
   }
 
   /**

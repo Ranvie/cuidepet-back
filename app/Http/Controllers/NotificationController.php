@@ -30,7 +30,7 @@ class NotificationController {
   public function list(ListingRequest $request) :JsonResponse {
     $validated     = $request->validated();
     $filters       = [new Filter('user_id', '=', auth()->id())];
-    $orders        = [new Ordenation('created_at', 'desc')];
+    $orders        = [new Ordenation('created_at', 'desc'), new Ordenation('id', 'desc')];
     $notifications = $this->notificationService->getList($validated['limit'], $validated['page'], filters: $filters, orders: $orders);
     
     $response = new BusinessResponse(200, $notifications);

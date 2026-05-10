@@ -39,8 +39,10 @@ class AnimalService {
   public function edit(int $id, array $data) :AnimalModel|AnimalDTO {
     $imagePath = $this->handleMedia($data, $id);
 
-    $data['imageProfile'] = $imagePath;
-    return $this->obAnimalModel->edit($id, $data);
+    if($imagePath) 
+      $data['imageProfile'] = $imagePath;
+    
+    return $this->obAnimalModel->edit($id, $data, false);
   }
 
   /**

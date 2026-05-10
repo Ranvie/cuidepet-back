@@ -69,7 +69,7 @@ class AnnouncementMediaService implements IAnnouncementMediaService {
    */
   public function edit(int $id, array $data) :AnnouncementMediaDTO|AnnouncementMediaModel {
     $data['url'] = $this->handleMedia($data, $id);
-    return $this->announcementMediaModel->edit($id, $data);
+    return $this->announcementMediaModel->edit($id, $data, false);
   }
 
   /**
