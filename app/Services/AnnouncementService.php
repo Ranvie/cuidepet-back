@@ -52,7 +52,7 @@ class AnnouncementService implements IAnnouncementService {
   ) {}
 
   /**
-   * Lista os anúncios com paginação.
+   * Lista os anúncios com paginação (Administrativo).
    * @param  int $limit Número de anúncios por página.
    * @param  int $page  Número da página.
    * @return array      Lista de anúncios paginada.
@@ -71,9 +71,16 @@ class AnnouncementService implements IAnnouncementService {
    * @param  array $orders    Ordenações a serem aplicadas na consulta.
    * @return array            Lista de anúncios do usuário paginada.
    */
-  public function getListByUser(int $limit, int $page, int $userId, array $relations = ['animal'], array $filters = [], array $orders = []) :array {
-    $filters[] = new Filter('user_id', '=', $userId);
-    return $this->obAnnouncementModel->list($limit, $page, relations: $relations, filters: $filters, orders: $orders);
+  public function getListByUser(int $limit, int $page, int $userId, array $relations = ['animal', 'formResponses'], array $filters = [], array $orders = []) :array {
+    $filters[]            = new Filter('user_id', '=', $userId);
+    $userAnnouncementList = $this->obAnnouncementModel->list($limit, $page, relations: $relations, filters: $filters, orders: $orders);
+
+    array_map(function($obAnnouncementDTO){
+      $obAnnouncementDTO->responsesCount = $obAnnouncementDTO->formResponses->count() ?? 0;
+      unset($obAnnouncementDTO->formResponses);
+    }, $userAnnouncementList['registers']);
+
+    return $userAnnouncementList;
   }
 
   /**

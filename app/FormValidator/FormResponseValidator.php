@@ -29,9 +29,9 @@ class FormResponseValidator extends FormValidatorAbstract {
   public function resolve() :string {
     $this->validateFormStructure();
 
-    foreach($this->requestPayload['pages'] ?? [] as $pageIndex => $page){  
+    foreach($this->requestPayload['pages'] ?? [] as $page){  
       foreach($page['inputs'] ?? [] as $inputIndex => $input) {
-        $field = "pages.{$pageIndex}.inputs.{$inputIndex}.value";
+        $field = ($inputIndex + 1) . ". " . $input['title'];
 
         if(!isset($input['value']))
           throw new BusinessException("O campo '{$field}' deve estar presente.", 400);
@@ -101,7 +101,8 @@ class FormResponseValidator extends FormValidatorAbstract {
    * @throws BusinessException Se o valor não for um número inteiro válido.
    */
   private function validateNumber(string $field, array $input) :void {
-    $this->validateString($field, $input['value'] ?? null, isRequired: $input['required']);
+    if($input['required'] && (!isset($input['value']) || trim((string)$input['value']) === ''))
+      throw new BusinessException("O campo '{$field}' é obrigatório.", 400);
 
     if(filter_var($input['value'], FILTER_VALIDATE_INT) === false)
       throw new BusinessException("O campo '{$field}' deve ser um número inteiro.", 400);

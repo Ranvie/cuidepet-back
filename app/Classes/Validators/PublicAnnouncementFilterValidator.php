@@ -114,7 +114,17 @@ class PublicAnnouncementFilterValidator extends ListingValidator {
         booleanOperators: ['AND', 'OR'],
         valueType: 'string',
         acceptedValues: null
-      )
+      ),
+
+      new FilterFieldDefinition(
+        field: 'address.cacheAddress.city',
+        name: 'Cidade do anúncio',
+        description: 'Filtra os anúncios com base na cidade.',
+        operators: ['=', '!=', 'LIKE', 'IN', 'NOT IN'],
+        booleanOperators: ['AND', 'OR'],
+        valueType: 'string',
+        acceptedValues: null
+      ),
     ];
 
     $orderRules = [

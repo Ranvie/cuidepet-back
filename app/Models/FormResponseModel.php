@@ -45,15 +45,15 @@ class FormResponseModel extends BusinessModel {
    * Recupera o anúncio relacionado à resposta do formulário. Uma resposta de formulário pertence a um anúncio.
    * @return BelongsTo
    */
-  public function announcements() :BelongsTo {
-    return $this->BelongsTo(AnnouncementModel::class, 'id', 'announcement_id');
+  public function announcement() :BelongsTo {
+    return $this->belongsTo(AnnouncementModel::class, 'announcement_id', 'id');
   }
 
   /**
    * Recupera o usuário relacionado à resposta do formulário. Uma resposta de formulário pertence a um usuário.
    * @return BelongsTo
    */
-  public function users() :BelongsTo {
-    return $this->belongsTo(UserModel::class, 'id', 'user_id');
+  public function user() :BelongsTo {
+    return $this->belongsTo(UserModel::class, 'user_id', 'id');
   }
 }

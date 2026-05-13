@@ -29,15 +29,15 @@ class FormStructureValidator extends FormValidatorAbstract {
     // VALIDA O CAMPO 'pages' DO FORMULÁRIO
     $this->validateArray('pages', $this->requestPayload['pages'] ?? null, FormFieldsLength::MAX_PAGE);
 
-    foreach($this->requestPayload['pages'] as $pageIndex => $page) {
+    foreach($this->requestPayload['pages'] as $page) {
       // VALIDA O CAMPO 'title' DE CADA PÁGINA
-      $this->validateString("pages.{$pageIndex}.title", $page['title'] ?? null, FormFieldsLength::MAX_TITLE);
+      $this->validateString("Título da página", $page['title'] ?? null, FormFieldsLength::MAX_TITLE);
 
       // VALIDA O CAMPO 'inputs' DE CADA PÁGINA  
-      $this->validateArray("pages.{$pageIndex}.inputs", $page['inputs'] ?? null, FormFieldsLength::MAX_INPUT);
+      $this->validateArray("de entrada de dados", $page['inputs'] ?? null, FormFieldsLength::MAX_INPUT);
 
       // VALIDA A ESTRUTURA DOS CAMPOS DO FORMULÁRIO
-      $this->validateFormInputs($pageIndex, $page['inputs'] ?? []);
+      $this->validateFormInputs($page['inputs'] ?? []);
     }
 
     return $this->extractFormFields();
@@ -45,31 +45,30 @@ class FormStructureValidator extends FormValidatorAbstract {
 
   /**
    * Valida a estrutura dos campos do formulário.
-   * @param  int   $pageIndex Posição da página no array de páginas do formulário.
-   * @param  array $inputs    Array de inputs da página do formulário.
+   * @param  array $inputs Array de inputs da página do formulário.
    * @return self
    */
-  private function validateFormInputs(int $pageIndex, array $inputs) :self {
+  private function validateFormInputs(array $inputs) :self {
     foreach($inputs ?? [] as $inputIndex => $input) {
-      $index = "pages.{$pageIndex}.inputs.{$inputIndex}.";
+      $index = ($inputIndex + 1) . ". ";
 
       // VALIDA O CAMPO 'title' DE CADA INPUT
-      $this->validateString($index . "title", $input['title'] ?? null, FormFieldsLength::MAX_TITLE);
+      $this->validateString($index . "Título", $input['title'] ?? null, FormFieldsLength::MAX_TITLE);
 
       // VALIDA O CAMPO 'type' DE CADA INPUT
-      $this->validateInputType($index . "type", $input['type'] ?? null);
+      $this->validateInputType($index . "Tipo", $input['type'] ?? null);
 
       // VALIDA O CAMPO 'placeholder' DE CADA INPUT
-      $this->validateInputPlaceholder($index . "placeholder", $input['placeholder'] ?? null, $input['type']);
+      $this->validateInputPlaceholder($index . "Placeholder", $input['placeholder'] ?? null, $input['type']);
 
       // VALIDA O CAMPO 'options' DE CADA INPUT
-      $this->validateInputOptions($index . "options", $input['options'] ?? null, $input['type']);
+      $this->validateInputOptions($index . "Opções", $input['options'] ?? null, $input['type']);
 
       // VALIDA O CAMPO 'required' DE CADA INPUT
-      $this->validateInputRequired($index . "required", $input['required'] ?? null);
+      $this->validateInputRequired($index . "de Obrigatoriedade", $input['required'] ?? null);
 
       // VALIDA O CAMPO 'value' DE CADA INPUT
-      $this->validateInputValue($index . "value", $input['value'] ?? null, $input['type']);
+      $this->validateInputValue($index . "Valor", $input['value'] ?? null, $input['type']);
     }
 
     return $this;

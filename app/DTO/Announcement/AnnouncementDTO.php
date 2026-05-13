@@ -46,6 +46,12 @@ class AnnouncementDTO {
   public AddressDTO $address;
 
   /**
+   * Quantidade de respostas que o anúncio recebeu
+   * @var int
+   */
+  public int $responsesCount;
+
+  /**
    * Identificador do endereço do anúncio
    * @var int|null
    */

@@ -68,7 +68,7 @@ class FilterFieldDefinition {
    * @return bool
    */
   public function isAcceptedValue(mixed $value): bool {
-    if($this->acceptedValues === null)
+    if($this->acceptedValues === null || !is_array($this->acceptedValues))
       return true;
   
     $values = \is_array($value) ? $value : [$value];

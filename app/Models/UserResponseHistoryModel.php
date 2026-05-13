@@ -52,15 +52,15 @@ class UserResponseHistoryModel extends BusinessModel {
    * Define relação entre histórico de respostas do usuário e anúncios. Um histórico de resposta pertence a um anúncio.
    * @return BelongsTo
    */
-  public function announcements() :BelongsTo {
-    return $this->BelongsTo(AnnouncementModel::class, 'id', 'announcement_id');
+  public function announcement() :BelongsTo {
+    return $this->belongsTo(AnnouncementModel::class, 'id', 'announcement_id');
   }
 
   /**
    * Define relação entre histórico de respostas e usuários. Um histórico de resposta pertence a um usuário.
    * @return BelongsTo
    */
-  public function users() :BelongsTo {
+  public function user() :BelongsTo {
     return $this->belongsTo(UserModel::class, 'id', 'user_id');
   }
 

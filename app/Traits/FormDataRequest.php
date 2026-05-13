@@ -18,10 +18,10 @@ trait FormDataRequest {
    * Sobrescreve o método all para converter valores específicos em null.
    * Se um valor for igual a __NULL__, ele será convertido para null.
    * Isso é útil para lidar com campos opcionais que podem ser enviados como string "__NULL__" para indicar ausência de valor.
-   * @param  array|null $keys
-   * @return mixed
+   * @param  array|mixed|null $keys
+   * @return array
    */
-  public function all(?array $keys = null) :mixed {
+  public function all($keys = null) {
     $data = $keys === null ? parent::all() : $keys;
 
     foreach($data as $key => $value) {

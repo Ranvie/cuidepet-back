@@ -44,7 +44,7 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
    * @return array               Lista paginada de resposta de um anúncio.
    */
   public function listAnnouncementResponses(int $limit, int $page, int $announcementId) :array {
-    return $this->obFormResponseModel->list($limit, $page, filters: [new Filter('announcement_id', '=', $announcementId)]);
+    return $this->obFormResponseModel->list($limit, $page, relations: ['user:id,username', 'announcement.animal'], filters: [new Filter('announcement_id', '=', $announcementId)]);
   }
 
   /**
@@ -91,7 +91,7 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
     ]); 
 
     if(!is_null($obResponseHistoryDTO?->expiresAt) && Carbon::parse($obResponseHistoryDTO?->expiresAt)->isFuture())
-      throw new BusinessException("Você já respondeu este anúncio, tente enviar uma nova resposta mais tarde.");
+      throw new BusinessException("Você já respondeu este anúncio, tente enviar uma nova resposta mais tarde.", 403);
 
     if(!$obFormDTO instanceof FormDTO)
       throw new BusinessException("Formulário original do anúncio {$data['announcement_id']} não encontrado.", 404);
