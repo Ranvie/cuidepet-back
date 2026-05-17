@@ -352,6 +352,9 @@ class AnnouncementService implements IAnnouncementService {
     $userId         = $obAnnouncement->user_id;
     $addressId      = $obAnnouncement->address_id;
 
+    if($obAnnouncement->blocked)
+      throw new BusinessException("Não é permitido excluir um anúncio pausado", 400);
+
     (new File("user/$userId/announcement/{$id}/"))->removeAll();
     $this->obAnnouncementModel->remove($id);
     $this->obAddressService->remove($addressId);

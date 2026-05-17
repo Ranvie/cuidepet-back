@@ -12,12 +12,13 @@ interface IAnnouncementResponseService {
 
   /**
    * Lista paginada de respostas que um anúncio possui.
-   * @param  int $limit          Número de formulários por página.
-   * @param  int $page           Número da página atual.
-   * @param  int $announcementId ID do anúncio associado.
-   * @return array               Lista paginada de resposta de um anúncio.
+   * @param  int   $limit          Número de formulários por página.
+   * @param  int   $page           Número da página atual.
+   * @param  int   $announcementId ID do anúncio associado.
+   * @param  array $filters        Condições que devem ser aplicadas na listagem
+   * @return array                 Lista paginada de resposta de um anúncio.
    */
-  public function listAnnouncementResponses(int $limit, int $page, int $announcementId) :array;
+  public function listAnnouncementResponses(int $limit, int $page, int $announcementId, array $filters) :array;
 
   /**
    * Busca uma resposta de um anúncio.

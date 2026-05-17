@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Validators\AnnouncementResponseValidator;
 use App\Http\Requests\FormResponseRequest;
 use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
@@ -26,7 +27,9 @@ class AnnouncementResponseController {
    */
   public function list(int $announcementId, ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    $registers = $this->obAnnouncementResponseService->listAnnouncementResponses($validated['limit'], $validated['page'], $announcementId);
+    [$filters, $orders] = new AnnouncementResponseValidator()->build($request);
+
+    $registers = $this->obAnnouncementResponseService->listAnnouncementResponses($validated['limit'], $validated['page'], $announcementId, $filters);
 
     return new BusinessResponse(200, $registers)->build();
   }

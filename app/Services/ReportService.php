@@ -73,6 +73,9 @@ class ReportService implements IReportService {
     if($obReportedEntity['model']->user_id === auth()->id())
       throw new BusinessException("Não é possível reportar seu próprio anúncio ou formulário", 403);
 
+    if($obReportedEntity['model']->blocked)
+      throw new BusinessException("A entidade está pausada e não pode ser denunciada", 400);
+
     $this->obReportModel->insertOrIgnore([
       'user_id'           => $data['userId'],
       'report_message_id' => $data['reportMessageId'],

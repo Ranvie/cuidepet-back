@@ -38,13 +38,15 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
 
   /**
    * Lista paginada de respostas que um anúncio possui.
-   * @param  int $limit          Número de formulários por página.
-   * @param  int $page           Número da página atual.
-   * @param  int $announcementId ID do anúncio associado.
-   * @return array               Lista paginada de resposta de um anúncio.
+   * @param  int  $limit          Número de formulários por página.
+   * @param  int  $page           Número da página atual.
+   * @param  int  $announcementId ID do anúncio associado.
+   * @param  array $filters       Condições que devem ser aplicadas na listagem
+   * @return array                Lista paginada de resposta de um anúncio.
    */
-  public function listAnnouncementResponses(int $limit, int $page, int $announcementId) :array {
-    return $this->obFormResponseModel->list($limit, $page, relations: ['user:id,username', 'announcement.animal'], filters: [new Filter('announcement_id', '=', $announcementId)]);
+  public function listAnnouncementResponses(int $limit, int $page, int $announcementId, array $filters) :array {
+    $filters = array_merge($filters, [new Filter('announcement_id', '=', $announcementId), new Filter('announcement.blocked', '=', false)]);
+    return $this->obFormResponseModel->list($limit, $page, relations: ['user:id,username,email,phone'], filters: $filters);
   }
 
   /**
@@ -54,7 +56,7 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
    * @return FormResponseDTO     Coleção de formulários do usuário.
    */
   public function getAnnouncementResponseById(int $announcementId, int $responseId) :FormResponseDTO {
-    $obFormResponseDTO = $this->obFormResponseModel->getByQuery([new Filter('id', $responseId), new Filter('announcement_id', '=', $announcementId)]);
+    $obFormResponseDTO = $this->obFormResponseModel->getByQuery([new Filter('id', $responseId), new Filter('announcement_id', '=', $announcementId), new Filter('announcement.blocked', '=', false)]);
 
     if(!$obFormResponseDTO instanceof FormResponseDTO)
       throw new BusinessException("A resposta do anúncio não foi encontrada", 404);
@@ -130,7 +132,8 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
   public function remove(int $announcementId, int $responseId) :bool {
     return $this->obFormResponseModel->getByQuery([
       new Filter('id', '=', $responseId),
-      new Filter('announcement_id', '=', $announcementId)
+      new Filter('announcement_id', '=', $announcementId),
+      new Filter('announcement.blocked', '=', false)
     ], parse: false)?->delete() ?? false;
   }
 

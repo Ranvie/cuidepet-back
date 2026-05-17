@@ -53,6 +53,9 @@ class FavoriteService implements IFavoriteService {
     if($obAnnouncementDTO->userId === $userId)
       throw new BusinessException('Não é possível favoritar seu próprio anúncio.', 400);
 
+    if($obAnnouncementDTO->blocked)
+      throw new BusinessException('Não é permitido favoritar um anúncio pausado.', 400);
+
     if(!$favorited instanceof FavoriteModel)
       $this->obFavoriteModel->create(['user_id' => $userId, 'announcement_id' => $announcementId], parse: false);
 

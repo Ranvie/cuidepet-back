@@ -24,7 +24,37 @@ class MyAnnouncementsFilterValidator extends ListingValidator {
         booleanOperators: ['AND', 'OR'],
         valueType: 'string',
         acceptedValues: null
-      )
+      ),
+
+      new FilterFieldDefinition(
+        field: 'type',
+        name: 'Tipo de anúncio',
+        description: 'Permite filtrar os anúncios pelo tipo',
+        operators: ['=', '!=', 'IN', 'NOT IN'],
+        booleanOperators: ['AND', 'OR'],
+        valueType: 'string',
+        acceptedValues: ['donation', 'lost']
+      ),
+
+      new FilterFieldDefinition(
+        field: 'status',
+        name: 'Status do anúncio',
+        description: 'Filtra os anúncios com base em se estão em aberto (1) ou fechados (0).',
+        operators: ['=', '!=', 'IN', 'NOT IN'],
+        booleanOperators: ['AND', 'OR'],
+        valueType: 'boolean',
+        acceptedValues: [0, 1]
+      ),
+
+      new FilterFieldDefinition(
+        field: 'created_at',
+        name: 'Data de criação',
+        description: 'Permite filtrar os anúncios por data de criação',
+        operators: ['=', '!=', '>', '<', '>=', '<='],
+        booleanOperators: ['AND', 'OR'],
+        valueType: 'date',
+        acceptedValues: 'YYYY-MM-DD ou YYYY-MM-DDTH:i:sZ'
+      ),
     ];
 
     $orderRules = [

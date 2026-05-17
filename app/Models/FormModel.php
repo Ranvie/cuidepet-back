@@ -73,7 +73,11 @@ class FormModel extends BusinessModel {
    * @return array       Lista de formulários do usuário
    */
   public function listAll(int $userId) :array {
-    $listForms = $this->query()->where('user_id', $userId)->get();
+    $listForms = $this->query()
+      ->where('user_id', $userId)
+      ->where('active', true)
+      ->where('blocked', false)
+      ->get();
 
     return array_combine(
       $listForms->pluck('id')->toArray(),
@@ -118,6 +122,9 @@ class FormModel extends BusinessModel {
 
     if (!$obFormModel instanceof FormModel)
       throw new BusinessException('O formulário solicitado não foi encontrado.');
+
+    if ($obFormModel->blocked)
+      throw new BusinessException('Não é possível excluir um formulário pausado.');
 
     $hasAnnouncements = $obFormModel->announcements->count() > 0;
 

@@ -140,6 +140,13 @@ class PublicAnnouncementFilterValidator extends ListingValidator {
         name: 'Data de criação',
         description: 'Ordena os anúncios por data de criação',
         directions: ['asc', 'desc']
+      ),
+
+      new OrdenationFieldDefinition(
+        field: 'favorited_count',
+        name: 'Número de favoritos',
+        description: 'Ordena os anúncios pelo número de favoritos',
+        directions: ['asc', 'desc']
       )
     ];
 

@@ -20,9 +20,10 @@ class FilterDiscoveryController extends Controller {
    * @var array<string, string>
    */
   protected array $routeValidators = [
-    'announcements'         => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
-    'favorites'             => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
-    'user/my-announcements' => \App\Classes\Validators\MyAnnouncementsFilterValidator::class,
+    'announcements'                        => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
+    'favorites'                            => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
+    'user/my-announcements'                => \App\Classes\Validators\MyAnnouncementsFilterValidator::class,
+    'user/my-announcements/form-responses' => \App\Classes\Validators\AnnouncementResponseValidator::class,
   ];
 
   /**
