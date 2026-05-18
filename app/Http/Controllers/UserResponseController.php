@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Validators\MyResponsesValidator;
 use App\Http\Requests\ListingRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\UserResponseService;
@@ -28,7 +29,9 @@ class UserResponseController {
    */
   public function list(ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    $registers = $this->obUserResponseService->listUserResponses($validated['limit'], $validated['page'], auth()->id());
+    
+    [$filters, $orders] = new MyResponsesValidator()->build($request);
+    $registers          = $this->obUserResponseService->listUserResponses($validated['limit'], $validated['page'], auth()->id(), $filters);
 
     return new BusinessResponse(200, $registers)->build();
   }

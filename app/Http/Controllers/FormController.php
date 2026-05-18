@@ -7,6 +7,7 @@ use App\Http\Requests\UserFormRequest;
 use App\Http\Response\BusinessResponse;
 use App\Services\FormService;
 use Illuminate\Http\JsonResponse;
+use App\Classes\Validators\FormFilterValidator;
 
 class FormController {
 
@@ -25,7 +26,8 @@ class FormController {
    */
   public function list(ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    $registers = $this->obFormService->listFormsByUser($validated['limit'], $validated['page'], auth()->id());
+    [$filters, $orders] = new FormFilterValidator()->build($request);
+    $registers          = $this->obFormService->listFormsByUser($validated['limit'], $validated['page'], auth()->id(), $filters);
 
     $response = new BusinessResponse(200, $registers);
     return $response->build();

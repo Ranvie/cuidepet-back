@@ -28,13 +28,14 @@ class FormService implements IFormService {
 
   /**
    * Lista paginada de formulários de um usuário específico.
-   * @param  int $limit  Número de formulários por página.
-   * @param  int $page   Número da página atual.
-   * @param  int $userId ID do usuário.
-   * @return FormDTO[]   Lista de formulários do usuário.
+   * @param  int   $limit   Número de formulários por página.
+   * @param  int   $page    Número da página atual.
+   * @param  int   $userId  ID do usuário.
+   * @param  array $filters Filtros aplicáveis para listagem de formulários
    */
-  public function listFormsByUser(int $limit, int $page, int $userId) :array {
-    return $this->formModel->list($limit, $page, filters: [new Filter('user_id', $userId)]);
+  public function listFormsByUser(int $limit, int $page, int $userId, array $filters) :array {
+    $filters = array_merge($filters, [new Filter('user_id', $userId)]);
+    return $this->formModel->list($limit, $page, filters: $filters);
   }
 
   /**

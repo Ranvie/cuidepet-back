@@ -78,8 +78,8 @@ class UserController {
 
     $groupedAddresses = $this->groupAddressesByAction($requestData['addresses'] ?? []);
     $groupedCeps      = [
-      'ADD' => array_map(fn($address) => $this->prepareZipcode($address['cep']), $groupedAddresses['ADD']),
-      'DEL' => array_map(fn($address) => $this->prepareZipcode($address['cep']), $groupedAddresses['DEL'])
+      'ADD' => array_map(fn($address) => $this->prepareZipcode($address['zipcode']), $groupedAddresses['ADD']),
+      'DEL' => array_map(fn($address) => $this->prepareZipcode($address['zipcode']), $groupedAddresses['DEL'])
     ];
 
     $this->userService->edit($user->id, $requestData);

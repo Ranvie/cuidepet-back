@@ -22,15 +22,17 @@ class UserResponseService implements IUserResponseService {
     private FormResponseModel $obFormResponseModel
   ) {}
 
-   /**
+  /**
    * Lista paginada de formulários respondidos por um usuário específico.
-   * @param  int $limit  Número de formulários por página.
-   * @param  int $page   Número da página atual.
-   * @param  int $userId ID do usuário.
-   * @return array       Lista paginada de formulários respondidos por um usuário específico.
+   * @param  int   $limit   Número de formulários por página.
+   * @param  int   $page    Número da página atual.
+   * @param  int   $userId  ID do usuário.
+   * @param  array $filters Filtros aplicáveis para a listagem de respostas do usuário
+   * @return array          Lista paginada de formulários respondidos por um usuário específico.
    */
-  public function listUserResponses(int $limit, int $page, int $userId) :array {
-    return $this->obFormResponseModel->list($limit, $page, filters: [new Filter('user_id', '=', $userId)]);
+  public function listUserResponses(int $limit, int $page, int $userId, array $filters) :array {
+    $filters = array_merge($filters, [new Filter('user_id', '=', $userId)]);
+    return $this->obFormResponseModel->list($limit, $page, relations: ['announcement:id,type,status,user_id', 'announcement.animal:announcement_id,name', 'announcement.user:id,username'], filters: $filters);
   }
 
   /**

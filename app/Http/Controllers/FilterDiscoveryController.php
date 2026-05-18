@@ -24,6 +24,7 @@ class FilterDiscoveryController extends Controller {
     'favorites'                            => \App\Classes\Validators\PublicAnnouncementFilterValidator::class,
     'user/my-announcements'                => \App\Classes\Validators\MyAnnouncementsFilterValidator::class,
     'user/my-announcements/form-responses' => \App\Classes\Validators\AnnouncementResponseValidator::class,
+    'user/my-responses'                    => \App\Classes\Validators\MyResponsesValidator::class,
   ];
 
   /**

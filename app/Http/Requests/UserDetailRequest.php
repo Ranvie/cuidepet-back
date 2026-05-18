@@ -31,7 +31,7 @@ class UserDetailRequest extends FormRequest {
       'imageProfile'                        => 'nullable|mimes:jpg,jpeg,png,webp|dimensions:min_width=300,max_width=5000,min_height=300,max_height=5000|max:5120',
       'addresses'                           => 'nullable|array',
       'addresses.*.action'                  => 'required|string|in:ADD,DEL',
-      'addresses.*.cep'                     => ['required', new ZipcodeRule()],
+      'addresses.*.zipcode'                 => ['required', new ZipcodeRule()],
       'preference'                          => 'nullable|array',
       'preference.receiveRegionAlarms'      => 'nullable|boolean',
       'preference.receiveAlarmsOnEmail'     => 'nullable|boolean',

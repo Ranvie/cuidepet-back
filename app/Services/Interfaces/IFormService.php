@@ -8,11 +8,12 @@ interface IFormService {
 
   /**
    * Lista paginada de formulários de um usuário específico.
-   * @param  int $limit   Número de formulários por página.
-   * @param  int $page    Número da página atual.
-   * @param  int $userId ID do usuário.
+   * @param  int   $limit   Número de formulários por página.
+   * @param  int   $page    Número da página atual.
+   * @param  int   $userId  ID do usuário.
+   * @param  array $filters Filtros aplicáveis para listagem de formulários
    */
-  public function listFormsByUser(int $limit, int $page, int $userId) :array;
+  public function listFormsByUser(int $limit, int $page, int $userId, array $filters) :array;
 
   /**
    * Lista todos os formulários de um usuário específico, sem paginação. (para select de formulário)
