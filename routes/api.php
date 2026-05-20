@@ -4,6 +4,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AnnouncementResponseController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\SpecieController;
 use App\Http\Controllers\FavoriteController;
@@ -22,6 +23,9 @@ Route::post('/login',             [AuthController::class, 'login']);
 Route::post('/register',          [AuthController::class, 'register']);
 Route::post('/recovery-password', [AuthController::class, 'recoveryPassword']);
 Route::get('/use-terms',          [AuthController::class, 'getUseTerms']);
+
+// ENDPOINT DE CONTATO
+Route::post('/contact-us', [ContactUsController::class, 'contactUs']);
 
 // ENDPOINT PARA BUSCAR MÍDIAS
 Route::get('/storage/{path}', [StorageController::class, 'get']);

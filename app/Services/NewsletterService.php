@@ -152,7 +152,7 @@ class NewsletterService {
    */
   public function sendNewsletterMailConfirmation(string $email, string $zipCode) :void {
     $token           = $this->tokenService->createToken('newsletter-subscription', ['email' => $email, 'zipCode' => $zipCode], 60);
-    $subscriptionUrl = url(config('app.frontend_url') . "/newsletter/confirm?token=$token");
+    $subscriptionUrl = url(config('app.frontend_url') . "/confirm-newsletter?token=$token");
 
     new MessageDispatcher(
       new EmailBuilder([$email],'Confirmação de Assinatura da Newsletter','mail.newsletterConfirmation',['subscriptionUrl' => $subscriptionUrl])

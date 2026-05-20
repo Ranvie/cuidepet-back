@@ -96,6 +96,8 @@ class FormModel extends BusinessModel {
       new Filter('announcements.active', '=', true),
       new Filter('announcements.blocked', '=', false),
       new Filter('announcements.status', '=', false),
+      new Filter('blocked', '=', false),
+      new Filter('active', '=', true),
     ], ['user'], $parse);
 
     return $form;

@@ -77,7 +77,7 @@ class NotificationBuilder implements Builder {
     return match ($type) {
       NotificationTypes::WELCOME                       => $this->getNotificationData(NotificationTypes::WELCOME,                       'announcement.create', [],    []),
       NotificationTypes::ANNOUNCEMENT_ALERT            => $this->getNotificationData(NotificationTypes::ANNOUNCEMENT_ALERT,            'announcement.view',   $data, ['announcementId', 'type']),
-      NotificationTypes::NEW_RESPONSE                  => $this->getNotificationData(NotificationTypes::NEW_RESPONSE,                  'announcement.view',   $data, ['announcementId', 'petName']),
+      NotificationTypes::NEW_RESPONSE                  => $this->getNotificationData(NotificationTypes::NEW_RESPONSE,                  'response.view',       $data, ['announcementId', 'responseId', 'petName']),
       NotificationTypes::ANNOUNCEMENT_UPDATE           => $this->getNotificationData(NotificationTypes::ANNOUNCEMENT_UPDATE,           'announcement.view',   $data, ['announcementId']),
       NotificationTypes::PET_FOUND                     => $this->getNotificationData(NotificationTypes::PET_FOUND,                     'announcement.view',   $data, ['announcementId', 'petName']),
       NotificationTypes::PET_ADOPTED                   => $this->getNotificationData(NotificationTypes::PET_ADOPTED,                   'announcement.view',   $data, ['announcementId', 'petName']),

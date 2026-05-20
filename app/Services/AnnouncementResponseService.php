@@ -92,11 +92,11 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
       new Filter('user_id', '=', $data['user_id'])
     ]); 
 
-    if(!is_null($obResponseHistoryDTO?->expiresAt) && Carbon::parse($obResponseHistoryDTO?->expiresAt)->isFuture())
-      throw new BusinessException("Você já respondeu este anúncio, tente enviar uma nova resposta mais tarde.", 403);
-
     if(!$obFormDTO instanceof FormDTO)
       throw new BusinessException("Formulário original do anúncio {$data['announcement_id']} não encontrado.", 404);
+
+    if(!is_null($obResponseHistoryDTO?->expiresAt) && Carbon::parse($obResponseHistoryDTO?->expiresAt)->isFuture())
+      throw new BusinessException("Você já respondeu este anúncio, tente enviar uma nova resposta mais tarde.", 403);
 
     if($obFormDTO->user->id === $data['user_id'])
       throw new BusinessException("Você não pode responder ao próprio anúncio.", 403);
@@ -115,7 +115,12 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
     $this->obFormResponseModel->upsert([$data], ['user_id', 'announcement_id'], ['payload']);
     $this->obUserResponseHistoryModel->upsert([$historyData], ['user_id', 'announcement_id'], ['expires_at']);
 
-    new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'petName' => $obAnimalDTO->name]))->dispatch();
+    $obFormResponse = $this->obFormResponseModel->getByQuery([
+      new Filter('user_id', $data['user_id']),
+      new Filter('announcement_id', $data['announcement_id'])
+    ]);
+
+    new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'responseId' => $obFormResponse->id, 'petName' => $obAnimalDTO->name]))->dispatch();
 
     return $this->obFormResponseModel->getByQuery([
       new Filter('user_id', '=', $data['user_id']),

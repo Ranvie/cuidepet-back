@@ -48,7 +48,7 @@ class AnnouncementAlertNotification {
         'mail.announcementAlert',
         [
           'type'            => $this->getAnnouncementTypeForEmail(),
-          'announcementUrl' => config('app.frontend_url') . '/announcements/' . $this->announcementId,
+          'announcementUrl' => config('app.frontend_url') . '/announcement/' . $this->announcementId,
         ]
       )))->dispatch();
     }
