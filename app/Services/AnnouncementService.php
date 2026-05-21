@@ -38,6 +38,7 @@ class AnnouncementService implements IAnnouncementService {
    * @param FormService              $obFormService              Serviço de formulários.
    * @param AddressService           $obAddressService           Serviço de endereços.
    * @param AnimalService            $obAnimalService            Serviço de animais.
+   * @param NewsletterService        $obNewsletterService        Serviço de newsletter.
    * @param FavoriteModel            $obFavoriteModel            Modelo de favoritos.
    */
   public function __construct(
@@ -115,7 +116,9 @@ class AnnouncementService implements IAnnouncementService {
    */
   public function create(array $data) :AnnouncementDTO {
     $user = $this->validateIfUserExists($data['userId']);
-    $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
+    
+    if(isset($data['formId'])) 
+      $this->validateIfFormBelongsToUser($data['userId'], $data['formId']);
 
     $announcementId = null;
 
@@ -142,7 +145,8 @@ class AnnouncementService implements IAnnouncementService {
       $animalData['userId']         = $data['userId'];
       $this->obAnimalService->create($animalData);
 
-      $announcementModel->form()->associate($data['formId']);
+      if(isset($data['formId'])) 
+        $announcementModel->form()->associate($data['formId']);
 
       $announcementMediaData = $data['announcementMedia'] ?? [];
       foreach ($announcementMediaData as $announcementMedia) {      

@@ -134,6 +134,9 @@ class UserService implements IUserService {
       DB::rollBack();
       throw new BusinessException('Ocorreu um erro ao editar o usuário. Tente novamente mais tarde. Detalhes: ' . $e->getMessage(), 500);
     }
+
+    if(isset($data['password']))
+      $user->tokens()->delete();
     
     return $this->userModel->getById($id, ['preference', 'roles', 'forms', 'newsletter.addresses'], true);
   }

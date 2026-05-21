@@ -63,7 +63,7 @@ class AnnouncementAlertNotification {
 
     foreach ($this->users as $addressNewsletter) {
       if (isset($addressNewsletter->newsletter->user->preference) && $addressNewsletter->newsletter->user->preference->receiveRegionAlarms ?? false)
-        $userIds[] = $addressNewsletter->newsletter->user->id;
+        $userIds[$addressNewsletter->newsletter->user->id] = $addressNewsletter->newsletter->user->id;
     }
 
     return $userIds;

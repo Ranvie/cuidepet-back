@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Classes\Filter;
 use App\DTO\Announcement\AnnouncementDTO;
 use App\Exceptions\BusinessException;
 use App\Models\AnnouncementModel;
@@ -46,8 +47,11 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
    * @return AnnouncementDTO|null Anúncio público ou null se não encontrado.
    */
   public function getById(int $id, ?int $userId = null, array $relations = ['user', 'animal.breed', 'animal.breed.specie', 'form', 'announcementMedia', 'favorites', 'address.cacheAddress']): ?AnnouncementDTO {
-    $obAnnouncementDTO = $this->obPublicAnnouncementModel->getById($id, $relations, true);
+    $filters = [new Filter('id', '=', $id), new Filter('active', '=', '1'), new Filter('blocked', '=', '0')];
+  
+    $obAnnouncementDTO = $this->obPublicAnnouncementModel->getByQuery($filters, $relations, true);
     $this->validateAnnouncementExists($obAnnouncementDTO);
+    $this->removeFormIfInvalid($obAnnouncementDTO);
 
     $this->applyFavorites($obAnnouncementDTO, $userId);
     return $obAnnouncementDTO;
@@ -67,6 +71,19 @@ class PublicAnnouncementService implements IPublicAnnouncementService {
       : false;
       
     unset($obPublicAnnouncementDTO->favorites);
+  }
+
+  /**
+   * Remove o formulário do anúncio caso ele seja inválido (ex: inativo ou bloqueado)
+   * @param  AnnouncementDTO $obAnnouncementDTO O objeto DTO do anúncio a ser verificado
+   * @return void
+   */
+  private function removeFormIfInvalid(AnnouncementDTO $obAnnouncementDTO) :void {
+    if (!isset($obAnnouncementDTO->form))
+      return;
+
+    if ($obAnnouncementDTO->form?->active === false || $obAnnouncementDTO->form?->blocked === true)
+      $obAnnouncementDTO->form = null;
   }
 
   /**
