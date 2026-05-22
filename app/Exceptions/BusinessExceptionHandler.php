@@ -13,6 +13,7 @@ use \Illuminate\Validation\ValidationException;
 use \Illuminate\Auth\AuthenticationException;
 use \Illuminate\Auth\Access\AuthorizationException;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 /**
  * Manipulador de exceções de negócio.
@@ -71,12 +72,13 @@ class BusinessExceptionHandler {
    */
   private function mapErrorCode(Throwable $exception): int {
     $statusCode = match (true) {
-      $exception instanceof AuthenticationException  => 401,
-      $exception instanceof AuthorizationException   => 403,
-      $exception instanceof NotFoundHttpException    => 404,
-      $exception instanceof ValidationException      => 422,
-      $exception instanceof InvalidArgumentException => 400,
-      default                                        => 500,
+      $exception instanceof InvalidArgumentException     => 400,
+      $exception instanceof AuthenticationException      => 401,
+      $exception instanceof AuthorizationException       => 403,
+      $exception instanceof NotFoundHttpException        => 404,
+      $exception instanceof ValidationException          => 422,
+      $exception instanceof TooManyRequestsHttpException => 429,
+      default                                            => 500,
     };
 
     return $statusCode;
@@ -89,10 +91,12 @@ class BusinessExceptionHandler {
    */
   private function defaultErrorMessages($statusCode) :string {
     $messages =  [
+      400 => 'Requisição inválida',
       401 => 'Não autenticado',
       403 => 'Acesso negado',
       404 => 'Recurso não encontrado',
       422 => 'Erro de validação',
+      429 => 'Muitas requisições',
       500 => 'Erro interno do servidor',
     ];
 
