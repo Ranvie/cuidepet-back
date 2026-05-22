@@ -30,10 +30,10 @@ class UserResponseController {
   public function list(ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
     
-    [$filters, $orders] = new MyResponsesValidator()->build($request);
+    [$filters, $orders] = (new MyResponsesValidator())->build($request);
     $registers          = $this->obUserResponseService->listUserResponses($validated['limit'], $validated['page'], auth()->id(), $filters);
 
-    return new BusinessResponse(200, $registers)->build();
+    return (new BusinessResponse(200, $registers))->build();
   }
 
   /**
@@ -44,7 +44,7 @@ class UserResponseController {
   public function get(int $responseId) :JsonResponse {
     $register = $this->obUserResponseService->getuserResponseById($responseId);
 
-    return new BusinessResponse(200, $register)->build();
+    return (new BusinessResponse(200, $register))->build();
   }
 
   /**
@@ -54,6 +54,6 @@ class UserResponseController {
    */
   public function delete(int $responseId) :JsonResponse {
     $this->obUserResponseService->remove($responseId);
-    return new BusinessResponse(200, 'Resposta excluída com sucesso')->build();
+    return (new BusinessResponse(200, 'Resposta excluída com sucesso'))->build();
   }
 }

@@ -19,13 +19,13 @@ class ContactUsService implements IContactUsService {
   public function contactUs(array $contactData): void {
     $recipient = env('MAIL_FROM_ADDRESS');
 
-    new MessageDispatcher(
+    (new MessageDispatcher(
       new EmailBuilder([$recipient], 'Contato recebido', 'mail.contactUs', [
         'name'    => $contactData['name']    ?? '',
         'email'   => $contactData['email']   ?? '',
         'message' => $contactData['message'] ?? ''
       ])
-    )->dispatch();
+    ))->dispatch();
   }
 
 }

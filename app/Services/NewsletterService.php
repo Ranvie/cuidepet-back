@@ -154,9 +154,9 @@ class NewsletterService {
     $token           = $this->tokenService->createToken('newsletter-subscription', ['email' => $email, 'zipCode' => $zipCode], 60);
     $subscriptionUrl = url(config('app.frontend_url') . "/confirm-newsletter?token=$token");
 
-    new MessageDispatcher(
+    (new MessageDispatcher(
       new EmailBuilder([$email],'Confirmação de Assinatura da Newsletter','mail.newsletterConfirmation',['subscriptionUrl' => $subscriptionUrl])
-    )->dispatch();
+    ))->dispatch();
   }
 
   /**
@@ -182,7 +182,11 @@ class NewsletterService {
    */
   public function unsubscribeByToken(string $token) :void {
     $obNewsletterIntegrationModel = $this->newsletterIntegrationAddressCacheModel->getByQuery([new Filter('hash', '=', $token)], [], false);
-    $obNewsletterIntegrationModel->delete();
+    
+    if(!$obNewsletterIntegrationModel instanceof NewsletterIntegrationAddressCacheModel)
+      throw new BusinessException('Token de cancelamento inválido.', 404);
+    
+    $obNewsletterIntegrationModel->delete($obNewsletterIntegrationModel->id);
   }
 
   /**

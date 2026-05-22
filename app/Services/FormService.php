@@ -81,7 +81,7 @@ class FormService implements IFormService {
    */
   public function create(array $data) :FormDTO {
     $requestPayload  = json_decode($data['payload'] ?? [], true) ?? [];
-    $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+    $data['payload'] = (new FormStructureValidator($requestPayload))->resolve();
 
     return $this->formModel->create($data);
   }
@@ -104,7 +104,7 @@ class FormService implements IFormService {
 
     if(isset($data['payload'])){
       $requestPayload  = json_decode($data['payload'] ?? "{}", true) ?? [];
-      $data['payload'] = new FormStructureValidator($requestPayload)->resolve();
+      $data['payload'] = (new FormStructureValidator($requestPayload))->resolve();
     }
 
     $obFormDTO = $this->formModel->edit($formId, $data);
@@ -113,7 +113,7 @@ class FormService implements IFormService {
       throw new BusinessException("Ocorreu um erro ao atualizar o formulário.", 500);
 
     if($obFormDTO->blocked)
-      new MessageDispatcher(new NotificationBuilder([$obFormDTO->userId], NotificationTypes::FORM_PAUSED, ['title' => $obFormDTO->title]))->dispatch();
+      (new MessageDispatcher(new NotificationBuilder([$obFormDTO->userId], NotificationTypes::FORM_PAUSED, ['title' => $obFormDTO->title])))->dispatch();
 
     return $obFormDTO;
   }

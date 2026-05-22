@@ -128,12 +128,12 @@ class AuthService {
     $frontUrl        = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
     $confirmationUrl = $frontUrl . "/confirm-email?token=" . urlencode($token);
 
-    new MessageDispatcher(new EmailBuilder(
+    (new MessageDispatcher(new EmailBuilder(
       [$obUserModel->email], 
       'CuidePet - Confirmação de e-mail', 
       'mail.emailConfirmation', 
       ['username' => $obUserModel->username, 'confirmationUrl' => $confirmationUrl]
-    ))->dispatch();
+    )))->dispatch();
   }
    
   /**
@@ -173,12 +173,12 @@ class AuthService {
     $frontUrl         = rtrim(config('app.front_url', env('APP_URL_FRONT', config('app.url'))), '/');
     $resetPasswordUrl = "$frontUrl/reset-password?token=" . urlencode($token);
 
-    new MessageDispatcher(new EmailBuilder(
+    (new MessageDispatcher(new EmailBuilder(
       [$userDto->email],
       'CuidePet - Recuperação de Senha', 
       'mail.recoverPassword', 
       ['username' => $userDto->username, 'resetUrl' => $resetPasswordUrl]
-    ))->dispatch();
+    )))->dispatch();
   }
 
   /**

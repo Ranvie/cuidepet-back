@@ -26,7 +26,7 @@ class AnnouncementController {
    */
   public function list(ListingRequest $request) :JsonResponse {
     $validated          = $request->validated();
-    [$filters, $orders] = new MyAnnouncementsFilterValidator()->build($request);
+    [$filters, $orders] = (new MyAnnouncementsFilterValidator())->build($request);
     $registers          = $this->obAnnouncementService->getListByUser($validated['limit'], $validated['page'], auth()->id(), filters: $filters, orders: $orders);
 
     $response = new BusinessResponse(200, $registers);

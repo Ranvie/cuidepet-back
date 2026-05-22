@@ -26,7 +26,7 @@ class FormController {
    */
   public function list(ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    [$filters, $orders] = new FormFilterValidator()->build($request);
+    [$filters, $orders] = (new FormFilterValidator())->build($request);
     $registers          = $this->obFormService->listFormsByUser($validated['limit'], $validated['page'], auth()->id(), $filters);
 
     $response = new BusinessResponse(200, $registers);
@@ -77,7 +77,7 @@ class FormController {
   public function create(UserFormRequest $request): JsonResponse {
     $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
     $registers     = $this->obFormService->create($obFormRequest);
-    return new BusinessResponse(200, $registers)->build();
+    return (new BusinessResponse(200, $registers))->build();
   }
 
   /**
@@ -89,7 +89,7 @@ class FormController {
   public function update(int $formId, UserFormRequest $request) :JsonResponse {
     $obFormRequest = array_merge($request->validated(), ['userId' => auth()->id()]);
     $registers     = $this->obFormService->edit($formId, $obFormRequest);
-    return new BusinessResponse(200, $registers)->build();
+    return (new BusinessResponse(200, $registers))->build();
   }
 
   /**
@@ -99,6 +99,6 @@ class FormController {
    */
   public function delete(int $formId) :JsonResponse {
     $this->obFormService->remove($formId);
-    return new BusinessResponse(200, 'Formulário excluído com sucesso')->build();
+    return (new BusinessResponse(200, 'Formulário excluído com sucesso'))->build();
   }
 }

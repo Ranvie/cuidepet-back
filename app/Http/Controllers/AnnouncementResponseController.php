@@ -27,11 +27,11 @@ class AnnouncementResponseController {
    */
   public function list(int $announcementId, ListingRequest $request) :JsonResponse {
     $validated = $request->validated();
-    [$filters, $orders] = new AnnouncementResponseValidator()->build($request);
+    [$filters, $orders] = (new AnnouncementResponseValidator())->build($request);
 
     $registers = $this->obAnnouncementResponseService->listAnnouncementResponses($validated['limit'], $validated['page'], $announcementId, $filters);
 
-    return new BusinessResponse(200, $registers)->build();
+    return (new BusinessResponse(200, $registers))->build();
   }
 
   /**
@@ -43,7 +43,7 @@ class AnnouncementResponseController {
   public function get(int $announcementId, int $responseId) :JsonResponse {
     $register = $this->obAnnouncementResponseService->getAnnouncementResponseById($announcementId, $responseId);
 
-    return new BusinessResponse(200, $register)->build();
+    return (new BusinessResponse(200, $register))->build();
   }
 
   /**
@@ -54,7 +54,7 @@ class AnnouncementResponseController {
   public function validateResponse(int $announcementId) :JsonResponse {
     $register = $this->obAnnouncementResponseService->checkIfUserResponded($announcementId, auth()->id());
 
-    return new BusinessResponse(200, $register)->build();
+    return (new BusinessResponse(200, $register))->build();
   }
 
   /**
@@ -67,7 +67,7 @@ class AnnouncementResponseController {
     $responseData = array_merge($request->validated(), ['user_id' => auth()->id(), 'announcement_id' => $announcementId]);
     $register     = $this->obAnnouncementResponseService->create($responseData);
 
-    return new BusinessResponse(200, $register)->build();
+    return (new BusinessResponse(200, $register))->build();
   }
 
   /**
@@ -78,6 +78,6 @@ class AnnouncementResponseController {
    */
   public function delete(int $announcementId, int $responseId) :JsonResponse {
     $this->obAnnouncementResponseService->remove($announcementId, $responseId);
-    return new BusinessResponse(200, 'Resposta excluída com sucesso')->build();
+    return (new BusinessResponse(200, 'Resposta excluída com sucesso'))->build();
   }
 }

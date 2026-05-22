@@ -37,7 +37,7 @@ class AnnouncementEditedNotification {
     if (isset($this->data['blocked']) && $this->data['blocked'] == true && $this->announcementModel->blocked == false) {
       $notificationType = NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED;
 
-      new MessageDispatcher(new NotificationBuilder([$this->announcementModel->user_id], NotificationTypes::ANNOUNCEMENT_PAUSED, ['petName' => $this->announcementModel->animal->name]))->dispatch();
+      (new MessageDispatcher(new NotificationBuilder([$this->announcementModel->user_id], NotificationTypes::ANNOUNCEMENT_PAUSED, ['petName' => $this->announcementModel->animal->name])))->dispatch();
     }
 
     $obNotificationBuilder = match ($notificationType) {
@@ -46,6 +46,6 @@ class AnnouncementEditedNotification {
       NotificationTypes::FAVORITED_ANNOUNCEMENT_PAUSED             => new NotificationBuilder($this->favoritedUserIds, $notificationType, ['petName'        => $this->announcementModel->animal->name])
     };
 
-    new MessageDispatcher($obNotificationBuilder)->dispatch();
+    (new MessageDispatcher($obNotificationBuilder))->dispatch();
   }
 }

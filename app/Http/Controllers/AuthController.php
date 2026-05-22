@@ -92,7 +92,7 @@ class AuthController {
   public function getUseTerms() :JsonResponse {
     $useTerms = $this->authService->getUseTerms();
 
-    return new BusinessResponse(200, $useTerms)->build();
+    return (new BusinessResponse(200, $useTerms))->build();
   }
 
   /**
@@ -102,7 +102,7 @@ class AuthController {
   public function acceptTerms() :JsonResponse {
     $this->authService->acceptTerms(auth()->id());
 
-    return new BusinessResponse(200, "Termos de uso aceitos com sucesso")->build();
+    return (new BusinessResponse(200, "Termos de uso aceitos com sucesso"))->build();
   }
 
   /**

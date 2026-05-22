@@ -32,7 +32,7 @@ class NewsletterController {
     $validated = $request->validated();
     $this->newsletterService->sendNewsletterMailConfirmation($validated['email'], $validated['zipcode']);
 
-    return new BusinessResponse(200, 'Enviamos um e-mail para você, verifique para confirmar a inscrição.')->build();
+    return (new BusinessResponse(200, 'Enviamos um e-mail para você, verifique para confirmar a inscrição.'))->build();
   }
 
   /**
@@ -45,7 +45,7 @@ class NewsletterController {
     $token = $request->query('token');
     $this->newsletterService->confirmNewsletterSubscription($token);
 
-    return new BusinessResponse(200, 'Newsletter confirmada com sucesso.')->build();
+    return (new BusinessResponse(200, 'Newsletter confirmada com sucesso.'))->build();
   }
 
   /**
@@ -57,7 +57,7 @@ class NewsletterController {
     $token = $request->query('token');
     $this->newsletterService->unsubscribeByToken($token);
 
-    return new BusinessResponse(200, 'Inscrição cancelada com sucesso.')->build();
+    return (new BusinessResponse(200, 'Inscrição cancelada com sucesso.'))->build();
   }
 
 }

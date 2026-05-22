@@ -101,10 +101,10 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
     if($obFormDTO->user->id === $data['user_id'])
       throw new BusinessException("Você não pode responder ao próprio anúncio.", 403);
 
-    new FormResponseValidator(
+    (new FormResponseValidator(
       $this->convertJsonStringToArray($data['payload'] ?? '[]'),
       $this->convertJsonStringToArray($obFormDTO->payload)
-    )->resolve();
+    ))->resolve();
 
     $historyData = [
       'user_id'         => $data['user_id'],
@@ -120,7 +120,7 @@ class AnnouncementResponseService implements IAnnouncementResponseService {
       new Filter('announcement_id', $data['announcement_id'])
     ]);
 
-    new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'responseId' => $obFormResponse->id, 'petName' => $obAnimalDTO->name]))->dispatch();
+    (new MessageDispatcher(new NotificationBuilder([$obFormDTO->user->id], NotificationTypes::NEW_RESPONSE, ['announcementId' => $data['announcement_id'], 'responseId' => $obFormResponse->id, 'petName' => $obAnimalDTO->name])))->dispatch();
 
     return $this->obFormResponseModel->getByQuery([
       new Filter('user_id', '=', $data['user_id']),

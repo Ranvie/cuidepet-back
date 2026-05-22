@@ -29,6 +29,6 @@ class ContactUsController {
     $data = $request->validated();
     $this->contactUsService->contactUs($data);
 
-    return new BusinessResponse(200, 'Contato recebido com sucesso!')->build();
+    return (new BusinessResponse(200, 'Contato recebido com sucesso!'))->build();
   }
 }

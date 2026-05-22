@@ -280,7 +280,7 @@ class AnnouncementService implements IAnnouncementService {
       }
 
       $favoritedUserIds = $this->getFavoritedUsersToNotify($id);
-      new AnnouncementEditedNotification($favoritedUserIds, $announcementModel, $data)->send();
+      (new AnnouncementEditedNotification($favoritedUserIds, $announcementModel, $data))->send();
 
       DB::commit();
     } catch (Exception $e) {

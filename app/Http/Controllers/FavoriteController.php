@@ -37,7 +37,7 @@ class FavoriteController {
     $userId             = auth()->id() ?? null;
     $registers          = $this->obFavoriteService->listFavorites($validated['limit'], $validated['page'], $userId, $filters, $orders);
 
-    return new BusinessResponse(200, $registers)->build();
+    return (new BusinessResponse(200, $registers))->build();
   }
 
   /**
@@ -60,7 +60,7 @@ class FavoriteController {
   public function create(int $announcementId) :JsonResponse {
     $this->obFavoriteService->addFavorite(auth()->id(), $announcementId);
 
-    return new BusinessResponse(200, "Anúncio favoritado com sucesso!")->build();
+    return (new BusinessResponse(200, "Anúncio favoritado com sucesso!"))->build();
   }
 
   /**
@@ -71,6 +71,6 @@ class FavoriteController {
   public function delete(int $announcementId) :JsonResponse {
     $this->obFavoriteService->removeFavorite(auth()->id(), $announcementId);
 
-    return new BusinessResponse(200, "Favorito removido com sucesso!")->build();
+    return (new BusinessResponse(200, "Favorito removido com sucesso!"))->build();
   }
 }

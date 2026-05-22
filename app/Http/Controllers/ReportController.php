@@ -25,7 +25,7 @@ class ReportController {
   public function listReportTemplates(string $reportType) :JsonResponse {
     $data = $this->obReportService->listReportTemplates($reportType);
 
-    return new BusinessResponse(200, $data)->build();
+    return (new BusinessResponse(200, $data))->build();
   }
 
   /**
@@ -37,7 +37,7 @@ class ReportController {
     $data = array_merge($request->validated(), ['userId' => auth()->id()]);
     $this->obReportService->create($data);
 
-    return new BusinessResponse(200, 'Denúncia realizada com sucesso!')->build();
+    return (new BusinessResponse(200, 'Denúncia realizada com sucesso!'))->build();
   }
 
 }
