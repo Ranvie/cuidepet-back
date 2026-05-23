@@ -5,11 +5,11 @@ use App\Http\Middleware\AcceptTerms;
 use \App\Http\Middleware\RejectIfUserHasRole;
 use \App\Http\Middleware\AllowIfUserHasRole;
 use App\Http\Middleware\OptionalAuth;
+use App\Http\Middleware\ResourceThrottle;
 use App\Http\Middleware\Validate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Routing\Middleware\ThrottleRequests;
 
 return Application::configure(basePath: dirname(__DIR__))
   ->withRouting(
@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
       'hasRole'      => AllowIfUserHasRole::class,
       'validate'     => Validate::class,
       'optionalAuth' => OptionalAuth::class,
-      'throttle'     => ThrottleRequests::class,
+      'throttle'     => ResourceThrottle::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {
