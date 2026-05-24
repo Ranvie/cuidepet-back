@@ -16,8 +16,6 @@ return new class extends Migration {
 			$table->boolean('receive_region_alarms')->default(false);
 			$table->boolean('receive_alarms_on_email')->default(false);
 		});
-
-		Artisan::call('db:seed', ['--class' => 'PreferenceSeeder']);
 	}
 
 	/**
