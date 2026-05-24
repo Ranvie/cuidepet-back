@@ -36,11 +36,16 @@ class AwesomeCepAddressProvider extends AbstractAddressProvider {
 
   /**
    * Constrói o caminho completo para a requisição de endereço.
-   * @param  string $zipCode CEP para consulta do endereço.
-   * @return string          Caminho completo para a requisição.
+   * @return string Caminho completo para a requisição.
    */
   protected function getConsultPath() :string {
-    return str_replace('{zipCode}', $this->zipcode, $this->baseUrl . $this->resourcePath);
+    $token = env('AWESOMEAPI_TOKEN', null);
+    $url   = str_replace('{zipCode}', $this->zipcode, $this->baseUrl . $this->resourcePath);
+    
+    if($token)
+      $url .= "?token={$token}";
+
+    return $url;
   }
 
   /**
