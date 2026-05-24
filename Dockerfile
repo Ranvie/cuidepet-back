@@ -17,6 +17,9 @@ RUN apt-get update \
         php8.3-bcmath \
         php8.3-mysql \
         php8.3-redis \
+        php8.3-gd \
+        php8.3-mbstring \
+        php8.3-xml \
     && apt-get install -y netcat-openbsd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
