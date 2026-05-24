@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
       'optionalAuth' => OptionalAuth::class,
       'throttle'     => ResourceThrottle::class,
     ]);
+    $middleware->trustProxies(at: '*');
   })
   ->withExceptions(function (Exceptions $exceptions) {
     $exceptions->render(function (\Throwable $exception) {

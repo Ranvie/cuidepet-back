@@ -1,0 +1,55 @@
+services:
+  redis:
+    image: redis:alpine
+    networks:
+      - cuidepet-network
+
+  mysql:
+    image: mysql:8.4
+    networks:
+      - cuidepet-network
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    command: --log-bin-trust-function-creators=1
+
+  webserver:
+    image: nginx:alpine
+    networks:
+      - cuidepet-network
+    working_dir: /var/www
+    volumes:
+      - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build: .
+    networks:
+      - cuidepet-network
+    working_dir: /var/www
+    volumes:
+      - app-code:/var/www
+      - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini
+      - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/cli/conf.d/99-overrides.ini
+      - ./phpdocker/php-fpm/init.sh:/phpdocker/php-fpm/init.sh
+    command: /phpdocker/php-fpm/init.sh
+    depends_on:
+      - mysql
+      - redis
+
+volumes:
+  mysql-data:
+  app-code:
+
+networks:
+  cuidepet-network:
+    driver: bridge
