@@ -4,7 +4,7 @@ namespace App\MessageDispatcher\Builders;
 
 use App\Exceptions\BusinessException;
 use App\MessageDispatcher\Contracts\Builder;
-use App\MessageDispatcher\Messages\EMailMessage;
+use App\MessageDispatcher\Messages\EmailMessage;
 use App\MessageDispatcher\Senders\EmailSender;
 
 /**
@@ -30,9 +30,9 @@ class EmailBuilder implements Builder {
 
   /**
    * Constrói a mensagem de newsletter com base nas configurações definidas no builder, realizando as transformações ou validações necessárias antes do envio
-   * @return EMailMessage Retorna a mensagem construída, que deve implementar a interface Message e conter
+   * @return EmailMessage Retorna a mensagem construída, que deve implementar a interface Message e conter
    */
-  public function build(): EMailMessage {
+  public function build(): EmailMessage {
     if(empty($this->recipients))
       throw new BusinessException('Nenhum destinatário fornecido para o email.', 422);
 
@@ -40,7 +40,7 @@ class EmailBuilder implements Builder {
     if (!$templateExists)
       throw new BusinessException("O template '{$this->template}' não existe.", 422);
 
-    return new EMailMessage(
+    return new EmailMessage(
       $this->recipients,
       $this->subject,
       $this->template,
