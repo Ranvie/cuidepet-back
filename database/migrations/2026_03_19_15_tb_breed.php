@@ -16,8 +16,6 @@ return new class extends Migration {
 			$table->foreignId('specie_id')->constrained('tb_specie')->onDelete('cascade');
 			$table->string('name', 255)->unique('BREED_UK_01');
 		});
-
-		Artisan::call('db:seed', ['--class' => 'BreedSeeder']);
 	}
 
 	/**

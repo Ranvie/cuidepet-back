@@ -14,8 +14,6 @@ return new class extends Migration {
       $table->id();
       $table->string('name', 255)->unique('SPECIE_UK_01');
     });
-
-    Artisan::call('db:seed', ['--class' => 'SpecieSeeder']);
   }
 
   /**

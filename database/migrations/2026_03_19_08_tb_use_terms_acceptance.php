@@ -17,8 +17,6 @@ return new class extends Migration {
 			$table->timestamp('accepted_at')->useCurrent();
 			$table->unique(['user_id', 'use_terms_id'], 'USE_TERMS_ACCEPTANCE_UK_01');
 		});
-
-		Artisan::call('db:seed', ['--class' => 'UserTermsAcceptanceSeeder']);
 	}
 
 	/**

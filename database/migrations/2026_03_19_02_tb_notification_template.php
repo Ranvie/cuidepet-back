@@ -16,8 +16,6 @@ return new class extends Migration {
 			$table->string('title', 100);
 			$table->string('message', 255);
 		});
-
-		Artisan::call('db:seed', ['--class' => 'NotificationTemplateSeeder']);
 	}
 
 	/**

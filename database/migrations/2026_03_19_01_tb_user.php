@@ -22,8 +22,6 @@ return new class extends Migration {
       $table->timestamp('created_at', 0)->useCurrent();
       $table->timestamp('updated_at', 0)->useCurrent()->useCurrentOnUpdate();
     });
-
-    Artisan::call('db:seed', ['--class' => 'UserSeeder']);
   }
 
   /**

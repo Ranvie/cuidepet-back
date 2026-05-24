@@ -16,8 +16,6 @@ return new class extends Migration {
 			$table->string('name', 20)->unique();
 			$table->string('description', 200);
 		});
-
-		Artisan::call('db:seed', ['--class' => 'RoleSeeder']);
 	}
 
 	/**

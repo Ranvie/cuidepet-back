@@ -16,8 +16,6 @@ return new class extends Migration {
 			$table->string('motive', 255);
 			$table->enum('type', ['announcement', 'form']);
 		});
-
-		Artisan::call('db:seed', ['--class' => 'ReportMessageSeeder']);
 	}
 
 	/**
