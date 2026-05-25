@@ -32,7 +32,7 @@ class File {
    * @param string $subdirectory Subdiretório opcional dentro do diretório de recursos.
    */
   public function __construct(string $subdirectory) {
-    $this->resourcePath = storage_path('\\app\\public') . DIRECTORY_SEPARATOR;
+    $this->resourcePath = storage_path('app' . DIRECTORY_SEPARATOR . 'public') . DIRECTORY_SEPARATOR;
 
     if(!file_exists($this->resourcePath)) {
       mkdir($this->resourcePath, 0755, true);
