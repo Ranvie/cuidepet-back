@@ -19,7 +19,11 @@ class Url {
    * Define a base URL da aplicação usando o nome da aplicação configurado.
    */
   public function __construct() {
-    $this->baseUrl = config('app.url_port') . '/api/';
+    $url = env('APP_MUST_HAVE_URL_PORT', true)
+      ? config('app.url_port')
+      : config('app.url');
+      
+    $this->baseUrl = $url . '/api/';
   }
 
   /**
