@@ -12,8 +12,8 @@ return new class extends Migration {
   public function up(): void {
     Schema::create('tb_token', function (Blueprint $table) {
       $table->id();
-      $table->string('type');
-      $table->string('token')->unique();
+      $table->string('type', 255);
+      $table->string('token', 255)->unique('TOKEN_UK_01');
       $table->longText('payload');
       $table->timestamp('expires_at', 0)->nullable();
     });
