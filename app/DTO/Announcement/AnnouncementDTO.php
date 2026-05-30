@@ -34,6 +34,12 @@ class AnnouncementDTO {
   public ?int $userId;
 
   /**
+   * Identificador do formulário do anúncio
+   * @var int|null 
+   */
+  public ?int $formId;
+
+  /**
    * Objeto do formulário vinculado ao anúncio
    * @var FormDTO|null
    */
