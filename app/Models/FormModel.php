@@ -64,7 +64,10 @@ class FormModel extends BusinessModel {
    * @return null|FormModel
    */
   public function getUserForm(int $userId, int $formId) :?FormModel {
-    return $this->getById($formId, [], false, [new Filter('user_id', '=', $userId)]);
+    return $this->getByQuery([
+      new Filter('id', '=', $formId),
+      new Filter('user_id', '=', $userId)
+    ], [], false);
   }
 
   /**

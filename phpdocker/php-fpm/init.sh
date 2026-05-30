@@ -11,4 +11,5 @@ echo "Banco disponível!"
 
 php artisan migrate --force
 
+php artisan queue:work --sleep=3 --tries=3 &
 exec php-fpm8.3 -F
