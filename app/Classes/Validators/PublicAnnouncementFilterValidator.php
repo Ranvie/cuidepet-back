@@ -143,7 +143,7 @@ class PublicAnnouncementFilterValidator extends ListingValidator {
       ),
 
       new OrdenationFieldDefinition(
-        field: 'favorited_count',
+        field: 'favorites_count',
         name: 'Número de favoritos',
         description: 'Ordena os anúncios pelo número de favoritos',
         directions: ['asc', 'desc']
